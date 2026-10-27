@@ -17,6 +17,8 @@ export interface OrduView {
 export type OrduClientMsg =
   | { t: 'ordu.get' }
   /** Hire a worker for a role, with a task for it or none. */
-  | { t: 'ordu.hire'; role: string; prompt?: string };
+  | { t: 'ordu.hire'; role: string; prompt?: string }
+  /** Give a role's worker its next task, waking it if it's asleep. */
+  | { t: 'ordu.tell'; workerId: string; prompt: string };
 
 export type OrduServerMsg = { t: 'ordu.state'; view: OrduView };

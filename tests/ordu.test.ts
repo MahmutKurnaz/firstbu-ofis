@@ -206,3 +206,24 @@ test('readReports reads only the first 4 KB of a huge file', (t) => {
   assert.equal(be?.status, 'ÇÖZÜLDÜ');
   assert.equal(be?.verdict, undefined);
 });
+
+test('readReports: with over 200 task folders, newest-mtime wins for verify and a named task is still found', (t) => {
+  const { dir } = project(t);
+  const ids = Array.from({ length: 205 }, (_, i) => `t${String(i).padStart(3, '0')}`);
+  // mtime order is the reverse of name order, so the directory listing and mtime order differ.
+  ids.forEach((id, i) => {
+    mkdirSync(work(dir, id), { recursive: true });
+    writeFileSync(work(dir, id, 'report.md'), `Durum: ${id}\n`);
+    const when = new Date(2021, 0, 1 + (ids.length - i));
+    utimesSync(work(dir, id), when, when);
+  });
+  mkdirSync(work(dir, 'zz-newest'), { recursive: true });
+  writeFileSync(work(dir, 'zz-newest', 'verify.md'), 'Sonuç: KALDI\n');
+  const newest = new Date(2030, 0, 1);
+  utimesSync(work(dir, 'zz-newest'), newest, newest);
+  utimesSync(work(dir, 'zz-newest', 'verify.md'), newest, newest);
+  const earliest = ids[ids.length - 1];
+  const reports = readReports(dir, reportConfig(), [{ role: 'be-lead', roleTask: earliest }]);
+  assert.equal(reports.find((r) => r.role === 'verify-be')?.verdict, 'KALDI');
+  assert.equal(reports.find((r) => r.role === 'be-lead')?.status, earliest);
+});

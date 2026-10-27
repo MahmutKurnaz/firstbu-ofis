@@ -9,15 +9,28 @@ import type { WorkerInfo } from '../../shared/protocol.js';
 import type { Floor } from '../floor.js';
 import { loadOrdu } from './config.js';
 
-/** This repository, where ordu/ (the templates and the shared roles' briefs) lives. */
-const REPO_ROOT = fileURLToPath(new URL('../../../', import.meta.url));
+/**
+ * This repository, where ordu/ (the templates and the shared roles' briefs) lives: the folder with
+ * the office's package.json, from src/server/ordu in a checkout or dist/server/server/ordu once built.
+ */
+export const REPO_ROOT = ((): string => {
+  let dir = path.dirname(fileURLToPath(import.meta.url));
+  for (let i = 0; i < 6; i++, dir = path.dirname(dir)) {
+    try {
+      if (JSON.parse(readFileSync(path.join(dir, 'package.json'), 'utf8')).name === 'agent-office') return dir;
+    } catch {
+      // keep looking
+    }
+  }
+  return fileURLToPath(new URL('../../../', import.meta.url));
+})();
 const MAX_BRIEF = 64 * 1024;
 
 /** The floor as hiring needs it, so a test can hand in a small fake. */
 export type HireFloor = Pick<Floor, 'dir'> & { plan: { wing: number }; workers: Pick<Floor['workers'], 'list' | 'deskOccupied' | 'spawn'> };
 
 /** A role's brief: a file in the project, else one in this repository's ordu/. */
-function readBrief(projectDir: string, file: string | undefined): string | undefined {
+export function readBrief(projectDir: string, file: string | undefined): string | undefined {
   if (!file || path.isAbsolute(file) || file.split(/[\\/]/).includes('..')) return undefined;
   for (const base of [projectDir, REPO_ROOT]) {
     const abs = path.join(base, file);
@@ -44,7 +57,8 @@ export function hireRole(floor: HireFloor, roleName: string, by: string, prompt?
   const found = findRole(loaded.config, roleName);
   if (!found) return `"${roleName}" diye bir rol yok`;
   const { role } = found;
-  if (floor.workers.list().some((w) => w.role === role.name)) return `${role.name} zaten masasında: iş ver`;
+  // One still running (or asleep, to be woken with a task) holds the role; one whose terminal ended doesn't.
+  if (floor.workers.list().some((w) => w.role === role.name && w.status !== 'exited')) return `${role.name} zaten masasında: iş ver`;
   let desk = role.desk;
   if (desk) {
     if (floor.workers.deskOccupied(desk)) return `${role.name}'in masası (${desk}) dolu`;

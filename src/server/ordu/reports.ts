@@ -23,11 +23,22 @@ function head(file: string): string | undefined {
 
 interface Found { task: string; kind: 'report' | 'verify'; file: string; at: number }
 
-/** report.md and verify.md in every task folder, newest first. */
-function scan(root: string): Found[] {
+/** report.md and verify.md in the newest task folders (and always in `own`, the hired roles' tasks), newest first. */
+function scan(root: string, own: Iterable<string>): Found[] {
   let tasks: string[];
   try {
-    tasks = readdirSync(root, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => d.name).slice(0, MAX_TASKS);
+    const dirs = readdirSync(root, { withFileTypes: true }).filter((d) => d.isDirectory()).map((d) => {
+      let at = 0;
+      try {
+        at = statSync(join(root, d.name)).mtimeMs;
+      } catch {
+        // gone since the listing
+      }
+      return { name: d.name, at };
+    });
+    const names = new Set(dirs.map((d) => d.name));
+    const newest = dirs.sort((a, b) => b.at - a.at).slice(0, MAX_TASKS).map((d) => d.name);
+    tasks = [...new Set([...newest, ...[...own].filter((t) => names.has(t))])];
   } catch {
     return [];
   }
@@ -54,9 +65,9 @@ function scan(root: string): Found[] {
 export function readReports(projectDir: string, config: OrduConfig, workers: Pick<WorkerInfo, 'role' | 'roleTask'>[]): RoleReport[] {
   if (!config.reportDir) return [];
   const rel = config.reportDir.replace(/\/+$/, '');
-  const found = scan(join(projectDir, rel));
-  if (!found.length) return [];
   const taskOf = new Map(workers.filter((w) => w.role && w.roleTask).map((w) => [w.role as string, w.roleTask as string]));
+  const found = scan(join(projectDir, rel), taskOf.values());
+  if (!found.length) return [];
   const out: RoleReport[] = [];
   for (const role of allRoles(config)) {
     const kind = role.name.startsWith('verify') ? 'verify' : 'report';

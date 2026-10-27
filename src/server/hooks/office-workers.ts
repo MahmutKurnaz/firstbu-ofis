@@ -147,6 +147,7 @@ export async function officeWorkers(ctx: Ctx, req: http.IncomingMessage, res: ht
   const ask = readHireRequest(body, floor.project.agentProviders);
   if (typeof ask === 'string') return send(res, 400, { error: ask });
   if (ask.role) {
+    if (!floor.project.agentProviders.includes('claude')) return send(res, 400, { error: 'This floor has no Claude Code: roles run on Claude Code' });
     // An ordu.json role: its desk, agent, model and effort are the role's, in the shared checkout.
     const hired = hireRole(floor, ask.role, who, ask.prompt, floor.workers.ownerOf(me.id));
     if (typeof hired === 'string') return send(res, 400, { error: hired });

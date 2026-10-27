@@ -133,5 +133,5 @@ function validTask(t: unknown): WorkerTask | undefined {
 
 /** A saved role, agent or task id: a short plain name. */
 function roleStr(v: unknown): string | undefined {
-  return typeof v === 'string' && /^[\w.-]{1,64}$/.test(v) ? v : undefined;
+  return typeof v === 'string' && /^[a-z0-9][\w.-]{0,63}$/i.test(v) ? v : undefined;
 }

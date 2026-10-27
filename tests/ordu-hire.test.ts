@@ -20,11 +20,12 @@
 // a successful hire without a problem has no `note`.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { OFIS_NOTU, rolePrompt } from '../src/shared/ordu.js';
-import { hireRole } from '../src/server/ordu/hire.js';
+import { REPO_ROOT, hireRole, readBrief } from '../src/server/ordu/hire.js';
+import { orduHandlers } from '../src/server/ws/handlers/ordu.js';
 import type { SpawnOpts } from '../src/server/workers/manager.js';
 import { restoreWorkers, saveWorkers } from '../src/server/workers/persist.js';
 import { newWorker } from '../src/server/workers/worker.js';
@@ -184,4 +185,82 @@ test('role, agentFile and roleTask survive workers.json', (t) => {
   restoreWorkers(file, plain, 'claude', () => false);
   assert.equal(plain.get('w1')?.info.role, undefined);
   assert.equal(plain.get('w1')?.info.agentFile, undefined);
+});
+
+test('hireRole: an exited worker of the role does not block hiring it again; an offline one does', (t) => {
+  const exited = fixture(t, [{ name: 'be-lead', agent: 'be-lead' }], { agents: ['be-lead'], running: [{ role: 'be-lead', deskId: 'desk-9', status: 'exited' }] });
+  assert.equal(typeof hireRole(exited.floor, 'be-lead', 'Ada'), 'object');
+  const offline = fixture(t, [{ name: 'be-lead', agent: 'be-lead' }], { agents: ['be-lead'], running: [{ role: 'be-lead', deskId: 'desk-9', status: 'offline' }] });
+  assert.equal(hireRole(offline.floor, 'be-lead', 'Ada'), 'be-lead zaten masasında: iş ver');
+});
+
+test('REPO_ROOT is the agent-office checkout', () => {
+  assert.equal(JSON.parse(readFileSync(path.join(REPO_ROOT, 'package.json'), 'utf8')).name, 'agent-office');
+});
+
+test('readBrief: the repo supplies a brief the project lacks; the project\'s own file wins', (t) => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'office-brief-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  assert.ok(readBrief(dir, 'ordu/roller/lead.md')?.includes('Lider'));
+  mkdirSync(path.join(dir, 'ordu', 'roller'), { recursive: true });
+  writeFileSync(path.join(dir, 'ordu', 'roller', 'lead.md'), 'PROJENİN KENDİ BRİFİ');
+  assert.equal(readBrief(dir, 'ordu/roller/lead.md'), 'PROJENİN KENDİ BRİFİ');
+});
+
+test('readBrief refuses to leave the project and the repo', (t) => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'office-brief-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  assert.equal(readBrief(dir, '../x'), undefined);
+  assert.equal(readBrief(dir, 'ordu/../../x'), undefined);
+  assert.equal(readBrief(dir, '/etc/passwd'), undefined);
+  assert.equal(readBrief(dir, undefined), undefined);
+});
+
+test('persist: an agentFile that looks like an option is dropped on restore, a plain one survives', (t) => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'office-persist-'));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  const file = path.join(dir, 'workers.json');
+  const info = (id: string, deskId: string, agentFile: string): WorkerInfo => ({
+    id, kind: 'agent', provider: 'claude', deskId, name: id, color: '#fff', status: 'idle', acked: true,
+    createdBy: 'Ada', createdAt: 1, cols: 100, rows: 30, viewers: [], role: 'r', agentFile,
+  });
+  saveWorkers(file, [newWorker(info('w1', 'desk-1', '--dangerous'), restoreTracker(undefined)), newWorker(info('w2', 'desk-2', 'be-lead'), restoreTracker(undefined))], true);
+  const back = new Map<string, ReturnType<typeof newWorker>>();
+  restoreWorkers(file, back, 'claude', () => false);
+  assert.equal(back.get('w1')?.info.agentFile, undefined);
+  assert.equal(back.get('w2')?.info.agentFile, 'be-lead');
+});
+
+test('ordu.tell resumes a worker that is not running, with the text', () => {
+  const calls: unknown[][] = [];
+  const warns: string[] = [];
+  const w = { id: 'w1', name: 'Backend Lideri', role: 'be-lead' };
+  const floor = {
+    workers: {
+      get: (id: string) => (id === 'w1' ? w : undefined),
+      prompt: (...a: unknown[]) => (calls.push(['prompt', ...a]), 'Worker is not running'),
+      resume: (...a: unknown[]) => (calls.push(['resume', ...a]), undefined),
+    },
+  };
+  const ctx = { floorOf: () => floor, warn: (_c: unknown, m: string) => warns.push(m), toastFloor: (_f: unknown, m: string) => calls.push(['toast', m]) };
+  (orduHandlers['ordu.tell'] as (ctx: unknown, c: unknown, msg: unknown) => void)(ctx, { peer: { name: 'Ada' } }, { t: 'ordu.tell', workerId: 'w1', prompt: ' işe koyul ' });
+  assert.deepEqual(calls.slice(0, 2), [['prompt', 'w1', 'işe koyul', 'Ada'], ['resume', 'w1', 'işe koyul']]);
+  assert.deepEqual(warns, []);
+  assert.equal(calls[2][0], 'toast');
+});
+
+test('ordu.tell refuses a worker that has no role', () => {
+  const calls: string[] = [];
+  const warns: string[] = [];
+  const floor = {
+    workers: {
+      get: () => ({ id: 'w1', name: 'Gezgin' }),
+      prompt: () => (calls.push('prompt'), undefined),
+      resume: () => (calls.push('resume'), undefined),
+    },
+  };
+  const ctx = { floorOf: () => floor, warn: (_c: unknown, m: string) => warns.push(m), toastFloor: () => calls.push('toast') };
+  (orduHandlers['ordu.tell'] as (ctx: unknown, c: unknown, msg: unknown) => void)(ctx, { peer: { name: 'Ada' } }, { t: 'ordu.tell', workerId: 'w1', prompt: 'merhaba' });
+  assert.deepEqual(warns, ['Bu bir rol ajanı değil']);
+  assert.deepEqual(calls, []);
 });

@@ -12,7 +12,7 @@ export interface OrduDeps {
 export function installOrdu(ctx: Ctx, deps: OrduDeps): OrduPanel {
   const panel = new OrduPanel($('ordu-body'), {
     openTerminal: (id) => deps.openTerminal(id),
-    tell: (workerId, prompt) => ctx.net.send({ t: 'worker.prompt', workerId, prompt }),
+    tell: (workerId, prompt) => ctx.net.send({ t: 'ordu.tell', workerId, prompt }),
     hire: (role, prompt) => ctx.net.send({ t: 'ordu.hire', role, ...(prompt ? { prompt } : {}) }),
   });
   const draw = () => {

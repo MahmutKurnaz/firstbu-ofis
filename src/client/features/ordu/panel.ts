@@ -18,6 +18,8 @@ interface Asking { role: string; kind: 'tell' | 'hire'; text: string }
 
 export class OrduPanel {
   private asking: Asking | null = null;
+  /** The box was just opened: give it the focus once, not on every redraw after. */
+  private focusBox = false;
 
   constructor(private readonly body: HTMLElement, private readonly deps: PanelDeps) {}
 
@@ -82,6 +84,7 @@ export class OrduPanel {
 
   private open(role: string, kind: Asking['kind']) {
     this.asking = this.asking?.role === role && this.asking.kind === kind ? null : { role, kind, text: '' };
+    this.focusBox = !!this.asking;
     this.redraw?.();
   }
 
@@ -115,7 +118,10 @@ export class OrduPanel {
         e.stopPropagation();
       },
     }) as HTMLInputElement;
-    queueMicrotask(() => input.focus());
+    if (this.focusBox) {
+      this.focusBox = false;
+      queueMicrotask(() => input.focus());
+    }
     return h(
       'div.ordu-ask',
       {},
