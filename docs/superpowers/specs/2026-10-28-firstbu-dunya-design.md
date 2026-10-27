@@ -1,4 +1,4 @@
-# FirstBU Dünyası — tasarım
+# Ajan Şehri — tasarım (ilk kiracı: FirstBU)
 
 Tarih: 2026-10-28 · Dal: `feat/firstbu-dunya` · Taban: agent-office fork'u (`MahmutKurnaz/firstbu-ofis`, MIT)
 
@@ -8,8 +8,12 @@ Mahmut'un FirstBU'da bir lider altında 14 rollük bir ajan ekibi var (`/Users/m
 `docs/AGENT_TEAMS.md`). Bugün bu ekiple terminal terminal konuşuyor. İstenen: içine girilen, canlı bir **oyun
 dünyası**. Orada hangi ekibin çalıştığı, hangisinin boşta olduğu, kimin soru beklediği ve raporların ne dediği
 bir bakışta görülsün. Bir ajana ya da masaya tıklayınca onun **gerçek terminali** açılsın ve oradan yazılsın.
-Kısacası "terminal merkezi, ama modern" olsun. Bu ilk proje. Sonra başka projeler (FirstBU dışındakiler) de aynı
-dünyaya bağlanacak ve günlük iş (düzeltme, sorun çözme) buradan yürüyecek.
+Kısacası "terminal merkezi, ama modern" olsun.
+
+**Bu FirstBU'ya özel değil.** Mahmut kendi "ajan ordusunu" kuruyor. 10 projesi olursa 10 ayrı ofis olur. Bir
+projenin bir ya da birden çok ofisi olabilir. Her ekibin yapısı farklı olabilir ve Mahmut bunu kendisi ayarlar.
+FirstBU yalnızca ilk kiracı ve örnek tasarım. Tüm kod genel yazılır, FirstBU'ya özgü hiçbir şey koda gömülmez,
+hepsi yapılandırmadan gelir.
 
 İlham: Selma Kocabıyık'ın "Higgsfield API ile ajan oyunu" yazısı ve `a-sirketi` reposundaki
 `docs/higgsfield-ofis/` (PROMPT.md'deki 10 kural, ADIMLAR.md, KAYNAKLAR.md). Selma'nın oyun kodu yayımlanmamış.
@@ -33,7 +37,8 @@ terminal, PTY, hook ile durum takibi, oyuncu karakteri, kamera ve proje başına
 7. **Canlılık** (Selma Adım 9'un şehir hali): kahve buharı, sokak lambaları, ofis ışıkları, gün/gece.
 8. **Ses.** Ajan kendi durumunu sesli söyleyebilir (TTS, ajan başına ayrı ses). Sesle komut, agent-office'te zaten
    var (tarayıcı dikte).
-9. **Yeni proje bağlanabilir.** agent-office'in "her repo bir kat" yapısı korunur. FirstBU ilk kat olur.
+9. **Çok proje, çok ofis.** Her proje caddede kendi ofis binasıyla (bir ya da birkaç) yer alır. Ekipler,
+   roller, karakterler ve yerleşim proje başına ayarlanır. Bkz. "Genel yapı: ajan ordusu".
 
 ## Hedef olmayanlar (şimdilik)
 
@@ -65,6 +70,46 @@ terminal, PTY, hook ile durum takibi, oyuncu karakteri, kamera ve proje başına
 - İşçi gövdesi kodla yapılmış (`Worker` sınıfı, prosedürel poz). GLB karakter için aynı API'yi (`setStatus`,
   `setAction`, balon, isim etiketi) koruyan ayrı bir gövde sınıfı gerekir. Şablon: köpek (`features/dog/world.ts`, AnimationMixer).
 - TTS yok, sıfırdan eklenir.
+
+## Genel yapı: ajan ordusu
+
+**Katmanlar:**
+
+```
+Şehir (tek dünya, tek cadde)
+ └─ Proje           = bir git reposu (FirstBU, X, Y …), kendi çalışma klasörü
+     └─ Ofis        = caddede bir bina; bir projenin 1..n ofisi olabilir
+         └─ Ekip    = ofisin içinde bir oda/bölge
+             └─ Rol = bir masa + bir karakter + bir terminal (Claude Code oturumu)
+```
+
+**Her şey yapılandırmadan gelir:**
+- **Proje dosyası** `<proje>/.agent-office/ordu.json`: o projenin ofisleri, ekipleri, rolleri, karakterleri,
+  ekip renkleri ve rapor klasörü (FirstBU için `.claude/work/`). Dünyanın içinden düzenlenebilir: ⚙️ → Ekipler
+  (ekip ekle/sil, rol taşı, karakter seç). Ayrıca elle de düzenlenebilir.
+- **Rol kaynağı:** Rol önce projenin `.claude/agents/<ad>.md`'sinden okunur. Yoksa ortak kütüphaneden
+  (`~/.claude/agents/` ya da bu repodaki `ordu/roller/`) gelir. Böylece bir rol birden çok projede kullanılabilir.
+  Rol, Claude dışında bir sağlayıcıyla (Codex, OpenCode …) da çalışabilir. agent-office bunu zaten destekliyor.
+- **Ekip şablonları** (`ordu/sablonlar/`): "yazılım ekibi" (FirstBU yapısı), "pazarlama ekibi", "içerik
+  ekibi" (a-sirketi yapısı: x-icerik, youtube-analiz, twitter-icerik) gibi hazır kalıplar. Yeni projeye
+  tek tıkla bir şablon basılır, sonra özelleştirilir.
+- **Karakter kataloğu** (`ordu/karakterler/`): hayvan + kıyafet kombinasyonları ortak havuzdadır. Bir rol
+  için katalogdan karakter seçilir. Aynı karakter başka projede başka role verilebilir. Yeni karakter F4 hattıyla
+  kataloğa eklenir.
+- **`ordu.json` yoksa:** Projenin `.claude/agents/*.md` dosyalarından tek ofisli, tek ekipli varsayılan bir
+  yerleşim üretilir. Hiç rol dosyası yoksa genel bir "yazılım ekibi" şablonu önerilir.
+
+**Teknik yol (*benim kararım*):** agent-office'te her proje zaten ayrı bir "kat"tır: kendi klasörü, işçileri ve
+`.agent-office/` durumu vardır. Bunu iki adımda şehre çeviriyoruz:
+1. **Önce (F1–F3):** Her proje kendi katında kendi cadde/ofis yerleşimini `ordu.json`'dan kurar. Projeler arası
+   geçiş agent-office'in mevcut kat listesiyle yapılır.
+2. **Sonra (F6, Şehir görünümü):** Tek cadde, tüm projelerin binaları yan yana. Her bina tabelasında canlı özet
+   var: kaç ajan çalışıyor, kaç soru bekliyor, son verify sonucu. Bir binaya girmek o projenin katına geçmek
+   demek. Bu adım sunucunun tüm katların özetini tek bir akışta yayınlamasını gerektiriyor. Bugün bir oyuncu tek
+   katı görüyor.
+
+FirstBU'ya özel olan her şey (14 rol, bölgeler, `report.md`/`verify.md` şablon kontrolü) bu yapının içinde
+**FirstBU'nun `ordu.json`'ı ve "yazılım ekibi" şablonu** olarak durur. Kodda değildir.
 
 ## Ekip modeli (verilen karar: her rol ayrı işçi)
 
@@ -135,7 +180,7 @@ caddeden geçen bisikletler ve yayalar (dekor), yağmur/gün batımı. Selma'nı
 parçaları). agent-office'in kendi ofis ve şehir kodu (`world/office/`, `world/outside.ts`, `world/city.ts`) da
 yeniden kullanılabilir. Son hali yine Higgsfield + Meshy ile kendi tasarımlarımız olur (F4).
 
-Yerleşim, projenin `.agent-office/teams.json` dosyasında durur: bölge → roller → koltuk id'leri. Dosya yoksa,
+Yerleşim, projenin `.agent-office/ordu.json` dosyasında durur: bölge → roller → koltuk id'leri. Dosya yoksa,
 projedeki `.claude/agents/*.md`'den (frontmatter: `name`, `description`, `model`) varsayılan bir yerleşim üretilir.
 Böylece başka bir proje bağlandığında kendi rolleriyle gelir.
 
@@ -187,7 +232,7 @@ agent-office'in `--settings` hook'ları birlikte çalışıyor mu, doğrulanır.
 **F1 — Roller ve ekipler** (mevcut ofis haritasında, dünya beklemeden):
 - İşçiye `agent` (rol adı) alanı. Yol: `WorkerInfo` → spawn mesajı → `spawn` → `providers/claude.ts`
   (`--agent`) → `persist.ts` → `office-workers` hire isteği ve MCP şeması → işe alma arayüzü.
-- `teams.json` okuyucu/üretici (sunucu) ve yeni `teams` WS mesajı.
+- `ordu.json` okuyucu/üretici (sunucu) ve yeni `teams` WS mesajı.
 - **Ekipler paneli** (`features/teams/`): bölge → rol → durum noktası, şu anki araç, son rapor
   (`report.md` Durum satırı, `verify.md` Sonuç satırı). Tıkla → terminal. "İş ver" kutusu → role prompt.
   Boş rolde "işe al" → o bölgenin koltuğuna `--agent <rol>` ile.
@@ -195,7 +240,7 @@ agent-office'in `--settings` hook'ları birlikte çalışıyor mu, doğrulanır.
 **F2 — Cadde haritası, taslak** (yeni stil `cadde`):
 - Cadde, kafe meydanı, 7 cam cepheli ofis, ağaçlar, şehir silueti, gün/gece.
 - Yeni `glb` prop türü ve `world/models.ts` ile yükleme. Taslaklar CC0 paketlerden.
-- Koltuklar ofislerdeki masalara dağıtılır (32+, beanbag'ler kafeye). `teams.json` bölgeleriyle eşleşir.
+- Koltuklar ofislerdeki masalara dağıtılır (32+, beanbag'ler kafeye). `ordu.json` bölgeleriyle eşleşir.
 - Ofis kapısında **Enter** → o ekibin paneli (üyeler, terminalleri, olay geçmişi). Selma kural 8.
 - Ölçek: karakter 1 birim, bina 2,5–3 birim. Binalar 10–15 cm gömülür, temas gölgesi ve dip bitkisi eklenir
   (Selma kural 4–5). Kamera: agent-office'in oyuncu kamerası kullanılır. Selma'nın üçüncü şahıs kurallarına
@@ -227,8 +272,8 @@ agent-office'in `--settings` hook'ları birlikte çalışıyor mu, doğrulanır.
   `speechSynthesis`'i (Türkçe ses) yedek olur. Sunucu tarafında, anahtar `.env`'de durur.
 - Sesle komut (dikte) mevcut. Yalnızca dünyadaki "iş ver" kutusuna bağlanır.
 
-**F6 — Diğer projeler.** Yeni repo = yeni kat (mevcut asansör). `teams.json` yoksa kendi `.claude/agents`'ından
-varsayılan bölgeler üretilir.
+**F6 — Şehir görünümü ve diğer projeler.** İkinci bir proje `ordu.json` ve bir şablonla bağlanır. Ardından
+tek caddede tüm proje binaları canlı tabelalarıyla gösterilir (bkz. "Genel yapı").
 
 ## Selma'nın adımları ↔ bizim fazlarımız
 
@@ -249,7 +294,7 @@ Selma'nın 10 adımını sırayla izliyoruz. agent-office'in hazır verdiği ad�
 
 ## Yapıcıya bırakılanlar
 
-Dosya/modül sınırları, WS mesaj adları, `teams.json` şeması ayrıntıları, arazi üretim yöntemi, CC0 paket seçimi,
+Dosya/modül sınırları, WS mesaj adları, `ordu.json` şeması ayrıntıları, arazi üretim yöntemi, CC0 paket seçimi,
 ses önbelleği, test yaklaşımı (mevcut `npm test` + harita testleri, 600 satır kuralı).
 
 ## Başarı ölçütü
