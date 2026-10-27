@@ -302,3 +302,20 @@ ses önbelleği, test yaklaşımı (mevcut `npm test` + harita testleri, 600 sat
 Mahmut dünyaya girer ve meydanda lideri görür. Doğrulama kalesinde verify-be'nin son sonucunu okur. Lidere iş
 verir. Liderin açtığı rollerin kendi binalarına yürüyüp çalıştığını görür. Soru soran ajan yanına gelir, cevap
 verir. Bir masaya tıklayıp o terminalde doğrudan yazar. Tüm bunlar için tek bir terminal penceresi açmaz.
+
+## F0 sonuçları (2026-10-28)
+
+- `npm install` + `npm run build` + `npm run typecheck`: temiz. `npm test`: 614 testten 613'ü geçti. Kalan 1
+  (`tests/worktrees.test.ts`), git'in Türkçe hata mesajı yüzünden kalıyor; `LANG=C` ile geçiyor. **F1'de
+  düzeltilecek:** ofis git çıktısını İngilizce bekliyor, işçi/sunucu git komutları `LC_ALL=C` ile çalışmalı.
+  Yoksa Türkçe sistemde silinmiş worktree'yi geri getirme bozuluyor.
+- FirstBU kat olarak açıldı (`agent-office /Users/mahmutkurnaz/firstbu`). `.agent-office/`, ofis tarafından
+  `.git/info/exclude`'a eklendi. FirstBU'nun `git status`'ı değişmedi (önce/sonra 24 satır, kullanıcının kendi işi).
+- Claude işçisi işe alındı (Opus 5.5, ortak checkout). Terminalde iki tur yazışıldı, durumlar `working → done`
+  doğru geçti.
+- FirstBU ayarları işçide yükleniyor: `0101/` okuma denemesi FirstBU'nun `.claude/settings.json` deny kuralıyla
+  engellendi. Hook'lar aynı dosyada ve ofisin `--settings`'i ek olarak yükleniyor, yani FirstBU hook'larının da
+  çalışması bekleniyor. **Hook'un kendi engel mesajı doğrudan gözlenmedi**, F1'in ilk adımında bir işçiyle
+  tekrar doğrulanacak.
+- Not: 3D görünümde terminale tıklamadan yazmak tuşları oyuna gönderiyor (E/P/X kısayolları). Klavye
+  odağının Ekipler panelinde net olması F1 arayüz ölçütü.
