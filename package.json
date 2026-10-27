@@ -11,7 +11,8 @@
   },
   "files": [
     "bin",
-    "dist"
+    "dist",
+    "ordu"
   ],
   "scripts": {
     "test": "node --import tsx --import=#tests/css --test tests/*.test.ts",

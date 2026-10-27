@@ -33,6 +33,7 @@ export interface HudAction {
 
 const PANELS: { id: HudPanel; icon: string; label: string; what: string }[] = [
   { id: 'workers', icon: '🤖', label: 'Workers', what: 'Every desk and what it’s up to' },
+  { id: 'ordu', icon: '🏢', label: 'Ekipler', what: 'Ofisler, ekipler, roller ve raporlar' },
   { id: 'people', icon: '👥', label: 'People', what: 'Who’s here, on which floor' },
   { id: 'spend', icon: '💸', label: 'Spend', what: 'Today, the budget, all time' },
   { id: 'limits', icon: '⏳', label: 'Claude limits', what: 'The plan’s 5-hour and week' },
@@ -41,7 +42,7 @@ const PANELS: { id: HudPanel; icon: string; label: string; what: string }[] = [
 ];
 
 /** The element each panel is. */
-const PANEL_EL: Record<HudPanel, string> = { workers: 'workers-panel', people: 'people-panel', spend: 'spend', limits: 'limits', chat: 'chat', floor: 'project-meta' };
+const PANEL_EL: Record<HudPanel, string> = { workers: 'workers-panel', ordu: 'ordu-panel', people: 'people-panel', spend: 'spend', limits: 'limits', chat: 'chat', floor: 'project-meta' };
 
 const PIN_SVG = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M16 9V4h1a1 1 0 0 0 0-2H7a1 1 0 0 0 0 2h1v5a3 3 0 0 1-3 3v2h5.97v7l1 1 1-1v-7H19v-2a3 3 0 0 1-3-3z"/></svg>';
 

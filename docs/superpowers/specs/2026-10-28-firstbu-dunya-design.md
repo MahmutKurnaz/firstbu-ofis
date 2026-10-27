@@ -319,3 +319,16 @@ verir. Bir masaya tıklayıp o terminalde doğrudan yazar. Tüm bunlar için tek
   tekrar doğrulanacak.
 - Not: 3D görünümde terminale tıklamadan yazmak tuşları oyuna gönderiyor (E/P/X kısayolları). Klavye
   odağının Ekipler panelinde net olması F1 arayüz ölçütü.
+
+## F1 sonuçları (2026-10-28)
+
+- Ekipler paneli ofiste: 7 ofis, 7 ekip, 15 rol (FirstBU `.agent-office/ordu.json`, yazılım şablonundan).
+- Panelden `scout-be` işe alındı: `claude --agent scout-be` ile açıldı (başlıkta `@scout-be`, model rol dosyasından
+  Sonnet 5.5). Prompt'un başında ofis notu ve görev klasörü (`.claude/work/<id>/`) var.
+- **F0'dan kalan doğrulama tamam:** scout-be'nin `grep -c 0101 CLAUDE.md` denemesi FirstBU'nun `guard-sensitive.sh`
+  hook'uyla engellendi ("Engellendi: 0101/ klasörü gerçek müşteri verisi içerir…"). FirstBU hook'ları ofis
+  işçilerinde çalışıyor.
+- Testler ayrı bir Sonnet 5.5 ajanı tarafından yazıldı. `GEÇTİ`'deki Türkçe İ'nin kelime sınırı hatasını yakaladı.
+- Rapor kuralı plandan farklı: işçisi olmayan rollere en yeni rapor atanmıyor (yoksa hepsinde aynı rapor görünürdü).
+  Yalnızca verify rolleri en yeni `verify.md`'yi gösterir.
+- FirstBU `git status` değişmedi (24 satır).
