@@ -1,3 +1,6 @@
+// Assertions match git's English error text; keep spawned git processes out of the user's locale.
+process.env.LC_ALL = 'C';
+
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';

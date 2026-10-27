@@ -11,6 +11,7 @@ import { midTurn } from './lifecycle.js';
 import type { Worker } from './types.js';
 import { COLORS, newWorker } from './worker.js';
 import { validRepos } from './worktree.js';
+import { roleFields } from './spawn-opts.js';
 
 /** What a worker with a live terminal can be doing. */
 const RUNNING = new Set<unknown>(['starting', 'idle', 'working', 'done', 'needs_input'] satisfies WorkerStatus[]);
@@ -30,6 +31,9 @@ export function saveWorkers(file: string, workers: Iterable<Worker>, stopping: b
     createdBy: info.createdBy,
     createdAt: info.createdAt,
     prompt: info.prompt,
+    role: info.role,
+    agentFile: info.agentFile,
+    roleTask: info.roleTask,
     worktree: info.worktree,
     repos: info.repos,
     title: info.title,
@@ -86,6 +90,7 @@ export function restoreWorkers(file: string, workers: Map<string, Worker>, defau
         createdBy: s.createdBy ?? '?',
         createdAt: s.createdAt ?? Date.now(),
         prompt: s.prompt,
+        ...roleFields({ role: roleStr(s.role), agentFile: roleStr(s.agentFile), roleTask: roleStr(s.roleTask) }),
         worktree: s.worktree,
         repos: s.worktree ? validRepos(s.repos) : undefined,
         title: s.title,
@@ -124,4 +129,9 @@ export function restoreWorkers(file: string, workers: Map<string, Worker>, defau
 function validTask(t: unknown): WorkerTask | undefined {
   const v = t as Partial<WorkerTask> | undefined;
   return typeof v?.name === 'string' && typeof v.summary === 'string' ? { name: v.name, summary: v.summary } : undefined;
+}
+
+/** A saved role, agent or task id: a short plain name. */
+function roleStr(v: unknown): string | undefined {
+  return typeof v === 'string' && /^[\w.-]{1,64}$/.test(v) ? v : undefined;
 }
