@@ -132,7 +132,10 @@ export function readHomeRequest(body: unknown): HomeRequest | string {
 
 /** A request to hire a worker, read from its JSON body. */
 export interface HireRequest {
-  prompt: string;
+  /** Its task: needed, unless it's hired for an ordu.json role (which may have a standing one). */
+  prompt?: string;
+  /** An ordu.json role to hire it for (see ordu/hire.ts): its desk, agent, model and effort come from there. */
+  role?: string;
   provider?: AgentProvider;
   model?: string;
   effort?: AgentEffort;
@@ -145,7 +148,8 @@ export interface HireRequest {
 export function readHireRequest(body: unknown, providers: AgentProvider[]): HireRequest | string {
   const b = (body ?? {}) as Record<string, unknown>;
   const prompt = typeof b.prompt === 'string' ? b.prompt.replace(/\r\n?/g, '\n').trim() : '';
-  if (!prompt) return 'Give the new worker its task: prompt';
+  if (b.role !== undefined && (typeof b.role !== 'string' || !/^[a-z0-9][a-z0-9_-]{0,39}$/.test(b.role))) return 'role is a role name from ordu.json';
+  if (!prompt && b.role === undefined) return 'Give the new worker its task: prompt';
   if (prompt.length > 20000) return 'The prompt is over 20000 characters';
   if (b.provider !== undefined && (!isAgentProvider(b.provider) || !providers.includes(b.provider))) return `provider is one of ${providers.join(', ')}`;
   if (b.model !== undefined && (typeof b.model !== 'string' || !b.model.trim() || b.model.length > 200)) return 'model is a model name';
@@ -156,7 +160,8 @@ export function readHireRequest(body: unknown, providers: AgentProvider[]): Hire
   if (b.desk !== undefined && (!seat || seat.station || seat.room)) return "desk is a desk or bean bag's id, like desk-3";
   if (b.issue !== undefined && !(Number.isSafeInteger(b.issue) && (b.issue as number) > 0)) return 'issue is an issue number';
   return {
-    prompt,
+    ...(prompt ? { prompt } : {}),
+    ...(typeof b.role === 'string' ? { role: b.role } : {}),
     ...(b.provider !== undefined ? { provider: b.provider as AgentProvider } : {}),
     ...(typeof b.model === 'string' ? { model: b.model.trim() } : {}),
     ...(b.effort !== undefined ? { effort: b.effort as AgentEffort } : {}),

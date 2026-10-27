@@ -287,7 +287,8 @@ export const TOOLS = [
     inputSchema: {
       type: 'object',
       properties: {
-        prompt: { type: 'string', description: 'The task, complete on its own.' },
+        prompt: { type: 'string', description: 'The task, complete on its own. Optional with role (the role may have a standing task).' },
+        role: { type: 'string', description: "A role from the floor's ordu.json (be-lead, verify-fe…): it sits at that role's desk as the project's own .claude/agents/<role> agent, in the shared checkout, and provider, model, effort, worktree and desk are ignored." },
         provider: { type: 'string', description: "Which agent runs it (claude, codex, opencode...; list_workers' providers). Default: the office's." },
         model: { type: 'string', description: "A model for it, instead of the provider's default." },
         effort: { type: 'string', enum: EFFORTS, description: 'Reasoning effort, for agents that take one.' },
@@ -295,7 +296,7 @@ export const TOOLS = [
         desk: { type: 'string', description: 'A desk or bean bag id (desk-3). Default: the next free one.' },
         issue: { type: 'integer', minimum: 1, description: 'The GitHub issue it works on, assigned when it starts.' },
       },
-      required: ['prompt'],
+      required: [],
       additionalProperties: false,
     },
     annotations: { destructiveHint: false, openWorldHint: false },

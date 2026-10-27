@@ -46,6 +46,12 @@ export interface WorkerInfo {
   createdBy: string;
   createdAt: number;
   prompt?: string;
+  /** The ordu.json role it was hired for (see shared/ordu.ts). */
+  role?: string;
+  /** The Claude Code agent it runs as: `claude --agent <agentFile>`. */
+  agentFile?: string;
+  /** The task id its role reports under (<reportDir>/<roleTask>/). */
+  roleTask?: string;
   /**
    * Set when the worker runs in its own git worktree (path relative to the office dir). `from` is
    * the branch the office was on when the worktree was cut, which its pull request targets.

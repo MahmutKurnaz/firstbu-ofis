@@ -297,6 +297,11 @@ test('reads send-home and hire requests', () => {
   assert.match(readHireRequest({ prompt: 'x', issue: 0 }, [...providers]) as string, /issue/);
 });
 
+test('a hire request may name a role from ordu.json instead of a prompt', () => {
+  assert.deepEqual(readHireRequest({ role: 'be-lead' }, ['claude']), { role: 'be-lead' });
+  assert.equal(readHireRequest({ role: 5 }, ['claude']), 'role is a role name from ordu.json');
+});
+
 test("Codex is told to pass the office's variables on to the MCP server", () => {
   const args = codexMcpArgs('/opt/app/bin/office-workers.js');
   assert.deepEqual(args.filter((_, i) => i % 2 === 0), ['-c', '-c', '-c']);

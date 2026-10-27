@@ -206,6 +206,8 @@ export const claude: ProviderAdapter<undefined, ClaudeSetup> = {
     // A model/effort chosen for this worker overrides whatever --agent-args set office-wide.
     if (info.model) args.push('--model', info.model);
     if (info.effort) args.push('--effort', info.effort);
+    // Hired for an ordu.json role: the project's own agent file says who it is (and its model, unless one was picked).
+    if (info.agentFile) args.push('--agent', info.agentFile);
     // The queue agent only ever adds to the queue: without these it can't touch the checkout's files.
     if (station === 'queue') args.push('--disallowedTools', ...QUEUE_AGENT_DISALLOWED_TOOLS);
     if (resumeSessionId) args.push('--resume', resumeSessionId);

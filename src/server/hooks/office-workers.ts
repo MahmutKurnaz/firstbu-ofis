@@ -8,6 +8,8 @@ import type { WorkerInfo } from '../../shared/protocol.js';
 import type { Ctx } from '../office/context.js';
 import { str } from '../office/input.js';
 import { readBody, send } from '../http/util.js';
+import { hireRole } from '../ordu/hire.js';
+import { orduChanged } from '../ws/handlers/ordu.js';
 
 /**
  * Pull request `n` on a floor, for a worker to have as its own: one that's open, or merged and still
@@ -144,6 +146,16 @@ export async function officeWorkers(ctx: Ctx, req: http.IncomingMessage, res: ht
 
   const ask = readHireRequest(body, floor.project.agentProviders);
   if (typeof ask === 'string') return send(res, 400, { error: ask });
+  if (ask.role) {
+    if (!floor.project.agentProviders.includes('claude')) return send(res, 400, { error: 'This floor has no Claude Code: roles run on Claude Code' });
+    // An ordu.json role: its desk, agent, model and effort are the role's, in the shared checkout.
+    const hired = hireRole(floor, ask.role, who, ask.prompt, floor.workers.ownerOf(me.id));
+    if (typeof hired === 'string') return send(res, 400, { error: hired });
+    ctx.toastFloor(floor, `${who}, ${hired.info.name} (${hired.info.role}) işe aldı`);
+    if (hired.note) ctx.toastFloor(floor, hired.note, 'warn');
+    orduChanged(ctx, floor);
+    return send(res, 200, { ok: true, worker: row(hired.info.id), ...(hired.note ? { note: hired.note } : {}) });
+  }
   const desk = ask.desk ?? nextFreeSeat((id) => floor.workers.deskOccupied(id), floor.plan.wing)?.id;
   if (!desk) return send(res, 409, { error: 'Every desk and bean bag is taken: send someone home first' });
   // A model or effort is the office's default worker's unless it says whose.

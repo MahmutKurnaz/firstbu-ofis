@@ -156,3 +156,18 @@ test('Claude models go by the name of the model, not only its family', () => {
   assert.equal(claudeModelName('gpt-5.5'), undefined);
   assert.equal(claudeModelName('<synthetic>'), undefined);
 });
+
+test('the Claude adapter launches with --agent <file> ahead of the -- prompt when the worker has an agent file', async () => {
+  const { providerAdapter } = await import('../src/server/providers/index.js');
+  const claude = providerAdapter('claude')!;
+  const launch = (info: object, prompt?: string) =>
+    claude.launch({ h: { info, state: claude.createState?.() } as never, args: [], setup: { settings: '/data/settings.json' }, prompt }).args;
+  const withAgent = launch({ agentFile: 'be-lead' }, 'do it');
+  const at = withAgent.indexOf('--agent');
+  assert.ok(at >= 0);
+  assert.equal(withAgent[at + 1], 'be-lead');
+  assert.ok(at + 1 < withAgent.indexOf('--'));
+  assert.equal(withAgent[withAgent.indexOf('--') + 1], 'do it');
+  assert.equal(launch({}, 'do it').includes('--agent'), false);
+  assert.equal(launch({ agentFile: 'be-lead' }).includes('--agent'), true);
+});

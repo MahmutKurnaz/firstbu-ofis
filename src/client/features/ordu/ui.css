@@ -1,0 +1,30 @@
+/* The Ekipler panel (features/ordu/panel.ts), in the HUD's sidebar beside the workers list. */
+.ordu-body { display: flex; flex-direction: column; gap: 4px; max-height: 46vh; overflow-y: auto; }
+.ordu-note { margin: 2px 0 6px; font-size: 12px; font-weight: 600; line-height: 1.35; color: var(--ink-2, #555); }
+.ordu-note.bad { color: var(--bad, #c0392b); }
+.ordu-office { margin: 6px 0 0; font-size: 13px; font-weight: 900; }
+.ordu-team-name { margin-top: 2px; padding-left: 8px; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; border-left: 4px solid var(--team); }
+.ordu-team { list-style: none; margin: 0; padding: 0 0 0 8px; border-left: 4px solid var(--team); }
+.ordu-role { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 3px 4px; border-radius: 8px; font-size: 13px; }
+.ordu-role:hover { background: var(--paper-2, #f3efe6); }
+.ordu-role.needs_input { background: #ffe3ea; }
+.ordu-dot { flex: none; width: 10px; height: 10px; border-radius: 50%; background: transparent; border: 2px dashed #aab; }
+.ordu-dot.idle, .ordu-dot.starting { background: #b9bfcc; border: none; }
+.ordu-dot.working { background: #2fbf71; border: none; animation: ordu-pulse 1.2s ease-in-out infinite; }
+.ordu-dot.needs_input { background: var(--bad, #e0435c); border: none; }
+.ordu-dot.done { background: #4a8fe7; border: none; }
+.ordu-dot.offline, .ordu-dot.exited { background: #e6e8ee; border: 2px solid #b9bfcc; }
+@keyframes ordu-pulse { 50% { transform: scale(1.35); opacity: 0.7; } }
+@media (prefers-reduced-motion: reduce) { .ordu-dot.working { animation: none; } }
+.ordu-name { flex: 1 1 140px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 6px; min-width: 0; }
+.ordu-sub { font-size: 11px; font-weight: 600; color: var(--ink-2, #777); }
+.ordu-what, .ordu-report { flex-basis: 100%; font-size: 12px; font-weight: 600; color: var(--ink-2, #555); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ordu-verdict { font-size: 11px; font-weight: 900; padding: 0 6px; border-radius: 6px; color: #fff; }
+.ordu-verdict.pass { background: #2fbf71; }
+.ordu-verdict.fail { background: var(--bad, #e0435c); }
+.ordu-actions { display: flex; gap: 4px; }
+.ordu-btn { font: inherit; font-size: 12px; font-weight: 800; padding: 2px 8px; border-radius: 8px; border: 2px solid var(--ink, #2b2b3a); background: var(--paper, #fffaf0); cursor: pointer; }
+.ordu-btn:hover { background: var(--paper-2, #f3efe6); }
+.ordu-btn.hire, .ordu-btn.go { background: #ffb38a; }
+.ordu-ask { flex-basis: 100%; display: flex; gap: 4px; }
+.ordu-input { flex: 1; min-width: 0; font: inherit; font-size: 13px; padding: 3px 6px; border-radius: 8px; border: 2px solid var(--ink, #2b2b3a); }
