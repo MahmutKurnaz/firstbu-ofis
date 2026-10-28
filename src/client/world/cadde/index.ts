@@ -14,6 +14,7 @@ import { agentConsole, buildBenches, buildBriefing, placeSetting } from '../stat
 import { dress, furnish, skyline } from './kaykit';
 import { caddeKit } from './kit';
 import { paintOffice, type OfficeView } from './offices';
+import { streetLife } from './passersby';
 import { PROPS } from './props';
 import { buildShell } from './shell';
 
@@ -58,6 +59,7 @@ export function buildCadde(plan: MapPlan): World {
   const briefing = buildBriefing(kit, '🤝 Toplantı');
   const boardMeshes = buildBoards(kit);
   const herald = buildBarista(kit);
+  const life = streetLife(kit);
   group.add(mergeByMaterial(kit.still));
 
   // Walking about: in through the gateway and out again, round what's in the way.
@@ -125,6 +127,7 @@ export function buildCadde(plan: MapPlan): World {
       }
       kit.gong?.update(dt);
       herald?.person.update(dt, t, false, false);
+      life.update(t, dt);
     },
     mood(lights, daylight) {
       // Out of doors: the sky's own light, warmer toward dusk; at night the lamps, the offices' ceilings and the city's windows come on.
@@ -166,6 +169,7 @@ export function buildCadde(plan: MapPlan): World {
         g.mat.dispose();
       }
       for (const v of views) v.accent.dispose();
+      life.dispose();
       for (const m of [kit.street.glass, kit.mats.glow, kit.mats.accent, kit.mats.lamp, kit.mats.warn, kit.mats.glass]) m.dispose();
     },
   };

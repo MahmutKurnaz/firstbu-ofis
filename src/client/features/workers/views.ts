@@ -193,7 +193,10 @@ export function installWorkerViews(ctx: Ctx, core: CoreState, parts: WorkerViews
     }
     arrangeSeats();
     // Whoever's waiting on someone lines up for the throne, the one who's waited longest first.
-    court?.line(waitingInOrder(store.workers.values()).filter(inCourt).map((w) => w.id));
+    court?.line(
+      waitingInOrder(store.workers.values()).filter(inCourt).map((w) => w.id),
+      new Set([...store.workers.values()].filter((w) => w.status === 'needs_input').map((w) => w.id)),
+    );
     renderWorkers((id) => parts.waiting.openWorkerTerminal(id));
     parts.waiting.renderWaiting();
     parts.notifier.sync(store.workers);
@@ -314,7 +317,11 @@ export function installWorkerViews(ctx: Ctx, core: CoreState, parts: WorkerViews
       adrift.update(dt, t, camera.position);
     }
     arrivals.update(dt);
-    parts.worlds.court()?.update(dt);
+    const court = parts.worlds.court();
+    // On a street, one stuck on a question comes to you while you're up and about (see Court.follow).
+    const me = ctx.player;
+    court?.follow(plan().style === 'cadde' && !me.seat && !core.upTop ? { x: me.pos.x, z: me.pos.z, rotY: me.facing } : null);
+    court?.update(dt);
   });
 
   /** The floor plan last shown, to tell someone knocking through from arriving on a floor already built out (or back on the office's map). */

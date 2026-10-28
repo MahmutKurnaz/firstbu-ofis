@@ -305,6 +305,14 @@ export function installWorkerActions(ctx: Ctx, core: CoreState, parts: WorkerAct
     // In line for the throne: in front of it, where it stands.
     const w = store.workerAtDesk(desk.id);
     const court = parts.worlds.court();
+    // Come to you already (on a street): it's right here, so just turn to it.
+    const by = w && court?.seeking(w.id) ? court.whereIs(w.id) : undefined;
+    if (by) {
+      player.facing = Math.atan2(by[0] - player.pos.x, by[1] - player.pos.z);
+      player.camYaw = player.facing - Math.PI;
+      player.lookPitch = -0.2;
+      return;
+    }
     const inLine = w && court ? court.spotOf(w.id) : -1;
     if (inLine >= 0) {
       // At the front: up on the throne, if it's free, where E is for them.

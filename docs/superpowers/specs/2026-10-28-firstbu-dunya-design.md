@@ -352,3 +352,15 @@ verir. Bir masaya tıklayıp o terminalde doğrudan yazar. Tüm bunlar için tek
 - **Lider akışı uçtan uca doğrulandı:** Aslan Lider'e görev verildi. Lider `hire_worker role=scout-fe` ile Mirket FE'yi
   işe aldı ve Mirket FE kendi ofisine (Keşif, desk-4) oturdu. Mirket FE `.claude/agents` altındaki dosyaları sayıp
   `tell_worker` ile lidere bildirdi, lider de sonucu yazdı: 14, doğru. FirstBU dosyalarına dokunulmadı.
+
+## F3 sonuçları (2026-10-28)
+
+- **Soru soran ajan sana yürür** (cadde): Sincap (quick-fix) `AskUserQuestion` ile soru sorunca Hata laboratuvarından
+  çıkıp caddeye yürüdü, 15 saniyede oyuncunun 1,7 m önünde durup ona döndü. Oyuncu caddenin güneyine gidince
+  peşinden geldi. **E** terminali açar, koltukta otururken kafedeki sıraya girer. Kale ve istasyon değişmedi.
+- **Alt ajan hayaletleri:** `SubagentStart`/`SubagentStop` hook'ları eklendi (yerel Claude Code 2.1.306 destekliyor).
+  Bir ajan üç Explore alt ajanı başlattı; masasının arkasında üç "👻 Explore" hayaleti göründü, bitince kayboldular.
+  FirstBU'nun scout rolleri Agent aracını kapattığı için onlarda hayalet çıkmaz (FirstBU'nun kendi kısıtı).
+- **Cadde canlılığı:** güney uçta yürüyen üç yaya, kafe tezgâhında kahve buharı.
+- Testleri ayrı Sonnet ajanı yazdı (16 yeni). Hareketler başsız Chrome ile doğrulandı (uygulamanın tarayıcı paneli
+  gizliyken kare çizmiyor).

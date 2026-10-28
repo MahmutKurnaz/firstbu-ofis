@@ -21,7 +21,7 @@ import { clockWork } from './clock.js';
 import { childEnv } from './env.js';
 import { midTurn } from './lifecycle.js';
 import { restoreWorkers, saveWorkers } from './persist.js';
-import { freeName, roleFields, type SpawnOpts } from './spawn-opts.js';
+import { freeName, markExited, roleFields, type SpawnOpts } from './spawn-opts.js';
 import { WorkerPrs } from './pr.js';
 import { WIN, binScript, defaultShell, resolveCommand, shellRun, shq, writeOfficeCommands } from './process.js';
 import { CARRY_ON_PROMPT, WorkerTasks } from './tasks.js';
@@ -641,7 +641,7 @@ export class WorkerManager {
     // Its folder was deleted meanwhile: it waits, marked lost, for someone to rebuild it or send it home.
     if (this.worktrees.checkLost(w)) {
       clockWork(info, 'exited');
-      info.status = 'exited';
+      markExited(info);
       this.emitUpdate(w);
       return;
     }
@@ -820,7 +820,7 @@ export class WorkerManager {
       }
       info.exitCode = exitCode;
       clockWork(info, 'exited');
-      info.status = 'exited';
+      markExited(info);
       const hint = info.kind === 'shell' ? ' — press R to restart' : info.sessionId ? ' — press R to resume' : '';
       const msg = `\r\n\x1b[2m[${info.name} exited with code ${exitCode}${hint}]\x1b[0m\r\n`;
       term.write(msg);
@@ -847,7 +847,7 @@ export class WorkerManager {
     const what = this.command(w.info);
     const msg = `\r\n\x1b[31mFailed to start ${what}: ${message}\x1b[0m\r\n`;
     clockWork(w.info, 'exited');
-    w.info.status = 'exited';
+    markExited(w.info);
     w.info.exitCode = -1;
     w.term?.write(msg);
     if (w.viewers.size) this.events.data(w.info.id, msg, [...w.viewers.keys()]);
