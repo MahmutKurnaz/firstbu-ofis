@@ -14,6 +14,7 @@ import { agentConsole, buildBenches, buildBriefing, placeSetting } from '../stat
 import { dress, furnish } from './kaykit';
 import { caddeKit } from './kit';
 import { paintOffice, type OfficeView } from './offices';
+import { streetDust } from './dust';
 import { buildNpcs } from './npcs';
 import { skylineOwn } from './skyline';
 import { streetLife } from './passersby';
@@ -76,6 +77,9 @@ export function buildCadde(plan: MapPlan): World {
   const herald = buildBarista(kit);
   const life = streetLife(kit);
   const npcs = buildNpcs(kit, herald?.person);
+  const dust = streetDust(kit);
+  /** How much daylight there is now (set by mood), for the dust. */
+  let dayNow = 1;
   group.add(mergeByMaterial(kit.still));
 
   // Walking about: in through the gateway and out again, round what's in the way.
@@ -145,9 +149,11 @@ export function buildCadde(plan: MapPlan): World {
       herald?.person.update(dt, t, false, false);
       life.update(t, dt);
       npcs.update(dt);
+      dust.update(t, dayNow);
     },
     mood(lights, daylight) {
       // Out of doors: the sky's own light, warmer toward dusk; at night the lamps, the offices' ceilings and the city's windows come on.
+      dayNow = daylight;
       const dark = 1 - daylight;
       lights.sun.color.copy(day).lerp(dusk, Math.min(1, dark * 1.6));
       // Bright enough under the offices' roofs (which shade them from the sun) to see faces and furniture,
@@ -191,6 +197,7 @@ export function buildCadde(plan: MapPlan): World {
       for (const v of views) v.accent.dispose();
       life.dispose();
       npcs.dispose();
+      dust.dispose();
       for (const m of [kit.street.glass, kit.mats.glow, kit.mats.accent, kit.mats.lamp, kit.mats.warn, kit.mats.glass]) m.dispose();
     },
   };
