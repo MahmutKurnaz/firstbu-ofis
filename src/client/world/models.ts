@@ -40,11 +40,7 @@ import npcKuryeUrl from '../models/npc-kurye.glb?url';
 import npcDedeUrl from '../models/npc-dede.glb?url';
 import npcRehberUrl from '../models/npc-rehber.glb?url';
 import npcKarsilayiciUrl from '../models/npc-karsilayici.glb?url';
-<<<<<<< Updated upstream
-=======
-import tugerUrl from '../models/tuger.glb?url';
 import sehirBinalariUrl from '../models/sehir-binalari.glb?url';
->>>>>>> Stashed changes
 import kaykitCafeUrl from '../models/kaykit-cafe.glb?url';
 import kaykitCityUrl from '../models/kaykit-city.glb?url';
 import kaykitFurnitureUrl from '../models/kaykit-furniture.glb?url';
