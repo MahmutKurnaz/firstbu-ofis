@@ -43,7 +43,9 @@ export function caddeKit(plan: MapPlan, pal: Record<string, string>): CaddeKit {
     still: new THREE.Group(),
     colliders: [],
     interactables: [],
-    mats: materials({ hull: pal.hull, panel: pal.panel, metal: pal.metal, glow: pal.glow }),
+    // The station's furniture in an office's colors: warm padded benches, light grey frames (its own
+    // are nearly black, which in a sunny street office read as holes in the floor).
+    mats: { ...materials({ hull: pal.hull, panel: pal.panel, metal: pal.metal, glow: pal.glow }), pad: toon('#9b7a62'), metalDark: toon('#8a919b') },
     height: plan.height,
     desks: new Map(),
     lights: [],

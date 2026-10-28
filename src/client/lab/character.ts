@@ -1,6 +1,6 @@
 // The character lab, for checking our own characters by eye (Vite dev only, it isn't built:
 // http://localhost:5173/lab/character.html). A plain Claude worker for scale, then the character
-// (`?model=aslan`, the default) worn by a worker standing, walking and sat on a bench-high seat, as
+// (`?model=aslan`, the default) worn by a worker standing, walking and sat typing at a bench and table, as
 // the office draws them (world/character/animal.ts). `t=<seconds>` steps to t and draws one frame,
 // for screenshots. Once it has drawn, window.__ready says how tall each one stands.
 
@@ -14,8 +14,14 @@ const q = new URLSearchParams(location.search);
 const name = (q.get('model') ?? 'aslan') as ModelName;
 const stepTo = q.has('t') ? Number(q.get('t')) : null;
 const { effect, scene, camera } = stage(document.getElementById('c') as HTMLCanvasElement);
-camera.position.set(0.6, 1.8, 6.2);
-camera.lookAt(0.6, 0.6, 0);
+// `cam=side`: from the side, close on the one sat at its table.
+if (q.get('cam') === 'side') {
+  camera.position.set(5.2, 1.3, 0.6);
+  camera.lookAt(2.4, 0.75, 0.4);
+} else {
+  camera.position.set(0.6, 1.8, 6.2);
+  camera.lookAt(0.6, 0.6, 0);
+}
 
 /** A bench-high seat, as the street's tables have (BENCH_TOP 0.45, the worker 0.08 below its top). */
 const SEAT = 0.37;
@@ -29,9 +35,13 @@ const acts = [
   { label: 'walk', x: 1.0, walking: true, seated: false },
   { label: 'sit', x: 2.4, walking: false, seated: true },
 ] as const;
-const seat = new THREE.Mesh(new THREE.BoxGeometry(0.6, SEAT, 0.5), new THREE.MeshToonMaterial({ color: '#5a6170' }));
-seat.position.set(2.4, SEAT / 2, -0.15);
+// The street's bench (its top 0.45 m up) under the seat, and its table in front: its edge 0.5 m out, its top at 0.78 m.
+const seat = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.45, 0.44), new THREE.MeshToonMaterial({ color: '#7b8796' }));
+seat.position.set(2.4, 0.225, 0);
 scene.add(seat);
+const table = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.06, 1.4), new THREE.MeshToonMaterial({ color: '#f3efe8' }));
+table.position.set(2.4, 0.75, 0.5 + 0.7);
+scene.add(table);
 
 void loadModel(name).then(async () => {
   const skins = await Promise.all(
@@ -40,6 +50,8 @@ void loadModel(name).then(async () => {
       w.root.position.set(a.x, a.seated ? SEAT : 0, 0);
       if (a.seated) w.root.scale.setScalar(SEAT_SCALE);
       w.walking = a.walking;
+      // Sat at work: typing.
+      if (a.seated) w.status = 'working';
       scene.add(w.root);
       const skin = new AnimalSkin(w, await loadModel(name), () => a.seated);
       return { a, w, skin };

@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import type { Model } from '../models';
+import { glance, look, reach, straighten } from './animal-pose';
 import type { Worker } from './worker';
 
 // A worker dressed as one of our own characters (the lion lead and the rest, F4): its little Claude
@@ -12,7 +13,11 @@ export const ANIMAL_HEIGHT = 1.85;
 /** How far the little worker's feet are above its root, which the office stands its root that far under the floor for (court.ts's FEET): the character's feet go there too. */
 const FEET = 0.07;
 /** How far over the seat's anchor (the little worker's hips) the character's hips go when it sits: on the seat's top. */
-const SEAT_UP = 0.1;
+const SEAT_UP = 0.24;
+/** How far toward its table it sits (m), so its hands reach the keyboard. */
+const SIT_FORWARD = 0.1;
+/** Where its hands go on the keyboard while it works, from its seat's anchor (m): out to each side, up (over the floor), and forward. */
+const KEYS = { side: 0.17, up: 0.82, forward: 0.62 };
 /** How tall it is sat down, of its height standing; and how far over its head its name tag goes (m). */
 const SITTING = 0.8;
 const TAG_GAP = 0.2;
@@ -34,6 +39,14 @@ export class AnimalSkin {
   private readonly tmp = new THREE.Vector3();
   /** Its hips' bone, which sitting puts on the seat. */
   private hips: THREE.Object3D | undefined;
+  /** Shoulder to hand, each side; and its head. */
+  private arms: THREE.Object3D[][] = [];
+  private head: THREE.Object3D | undefined;
+  private spine: THREE.Object3D | undefined;
+  private neck: THREE.Object3D | undefined;
+  private readonly ahead = new THREE.Vector3();
+  private t = Math.random() * 10;
+  private readonly key = new THREE.Vector3();
 
   constructor(
     private worker: Worker,
@@ -56,7 +69,14 @@ export class AnimalSkin {
     this.root.add(body);
     body.traverse((o) => {
       if (!this.hips && /hips/i.test(o.name) && (o as THREE.Bone).isBone) this.hips = o;
+      if (o.name === 'Head' && (o as THREE.Bone).isBone) this.head = o;
+      if (o.name === 'Spine02' && (o as THREE.Bone).isBone) this.spine = o;
+      if (o.name === 'neck' && (o as THREE.Bone).isBone) this.neck = o;
     });
+    for (const side of ['Left', 'Right']) {
+      const chain = ['Arm', 'ForeArm', 'Hand'].map((b) => body.getObjectByName(side + b));
+      if (chain.every(Boolean)) this.arms.push(chain as THREE.Object3D[]);
+    }
     this.mixer = new THREE.AnimationMixer(body);
     for (const clip of model.clips) {
       const name = clip.name.toLowerCase();
@@ -69,6 +89,7 @@ export class AnimalSkin {
   }
 
   update(dt: number) {
+    this.t += dt;
     const want = clipFor(this.worker.walking, this.seated());
     const next = this.actions.has(want) ? want : this.actions.has('idle') ? 'idle' : null;
     if (next && next !== this.playing) {
@@ -91,7 +112,24 @@ export class AnimalSkin {
       const seat = this.worker.root.getWorldPosition(this.tmp).y + SEAT_UP;
       const hips = this.hips.getWorldPosition(this.tmp).y;
       this.root.position.y = (seat - hips) / scale;
+      this.root.position.z = SIT_FORWARD / scale;
+      this.root.updateMatrixWorld(true);
+      // The clip sits hunched over its knees, which at a desk would put that big head on the table: up straight.
+      if (this.spine && this.neck) straighten(this.spine, this.neck, this.ahead.set(0, 0, 1).transformDirection(this.worker.root.matrixWorld));
+      // At work: hands on the keyboard, tapping away, eyes on the screen but for a glance now and then.
+      const working = this.worker.status === 'working';
+      if (working) {
+        const floor = this.worker.root.getWorldPosition(this.tmp).y;
+        this.arms.forEach((chain, i) => {
+          const side = i === 0 ? 1 : -1;
+          const tap = Math.max(0, Math.sin(this.t * 14 + i * 1.7)) * 0.018;
+          this.key.set((side * KEYS.side) / scale, (KEYS.up - floor + tap) / scale, KEYS.forward / scale);
+          reach(chain, this.worker.root.localToWorld(this.key));
+        });
+      }
+      if (this.head) look(this.head, glance(this.t, working));
     } else {
+      this.root.position.z = 0;
       // On its feet, down where the little worker's feet would be.
       this.root.position.y = FEET;
     }
