@@ -26,6 +26,8 @@ export interface TermTabsOptions {
   keypad: HTMLElement | null;
   /** Back on the terminal's tab. */
   focusTerm(): void;
+  /** The Images tab (see termimages.ts), beside the terminal's own: its page, and what shows and hides it. */
+  images?: { el: HTMLElement; show(): void; hide(): void };
 }
 
 /** The tab bar (above the terminal) and where the pages show (beside it). */
@@ -40,6 +42,7 @@ export function termTabs(workerId: string, opts: TermTabsOptions): { bar: HTMLEl
   const openOut = h('a.term-tab-out.hidden', { target: '_blank', rel: 'noopener noreferrer', title: 'Bu sayfayı kendi tarayıcı sekmesinde aç (burada görünmeyen siteler için)' }, '↗ Yeni sekme') as HTMLAnchorElement;
   const bar = h('div.term-tabbar', {}, tabsBar, openOut, addBtn, form);
   const pages = h('div.term-webhost.hidden');
+  if (opts.images) pages.append(opts.images.el);
 
   const tabs = tabsByWorker.get(workerId) ?? [];
   tabsByWorker.set(workerId, tabs);
@@ -48,8 +51,12 @@ export function termTabs(workerId: string, opts: TermTabsOptions): { bar: HTMLEl
 
   const render = () => {
     const mainTab = h('div.term-tab', { class: active === 'main' ? 'on' : '' }, h('button.term-tab-label', { type: 'button', role: 'tab', 'aria-selected': String(active === 'main'), onclick: () => show('main') }, '💻 Terminal'));
+    const imagesTab = opts.images
+      ? h('div.term-tab', { class: active === 'images' ? 'on' : '' }, h('button.term-tab-label', { type: 'button', role: 'tab', 'aria-selected': String(active === 'images'), onclick: () => show('images') }, '🖼️ Görseller'))
+      : null;
     tabsBar.replaceChildren(
       mainTab,
+      ...(imagesTab ? [imagesTab] : []),
       ...tabs.map((t) =>
         h(
           'div.term-tab',
@@ -81,6 +88,8 @@ export function termTabs(workerId: string, opts: TermTabsOptions): { bar: HTMLEl
     pages.classList.toggle('hidden', onMain);
     opts.keypad?.classList.toggle('hidden', !onMain);
     for (const [tid, frame] of frames) frame.classList.toggle('hidden', tid !== id);
+    if (id === 'images') opts.images?.show();
+    else opts.images?.hide();
     render();
     if (onMain) opts.focusTerm();
   };

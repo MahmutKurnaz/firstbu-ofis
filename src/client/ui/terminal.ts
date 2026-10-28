@@ -13,6 +13,7 @@ import { findLine } from '../../shared/search';
 import { DROP_MAX_BYTES, droppedPaths } from '../../shared/drops';
 import { engineLabel, providerUsageNote, providerUsageState, providerWaitingLabel, resolvedProvider } from './provider';
 import { naturalKey } from './termkeys';
+import { termImages } from './termimages';
 import { termTabs } from './termtabs';
 import { dictateField, dictation } from './dictate';
 
@@ -125,6 +126,9 @@ export function openTerminal(net: Net, workerId: string, onChanges?: () => void,
     title: 'Esc\'i terminale gönder (Ctrl+[): /skills gibi bir menüyü kapatır ya da ajanı durdurur. Esc tuşu tek başına terminalden çıkar',
     'aria-label': 'Esc\'i terminale gönder',
   }, '⎋ Esc');
+  // Picks pictures from this computer for the agent (dropping or pasting them works too).
+  const pickBtn = h('button.btn', { type: 'button', title: 'Bilgisayarından bir görsel seç: ajana gönderilir (terminale sürükleyip bırakabilir ya da ekran görüntüsünü yapıştırabilirsin)' }, '🖼️ Görsel');
+  const picker = h('input', { type: 'file', accept: 'image/*', multiple: '', hidden: '' }) as HTMLInputElement;
   const changesBtn = h('button.btn', { type: 'button', title: 'Bu çalışanın değiştirdikleri: dosyalar, diff, commit, PR aç (masada C)' }, '🌿 Değişiklikler');
   const hideBtn = h('button.btn.term-hide', { type: 'button', title: 'Bu terminali gizle; çalışan masasında çalışmaya devam eder', 'aria-label': 'Terminali gizle' }, 'Gizle');
   const closeBtn = h('button.btn.close', { title: 'Terminali gizle (Esc ya da Ctrl+]) · çalışan çalışmaya devam eder; ⎋ Esc ya da Ctrl+[ terminale Esc gönderir', 'aria-label': 'Terminali gizle' }, '✕');
@@ -134,7 +138,8 @@ export function openTerminal(net: Net, workerId: string, onChanges?: () => void,
   const sayBtn = h('button.btn.primary', { type: 'submit' }, 'Gönder');
   const sayForm = h('form.term-say', {}, dictateField(say), sayBtn);
   const keypad = opts.keypad ? h('div.term-keypad', {}, keys, sayForm) : null;
-  const tabs = termTabs(workerId, { host, keypad, focusTerm: () => term.focus() });
+  const images = termImages({ floor: store.floor ?? '', workerId, insert: (paths) => insertPaths(paths) });
+  const tabs = termTabs(workerId, { host, keypad, focusTerm: () => term.focus(), images });
   // What you say is typed in at the terminal's cursor, as a paste, for you to read over and send (see dictate.ts).
   const mic = dictation(
     {
@@ -149,7 +154,7 @@ export function openTerminal(net: Net, workerId: string, onChanges?: () => void,
   );
   host.append(mic.live);
   // The keypad has an Esc of its own, and a 🎤 on its prompt box.
-  const el = h('div.modal.term', { role: 'dialog', 'aria-label': `${info.name} terminali` }, h('header', {}, dot, title, pill, cost, viewers, typed, modelsBtn, keypad ? null : mic.button, keypad ? null : escBtn, onChanges ? changesBtn : null, hideBtn, closeBtn), tabs.bar, host, tabs.pages, keypad);
+  const el = h('div.modal.term', { role: 'dialog', 'aria-label': `${info.name} terminali` }, h('header', {}, dot, title, pill, cost, viewers, typed, modelsBtn, keypad ? null : mic.button, keypad ? null : escBtn, pickBtn, picker, onChanges ? changesBtn : null, hideBtn, closeBtn), tabs.bar, host, tabs.pages, keypad);
 
   const term = new Terminal({
     fontFamily: 'ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace',
@@ -428,6 +433,18 @@ export function openTerminal(net: Net, workerId: string, onChanges?: () => void,
       el.classList.toggle('uploading', --uploading > 0);
     }
   };
+  // Paths (relative to its folder) the agent made: typed in as a paste, for it to open.
+  const insertPaths = (paths: string[]) => {
+    sayTyping();
+    sendSize(true);
+    term.paste(`${droppedPaths(paths)} `);
+    term.focus();
+  };
+  pickBtn.addEventListener('click', () => picker.click());
+  picker.addEventListener('change', () => {
+    void insertFiles([...(picker.files ?? [])]);
+    picker.value = '';
+  });
   const hasFiles = (e: DragEvent) => !!e.dataTransfer?.types.includes('Files');
   // The whole screen is the drop zone while the terminal is open, so a near miss doesn't open the file in the browser.
   let dragDepth = 0;
