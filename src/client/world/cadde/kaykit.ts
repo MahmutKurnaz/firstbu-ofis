@@ -117,7 +117,7 @@ export function dress(kit: CaddeKit, props: PropConfig[]) {
     }
   }
   for (const side of [-1, 1]) {
-    kay(kit, 'kaykit-city', 'firehydrant', side * 8.6, 22, 0, 1.2);
+    kay(kit, 'kaykit-city', 'firehydrant', side * 8.6, 22, 0, 0.8);
     kay(kit, 'kaykit-city', 'trash_A', side * 8.4, 16.6, 0, 1.6);
     solid(kit, side * 8.6, 22, 0.6, 0.6, 1);
   }

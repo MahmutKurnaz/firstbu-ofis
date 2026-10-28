@@ -22,6 +22,7 @@ oynar.
 | Rol | Hayvan | Durum |
 |---|---|---|
 | lead | Aslan (lacivert takım, altın kravat iğnesi, 1,85 m) | Hazır, `aslan` (ve yedek `aslan-sevimli`) |
+| prompt-refiner, fe-lead, be-lead, bug-hunter, verify-be | Kızıl Panda, Susamuru, Kaplan, Tavşan, Geyik (yönetim ekibi) | Hazır (2026-10-28): `kizil-panda`, `susamuru`, `kaplan`, `tavsan`, `geyik`; klipler idle, walk, sit, drink, skill |
 
 ## Rol karakterleri (13 yeni model)
 

@@ -10,6 +10,11 @@ import dogPugUrl from '../models/dog-pug.glb?url';
 import dogPupUrl from '../models/dog-pup.glb?url';
 import dogPomeranianUrl from '../models/dog-pomeranian.glb?url';
 import dogShibaUrl from '../models/dog-shiba.glb?url';
+import geyikUrl from '../models/geyik.glb?url';
+import kaplanUrl from '../models/kaplan.glb?url';
+import kizilPandaUrl from '../models/kizil-panda.glb?url';
+import susamuruUrl from '../models/susamuru.glb?url';
+import tavsanUrl from '../models/tavsan.glb?url';
 import kaykitCafeUrl from '../models/kaykit-cafe.glb?url';
 import kaykitCityUrl from '../models/kaykit-city.glb?url';
 import kaykitFurnitureUrl from '../models/kaykit-furniture.glb?url';
@@ -36,6 +41,12 @@ const MODELS = {
   // Our own characters (blender/scripts/build_aslan.py): only a worker wearing one loads it.
   aslan: { url: aslanUrl, preload: false },
   'aslan-sevimli': { url: aslanSevimliUrl, preload: false },
+  // The management team (docs/karakterler.md): kızıl panda, susamuru, kaplan, tavşan, geyik.
+  'kizil-panda': { url: kizilPandaUrl, preload: false },
+  susamuru: { url: susamuruUrl, preload: false },
+  kaplan: { url: kaplanUrl, preload: false },
+  tavsan: { url: tavsanUrl, preload: false },
+  geyik: { url: geyikUrl, preload: false },
   // Your own character, from Mahmut's photos (features/avatar/).
   mahmut: { url: mahmutUrl, preload: false },
   // The street's CC0 drafts (KayKit, see blender/scripts/build_kaykit.py): only the street loads them.

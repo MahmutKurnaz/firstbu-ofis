@@ -1,0 +1,268 @@
+{
+  "_": "The world's furniture at real-world sizes, in meters (w across its front, d deep, h tall), each with the range it was found in on the web and its sources. The single source: blender/scripts/build_meshy_props.py sizes each Meshy piece to it (each axis its own, so a desk is the right height whatever shape Meshy drew), tests/furniture.test.ts holds the finished models and the code's own constants to it, and docs/mobilya-olculeri.md is written from it (node blender/scripts/furniture_doc.mjs). `verified`: sources = the range comes from the pages listed; partly = no standard found, a common size.",
+  "people": {
+    "note": "Adults: median stature 1.755 m (men) and 1.626 m (women), 95th percentile 1.87 m and 1.74 m; seated eye height 0.75-0.80 m, popliteal height 0.39-0.43 m (5th-95th: 0.38-0.51 m). Our characters are 1.30-2.10 m (docs/karakterler.md); the lion lead 1.85 m, Mahmut 1.8 m.",
+    "src": [
+      "people-ncsu",
+      "people-gvsu"
+    ]
+  },
+  "constants": {
+    "tableTop": 0.76,
+    "benchTop": 0.45,
+    "doorHeight": 2.13,
+    "doorWidth": 0.91,
+    "doorwayWidth": 2.0,
+    "ceiling": 4.2,
+    "floorToFloor": 4.0,
+    "meetingTable": {
+      "w": 3.8,
+      "d": 1.4,
+      "h": 0.76,
+      "perPerson": 0.76,
+      "seats": 10
+    },
+    "range": {
+      "tableTop": "Desk height 71-76 cm.",
+      "benchTop": "Bench and chair seats 43-48 cm.",
+      "door": "A commercial door leaf is 0.91 x 2.13 m (36 x 84 in); the clear opening is at least 0.81 m wide and 2.03 m high (ADA). Our suite doorways are double doors, 2.0 m.",
+      "ceiling": "Finished ceilings of Class A offices run 3.0-3.7 m (10-12 ft), floor to floor 3.75-4.3 m. Ours are ground-floor glass offices at 4.2 m, the tall end (taller ground floors are common; no source for the number).",
+      "meetingTable": "A table for ten is 3.0-3.7 m (10-12 ft) by 1.2-1.5 m (48-58 in), 61-76 cm of edge a person, the room 0.9 m clear all round."
+    },
+    "src": [
+      "desk-din",
+      "door-civils",
+      "floor-cre",
+      "conference-of2go",
+      "conference-branch"
+    ],
+    "note": "The station's kit (world/station/kit.ts: TABLE_TOP, BENCH_TOP) has the desk and the bench seat, and a worker's seat anchor and laptop sit to them, so every desk and chair a worker uses matches them."
+  },
+  "sources": {
+    "desk-din": "https://yaasa.com/en/blogs/yaasa-blog/schreibtisch-masse",
+    "desk-guide": "https://eurekaergonomic.com/blogs/eureka-ergonomic-blog/standard-desk-dimensions-guide",
+    "desk-ansi": "https://www.officefurniture2go.com/answers/desk-space-planning/ansi-bifma-office-workstation-space-planning.html",
+    "chair-branch": "https://branchfurniture.com/cdn/shop/files/specs-open-box-task-chair.pdf",
+    "chair-zoro": "https://www.zoro.com/i/G6706161/",
+    "sofa-castlery": "https://www.castlery.com/us/blog/sofa-sizes-and-dimensions",
+    "sofa-interior": "https://shop.interiorcompany.com/blogs/guides/standard-sofa-sizes",
+    "bookcase-of2go": "https://www.officefurniture2go.com/answers/bookcases-shelving/what-are-the-standard-sizes-for-an-office-bookcase.html",
+    "bench-wabash": "https://wabashvalley.com/blogs/blog/standard-bench-dimensions",
+    "bench-dambis": "https://www.dambis.ee/en/product/park-bench-nisha/",
+    "lamp-gdc": "https://globaldesigningcities.org/?p=20476",
+    "lamp-encinitas": "https://encinitasca.gov/home/showpublisheddocument/8140/638314156997070000",
+    "tree-honolulu": "https://www.honolulu.gov/dpp/street-tree-standards/",
+    "tree-sydney": "https://meetings.cityofsydney.nsw.gov.au/documents/s67913/Attachment",
+    "tree-stock": "https://iris.londoncouncils.gov.uk/viewer/tree-caliper-size-chart.html",
+    "cafe-bbqguys": "https://www.bbqguys.com/a/28806/learn/outdoor-living/buying-guides/furniture/table-chair-height",
+    "umbrella-jeco": "https://www.walmart.com/ip/Jeco-UBF92-9-ft-Aluminum-Steel-Umbrella-Fabric-Tan/120360055",
+    "umbrella-golden": "https://blog.wellappointedhouse.com/products/9-golden-state-patio-umbrella-in-aruba",
+    "conference-of2go": "https://www.officefurniture2go.com/answers/conference-tables/what-size-conference-table-for-10-people.html",
+    "conference-branch": "https://www.branchfurniture.com/blogs/turn-key/conference-table-size-buying-guide",
+    "door-civils": "https://civils.ai/blog/minimum-door-dimension-requirements/",
+    "floor-cre": "https://www.adventuresincre.com/glossary/floor-floor-height/",
+    "planter-pots": "https://potsplantersandmore.com/buying-guides/commercial-planter-sizing/",
+    "people-ncsu": "https://www.ergocenter.ncsu.edu/wp-content/uploads/sites/18/2017/09/Anthropometric-Summary-Data-Tables.pdf",
+    "people-gvsu": "https://www.gvsu.edu/cms4/asset/30F6D8A1-9140-75C7-2CAACF4A83B9D5A8/seatingmeasurements.pdf",
+    "machine-ggm": "https://www.ggmgastro.com/en-gb-eur/commercial-bean-to-cup-coffee-machine-16-drink-options-5-touchscreen-kvacb"
+  },
+  "pieces": {
+    "agac": {
+      "w": 2.2,
+      "d": 2.2,
+      "h": 4.0,
+      "kind": "street",
+      "range": "Planted street tree, 2 in caliper: about 3-3.6 m (10-12 ft); mature 8 m and up. Tree pit: 1.35 m square typical (Sydney), 1.5 m preferred (Honolulu); the bed here is wider than a pit, a planter curb round it.",
+      "src": [
+        "tree-honolulu",
+        "tree-sydney",
+        "tree-stock"
+      ],
+      "verified": "sources"
+    },
+    "lamba": {
+      "w": 1.3,
+      "d": 0.45,
+      "h": 4.5,
+      "kind": "street",
+      "range": "Pedestrian-scale lamps 3-5 m: 3.7-5.2 m with 15 ft acorn posts (Encinitas), 4.5-6 m on sidewalks (Global Street Design Guide).",
+      "src": [
+        "lamp-gdc",
+        "lamp-encinitas"
+      ],
+      "verified": "sources"
+    },
+    "bank": {
+      "w": 1.8,
+      "d": 0.6,
+      "h": 0.85,
+      "seat": 0.46,
+      "kind": "street",
+      "range": "Seat 45-48 cm (18-19 in; 17.7 in on the Tor bench), 1.8 m for three, back 30-46 cm over the seat, seat depth 38-50 cm.",
+      "src": [
+        "bench-wabash",
+        "bench-dambis"
+      ],
+      "verified": "sources"
+    },
+    "kafe-masasi": {
+      "w": 2.7,
+      "d": 2.7,
+      "h": 2.4,
+      "seat": 0.45,
+      "top": 0.74,
+      "kind": "street",
+      "range": "Bistro table 71-76 cm with 43-48 cm stools; a 9 ft (2.7 m) market umbrella stands 2.3-2.45 m (7.5-8 ft) overall.",
+      "src": [
+        "cafe-bbqguys",
+        "umbrella-jeco",
+        "umbrella-golden"
+      ],
+      "verified": "sources"
+    },
+    "kahve-tezgahi": {
+      "w": 4.0,
+      "d": 1.1,
+      "h": 1.75,
+      "top": 1.05,
+      "kind": "street",
+      "range": "Counter height 36-42 in (0.91-1.07 m): 1.05 m. The espresso machine on it brings it to 1.75 m. (No counter standard found: common practice.)",
+      "src": [
+        "cafe-bbqguys"
+      ],
+      "verified": "partly"
+    },
+    "kahve-makinesi": {
+      "w": 0.9,
+      "d": 0.7,
+      "h": 1.8,
+      "kind": "street",
+      "range": "Floor-standing drinks machines (vending cabinets) are about 1.8 m (72 in) tall. Countertop bean-to-cup units are only 0.44-0.6 m, so this is the floor kind. (No standard found: common practice.)",
+      "src": [
+        "machine-ggm"
+      ],
+      "verified": "partly"
+    },
+    "saksi": {
+      "w": 3.0,
+      "d": 0.8,
+      "h": 1.1,
+      "kind": "street",
+      "range": "Commercial planter boxes run 0.6-1.8 m long (0.9-1.2 m most common) up to 3.0 x 1.07 x 1.2 m for the largest; 12-48 in high. This is a large one: box 55 cm, shrubs to 1.1 m.",
+      "src": [
+        "planter-pots"
+      ],
+      "verified": "sources"
+    },
+    "ofis-masa": {
+      "w": 1.4,
+      "d": 0.7,
+      "h": 0.76,
+      "top": 0.76,
+      "kind": "office",
+      "range": "Fixed desk 71-76 cm (DIN: 74 +/- 2 cm); width 1.2-1.8 m, depth 0.6-0.76 m.",
+      "src": [
+        "desk-din",
+        "desk-guide",
+        "desk-ansi"
+      ],
+      "verified": "sources"
+    },
+    "cicek-saksi": {
+      "w": 0.7,
+      "d": 0.7,
+      "h": 0.8,
+      "kind": "office",
+      "range": "Large floor pot 60-75 cm across; 80 cm with flowers. (Common practice.)",
+      "src": [
+        "planter-pots"
+      ],
+      "verified": "partly"
+    },
+    "ofis-sandalye": {
+      "w": 0.62,
+      "d": 0.62,
+      "h": 1.0,
+      "seat": 0.46,
+      "kind": "office",
+      "range": "Task chair seat 43-53 cm (17-21 in), overall 0.95-1.09 m (37-43 in); 5th-percentile woman to 95th-percentile man need 38-51 cm.",
+      "src": [
+        "chair-branch",
+        "chair-zoro",
+        "people-gvsu"
+      ],
+      "verified": "sources"
+    },
+    "yonetici-masa": {
+      "w": 1.8,
+      "d": 0.9,
+      "h": 0.76,
+      "top": 0.76,
+      "kind": "office",
+      "range": "Executive desk 1.5-1.8 m wide, 0.76-0.91 m deep, 71-76 cm high.",
+      "src": [
+        "desk-guide",
+        "desk-din"
+      ],
+      "verified": "sources"
+    },
+    "yonetici-koltuk": {
+      "w": 0.72,
+      "d": 0.72,
+      "h": 1.2,
+      "seat": 0.48,
+      "kind": "office",
+      "range": "High-back executive chair: seat 45-55 cm, overall up to 1.25 m (49 in).",
+      "src": [
+        "chair-zoro"
+      ],
+      "verified": "sources"
+    },
+    "kanepe": {
+      "w": 2.0,
+      "d": 0.9,
+      "h": 0.85,
+      "seat": 0.45,
+      "kind": "office",
+      "range": "Three-seater: 1.83-2.44 m long (2.1 m average), 0.81-1.0 m deep, 0.76-0.91 m high, seat 43-48 cm.",
+      "src": [
+        "sofa-castlery",
+        "sofa-interior"
+      ],
+      "verified": "sources"
+    },
+    "kitaplik": {
+      "w": 0.9,
+      "d": 0.33,
+      "h": 1.83,
+      "kind": "office",
+      "range": "Office bookcase: 1.83 m (72 in, five shelves), 76-107 cm wide, 30-38 cm (12-15 in) deep.",
+      "src": [
+        "bookcase-of2go"
+      ],
+      "verified": "sources"
+    },
+    "fikus": {
+      "w": 0.9,
+      "d": 0.9,
+      "h": 1.5,
+      "kind": "office",
+      "range": "Indoor fiddle-leaf fig: 1.2-1.8 m. (Common practice.)",
+      "src": [],
+      "verified": "partly"
+    },
+    "toplanti-sandalye": {
+      "w": 0.6,
+      "d": 0.6,
+      "h": 0.92,
+      "seat": 0.46,
+      "kind": "office",
+      "range": "Meeting chair: seat 43-53 cm, back to about 0.9 m.",
+      "src": [
+        "chair-branch",
+        "chair-zoro"
+      ],
+      "verified": "sources"
+    }
+  }
+}

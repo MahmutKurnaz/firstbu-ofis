@@ -9,6 +9,7 @@ import type { Worker } from './worker';
 // tag, bubble and globe stay as they are, over the character's head.
 
 /** How tall the characters stand (m), whatever the seat or hall scales the little workers to: the lead a little taller than you (1.7 m), as Mahmut asked. */
+/** The lead lion's height, and what a character without one of its own stands at (m). */
 export const ANIMAL_HEIGHT = 1.85;
 /** How far the little worker's feet are above its root, which the office stands its root that far under the floor for (court.ts's FEET): the character's feet go there too. */
 const FEET = 0.07;
@@ -60,6 +61,8 @@ export class AnimalSkin {
     model: Model,
     /** Whether the worker's root is in its seat right now (the views know: it's parented to the desk's seat). */
     private seated: () => boolean,
+    /** How tall it stands (m): each character its own, from docs/karakterler.md. */
+    private readonly height = ANIMAL_HEIGHT,
   ) {
     const body = model.scene;
     // Stood on the floor at its origin, as tall as a worker. Measured as it's drawn, skinned on its
@@ -67,8 +70,8 @@ export class AnimalSkin {
     body.updateMatrixWorld(true);
     const box = new THREE.Box3().setFromObject(body, true);
     const h = box.max.y - box.min.y || 1;
-    body.scale.setScalar(ANIMAL_HEIGHT / h);
-    body.position.y = -box.min.y * (ANIMAL_HEIGHT / h);
+    body.scale.setScalar(this.height / h);
+    body.position.y = -box.min.y * (this.height / h);
     body.traverse((o) => {
       const m = o as THREE.Mesh;
       if (m.isMesh) m.castShadow = m.receiveShadow = true;
@@ -180,7 +183,7 @@ export class AnimalSkin {
       if (this.cup.visible) this.cup.scale.setScalar(1 / Math.max(1e-4, this.cup.parent!.getWorldScale(this.tmp).x));
     }
     const floor = this.worker.root.getWorldPosition(this.tmp).y;
-    const top = sat ? (ANIMAL_HEIGHT * SITTING - floor) / scale : FEET + ANIMAL_HEIGHT / scale;
+    const top = sat ? (this.height * SITTING - floor) / scale : FEET + this.height / scale;
     const tags = this.worker.root.children.filter((c): c is THREE.Sprite => (c as THREE.Sprite).isSprite && c.visible);
     const lift = Math.max(0, top + TAG_GAP / scale - Math.min(...tags.map((c) => c.position.y)));
     if (tags.length && lift > 0) for (const c of tags) c.position.y += lift;

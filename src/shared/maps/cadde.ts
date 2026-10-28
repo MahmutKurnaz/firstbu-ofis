@@ -72,7 +72,7 @@ const props: PropConfig[] = [
     [-4.6, 9.6],
     [4.6, 9.6],
   ].map(([x, z]) => ({ kind: 'parasol', x, z })),
-  { kind: 'counter', x: -4.2, z: -9.4, width: 4.4, rotY: 0 },
+  { kind: 'counter', x: -4.2, z: -9.4, width: 4, rotY: 0 },
   { kind: 'dispenser', x: 4.2, z: -9.6, rotY: 0 },
   { kind: 'gong', x: 6.6, z: -6.4, rotY: east },
   // Benches and planters toward the way in.

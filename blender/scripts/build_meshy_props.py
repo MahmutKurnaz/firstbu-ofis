@@ -1,7 +1,7 @@
 """The world's own furniture and street things (world/cadde/meshy.ts): the 16 props made with Meshy
 (blender/scripts/meshy_props.py), shrunk (about 3000 triangles each, 512 px texture) and put in one file,
 src/client/models/meshy-props.glb. Each piece is a root of its own, named by its key (`agac`, `bank`…),
-standing on the floor at the origin, centred, its front toward +z, sized in meters as in SIZE below.
+standing on the floor at the origin, centred, its front toward +z, sized in meters as in blender/furniture.json.
 Those names are a contract with world/cadde/meshy.ts and tests/meshy-props.test.ts.
 
 Each piece's ambient occlusion (the soft dark where things meet: legs on the floor, cushions, leaves, drawers)
@@ -10,6 +10,7 @@ toon lighting keeps a depth it can't make for itself.
 
     blender --background --factory-startup --python blender/scripts/build_meshy_props.py -- --src <dir with the <key>.glb files>
 """
+import json
 import os
 import sys
 import tempfile
@@ -20,25 +21,9 @@ import numpy as np
 sys.path.insert(0, os.path.dirname(__file__))
 import aokit  # noqa: E402
 
-# key: (which side to size by: 'h' height, 'w' width (x), 'd' depth (y in Blender), meters)
-SIZE = {
-    "agac": ("h", 4.2),
-    "lamba": ("h", 4.4),
-    "bank": ("w", 1.9),
-    "kafe-masasi": ("h", 2.7),
-    "kahve-tezgahi": ("w", 4.4),
-    "kahve-makinesi": ("h", 1.9),
-    "saksi": ("w", 3.2),
-    "ofis-masa": ("w", 1.6),
-    "cicek-saksi": ("h", 0.9),
-    "ofis-sandalye": ("h", 1.0),
-    "yonetici-masa": ("w", 2.2),
-    "yonetici-koltuk": ("h", 1.25),
-    "kanepe": ("w", 2.2),
-    "kitaplik": ("h", 2.2),
-    "fikus": ("h", 1.6),
-    "toplanti-sandalye": ("h", 0.95),
-}
+# Each piece's size, in meters (w across, d deep, h tall), from blender/furniture.json.
+SPEC = json.load(open(os.path.join(os.path.dirname(__file__), "..", "furniture.json")))["pieces"]
+SIZE = list(SPEC)
 TRIS = 5000
 TEX = 1024
 # How far the occlusion reaches (m), and how much of the colour it can take away.
@@ -72,22 +57,21 @@ def piece(path, key):
         aokit.apply_modifier(ob, "d")
     ob.name = key
     ob.data.name = key
-    # In Blender z is up: the model is y-up in the file, so its height is z here.
+    # In Blender z is up: the model is y-up in the file, so its height is z here. Each axis is brought to its own size.
     vs = [v.co for v in ob.data.vertices]
     mn = [min(v[i] for v in vs) for i in range(3)]
     mx = [max(v[i] for v in vs) for i in range(3)]
-    side, meters = SIZE[key]
-    extent = {"h": mx[2] - mn[2], "w": mx[0] - mn[0], "d": mx[1] - mn[1]}[side]
-    k = meters / extent
+    spec = SPEC[key]
+    k = (spec["w"] / (mx[0] - mn[0]), spec["d"] / (mx[1] - mn[1]), spec["h"] / (mx[2] - mn[2]))
     for v in ob.data.vertices:
-        v.co.x = (v.co.x - (mn[0] + mx[0]) / 2) * k
-        v.co.y = (v.co.y - (mn[1] + mx[1]) / 2) * k
-        v.co.z = (v.co.z - mn[2]) * k
+        v.co.x = (v.co.x - (mn[0] + mx[0]) / 2) * k[0]
+        v.co.y = (v.co.y - (mn[1] + mx[1]) / 2) * k[1]
+        v.co.z = (v.co.z - mn[2]) * k[2]
     for mat in ob.data.materials:
         for node in mat.node_tree.nodes:
             if node.type == 'TEX_IMAGE' and node.image and max(node.image.size) > TEX:
                 node.image.scale(TEX, TEX)
-    print(f"  {key}: {(mx[0]-mn[0])*k:.2f} x {(mx[1]-mn[1])*k:.2f} x {(mx[2]-mn[2])*k:.2f} m, {aokit.tris(ob)} tris")
+    print(f"  {key}: {spec['w']:.2f} x {spec['d']:.2f} x {spec['h']:.2f} m (was {mx[0]-mn[0]:.2f} x {mx[1]-mn[1]:.2f} x {mx[2]-mn[2]:.2f}), {aokit.tris(ob)} tris")
     return ob
 
 

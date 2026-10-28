@@ -71,3 +71,17 @@ Eşyalar: sokak ağacı, lamba, bank, kafe masası, kahve tezgâhı, kahve makin
 | 2026-10-28 | 16 eşya, seçilen görselden dokulu 3D | 480 |
 | 2026-10-28 | Mahmut'un konseptleri | 36 |
 | 2026-10-28 | Mahmut 3D, iskelet, 6 klip | 58 |
+
+## Yönetim ekibinin 3D karakterleri (Meshy, doğrudan)
+
+Onay: Mahmut, 2026-10-28 ("Evet, 265 kredi"). Betik: `blender/scripts/meshy_characters.py` (3D, iskelet, klipler); klipler `merge_clips.mjs --from` ile birleştirildi (idle, walk, sit, drink + kendi yetenek klibi `skill`). Konsept: `docs/konseptler/` (kızıl-panda 1, susamuru 1, kaplan 1, tavşan 0, geyik 1).
+
+| Tarih | Ne | Kredi |
+| --- | --- | --- |
+| 2026-10-28 | Kızıl Panda, Susamuru, Kaplan, Tavşan, Geyik: seçilen konseptten 3D (meshy-7.1, A-poz, 12k üçgen, dokulu) | 150 |
+| 2026-10-28 | 5 iskelet (boy: 1,55 / 1,65 / 1,95 / 1,70 / 1,95 m) | 25 |
+| 2026-10-28 | 5 × 5 klip (Idle 0, Casual_Walk 30, Chair_Sit_Idle_M 33, Sit_and_Drink 343 + Listening_Gesture 47 / Idle_02 11 / Agree_Gesture 25 / Alert 2 / Alert 2) | 75 |
+
+Toplam 250 (onaylanan 265'in altında). Bakiye 4.285 → 4.035. Modeller: `src/client/models/{kizil-panda,susamuru,kaplan,tavsan,geyik}.glb` (1,5-1,8 MB), yalnızca bir ajan giyince yüklenir.
+
+Mobilya ve yapı ölçüleri ve kaynakları: `docs/mobilya-olculeri.md` (`blender/furniture.json`).

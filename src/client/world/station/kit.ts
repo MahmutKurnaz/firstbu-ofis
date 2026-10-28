@@ -11,7 +11,7 @@ import { mesh, toon } from '../toon';
 
 /** The most light pods that light the deck for real (the rest just glow). */
 export const MAX_LIGHTS = 6;
-export const TABLE_TOP = 0.78;
+export const TABLE_TOP = 0.76;
 export const BENCH_TOP = 0.45;
 /** How big one tile of the hull's panelling and of the deck's plating is (m). */
 export const PANEL = 3;
