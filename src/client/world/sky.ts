@@ -700,6 +700,7 @@ export class Sky {
     const ambI = lerp(0.12, 0.5, day);
     const { sun, hemi, ambient } = this.lights;
     hemi.intensity = hemiI + flash * 3;
+    this.scene.environmentIntensity = 0.45 * Math.min(1, hemiI / 1.5); // the physical materials' sky light dims with the rest
     hemi.color.copy(C.hemiSkyNight).lerp(C.hemiSky, day).lerp(SPOOKY.hemiSky, sp * 0.5);
     hemi.groundColor.copy(C.hemiGroundNight).lerp(C.hemiGround, day).lerp(SPOOKY.hemiGround, sp * 0.5);
     ambient.intensity = ambI + flash;

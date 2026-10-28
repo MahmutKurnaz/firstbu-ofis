@@ -1,5 +1,5 @@
 """The world's own furniture and street things (world/cadde/meshy.ts): the 16 props made with Meshy
-(blender/scripts/meshy_props.py), shrunk (about 3000 triangles each, 512 px texture) and put in one file,
+(blender/scripts/meshy_props.py), shrunk (about 5000 triangles each, 1024 px texture) and put in one file,
 src/client/models/meshy-props.glb. Each piece is a root of its own, named by its key (`agac`, `bank`…),
 standing on the floor at the origin, centred, its front toward +z, sized in meters as in blender/furniture.json.
 Those names are a contract with world/cadde/meshy.ts and tests/meshy-props.test.ts.
@@ -63,6 +63,8 @@ def piece(path, key):
     mx = [max(v[i] for v in vs) for i in range(3)]
     spec = SPEC[key]
     k = (spec["w"] / (mx[0] - mn[0]), spec["d"] / (mx[1] - mn[1]), spec["h"] / (mx[2] - mn[2]))
+    # The import's split normals were for the old shape: drop them, so it's shaded from its new one.
+    bpy.ops.mesh.customdata_custom_splitnormals_clear()
     for v in ob.data.vertices:
         v.co.x = (v.co.x - (mn[0] + mx[0]) / 2) * k[0]
         v.co.y = (v.co.y - (mn[1] + mx[1]) / 2) * k[1]
@@ -90,7 +92,9 @@ def bake_occlusion(ob, floor):
     bpy.ops.object.select_all(action='DESELECT')
     ob.select_set(True)
     bpy.context.view_layer.objects.active = ob
-    floor.hide_render = False
+    # Alone with its floor: the other pieces all stand at the origin too, and would shade it.
+    for other in bpy.data.objects:
+        other.hide_render = other not in (ob, floor)
     bpy.ops.object.bake(type='AO', margin=8)
     nt.nodes.remove(node)
     px = np.array(base.pixels[:], dtype=np.float32).reshape(-1, 4)

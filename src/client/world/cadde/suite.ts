@@ -155,11 +155,17 @@ export function buildDesks(kit: CaddeKit) {
       const nz = Math.cos(d.rotY);
       const desk = placed(d.x - nx * 0.25, 0, d.z - nz * 0.25, d.rotY + Math.PI);
       kit.group.add(desk);
-      meshy(desk, lead ? 'yonetici-masa' : 'ofis-masa', { scale: 1 });
+      // A plain top stands in at the real size (76 cm) until the model arrives, so the laptop isn't left in mid-air.
+      const top = mesh(box(lead ? 1.8 : 1.4, 0.76, lead ? 0.9 : 0.7), toon(lead ? '#5a3a28' : '#d8d2c6'), 0, 0.38, 0);
+      desk.add(top);
+      meshy(desk, lead ? 'yonetici-masa' : 'ofis-masa', { scale: 1, replaces: [top] });
       collide(kit, d.x - nx * 0.25, d.z - nz * 0.25, Math.abs(nz) > 0.5 ? (lead ? 1.8 : 1.4) : 0.9, Math.abs(nz) > 0.5 ? 0.9 : lead ? 1.8 : 1.4, 0, 0.78);
       const chair = placed(d.x + nx * 0.85, 0, d.z + nz * 0.85, d.rotY + Math.PI);
       kit.group.add(chair);
-      meshy(chair, lead ? 'yonetici-koltuk' : 'ofis-sandalye', { scale: 1 });
+      const seat = mesh(box(0.5, 0.06, 0.5), toon('#2f343b'), 0, 0.5, 0);
+      const back = mesh(box(0.5, 0.5, 0.06), toon('#2f343b'), 0, 0.78, -0.22);
+      chair.add(seat, back);
+      meshy(chair, lead ? 'yonetici-koltuk' : 'ofis-sandalye', { scale: 1, replaces: [seat, back] });
     }
   }
 }

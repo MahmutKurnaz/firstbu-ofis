@@ -30,7 +30,7 @@ function tree(kit: CaddeKit, p: PropConfig) {
   g.add(t);
   // Its own tree, in its own round bed, in their place (a 4 m street tree, its bed 2.2 m across: blender/furniture.json).
   meshy(g, 'agac', { scale: s, turn: t.rotation.y, replaces: [...g.children] });
-  kit.still.add(g);
+  kit.group.add(g);
   kit.colliders.push({ minX: p.x - 0.3, maxX: p.x + 0.3, minZ: p.z - 0.3, maxZ: p.z + 0.3, top: 99 });
 }
 
@@ -69,7 +69,7 @@ function planter(kit: CaddeKit, p: PropConfig) {
   const n = Math.max(2, Math.round(w / 0.7));
   for (let i = 0; i < n; i++) g.add(mesh(new THREE.SphereGeometry(0.34, 10, 8), toon(i % 2 ? '#4f9d58' : '#3f8a4a'), -w / 2 + (i + 0.5) * (w / n), 0.78, 0));
   meshy(g, 'saksi', { scale: w / 3, replaces: [...g.children] });
-  kit.still.add(g);
+  kit.group.add(g);
   collide(kit, p.x, p.z, w, d, p.rotY ?? 0, 0.55);
 }
 
@@ -87,7 +87,7 @@ function bench(kit: CaddeKit, p: PropConfig) {
   }
   // Its own bench: the seat faces +z, like the one it replaces (its back at -z).
   meshy(g, 'bank', { scale: w / 1.8, replaces: [...g.children] });
-  kit.still.add(g);
+  kit.group.add(g);
   collide(kit, p.x, p.z, w * s, d * s, p.rotY ?? 0, 0.45);
 }
 
@@ -109,7 +109,7 @@ function parasol(kit: CaddeKit, p: PropConfig) {
   }
   // Its own table under a striped parasol, stools round it.
   meshy(g, 'kafe-masasi', { scale: s, replaces: [...g.children] });
-  kit.still.add(g);
+  kit.group.add(g);
   kit.colliders.push({ minX: p.x - 0.55 * s, maxX: p.x + 0.55 * s, minZ: p.z - 0.55 * s, maxZ: p.z + 0.55 * s, top: 0.76 });
 }
 

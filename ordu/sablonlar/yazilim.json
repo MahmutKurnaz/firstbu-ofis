@@ -4,8 +4,8 @@
   "offices": [
     { "id": "yonetim", "name": "Yönetim", "teams": [
       { "id": "liderlik", "name": "Liderlik", "color": "#e8b931", "roles": [
-        { "name": "lead", "title": "Aslan Lider", "character": "aslan", "model": "opus", "effort": "high", "brief": "ordu/roller/lead.md", "resident": true },
-        { "name": "prompt-refiner", "title": "Kızıl Panda", "agent": "prompt-refiner", "character": "kizil-panda" }
+        { "name": "lead", "desk": "desk-1", "title": "Aslan Lider", "character": "aslan", "model": "opus", "effort": "high", "brief": "ordu/roller/lead.md", "resident": true },
+        { "name": "prompt-refiner", "desk": "desk-2", "title": "Kızıl Panda", "agent": "prompt-refiner", "character": "kizil-panda" }
       ] }
     ] },
     { "id": "kesif", "name": "Keşif ofisi", "teams": [

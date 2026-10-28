@@ -138,6 +138,8 @@ export function themeOffice(kit: CaddeKit, p: PropConfig, index: number, color: 
   const theme = THEMES[index];
   if (!theme) return;
   const o = officeBox(p);
+  // The themes are laid out for the street's team offices (14 across, 18 deep): any other size is left to its own furnishing.
+  if (Math.abs(o.width - 14) > 0.01 || Math.abs(o.length - 18) > 0.01) return;
   const g = placed(o.x, 0, o.z, o.rotY);
   kit.group.add(g);
   const bx: Ctx['bx'] = (w, h, d, col, u, y, v, glows = false) => {

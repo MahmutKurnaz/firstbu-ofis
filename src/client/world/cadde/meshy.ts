@@ -36,6 +36,8 @@ function root(): Promise<THREE.Object3D | null> {
     .then((m) => m.scene)
     .catch(() => {
       console.warn("cadde: meshy-props didn't load");
+      // Asked again by the next piece, rather than none ever being there.
+      pack = null;
       return null;
     });
   return pack;
