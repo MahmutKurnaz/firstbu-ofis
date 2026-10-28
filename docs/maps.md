@@ -310,6 +310,6 @@ A map without a dungeon can still have a script: a guard who walks each worker t
 
 ## Editing the street (J)
 
-On the street, **J** turns the editor on (admins only, for now): click a tree, a bench, a lamp, a café table, a planter or any other thing, and drag it where you want it. **R** turns it (Shift+R the other way), **[** and **]** make it smaller or bigger, **Delete** takes it away, **Ctrl+D** puts a copy beside it and **Ctrl+Z** (Ctrl+Shift+Z) goes back. **J** or **Esc** leaves.
+On the street, **J** turns the editor on (admins only, for now): click a tree, a bench, a lamp, a café table, a planter or any other thing, and drag it where you want it. **R** turns it (Shift+R the other way), **[** and **]** make it smaller or bigger, **Delete** takes it away, **Ctrl+D** puts a copy beside it and **Ctrl+Z** (Ctrl+Shift+Z) goes back. **N** goes through the catalog (the street's own pieces: trees, benches, sofas, tables, lamps, planters, the kiosk, the statue…), **Enter** puts the one it's on down where the pointer is, and **Y** swaps the selected one for it. **J** or **Esc** leaves.
 
 Every change is saved at once, for everyone, as a map of your own, `.agent-office/maps/duzen.json`, which `extends` the street and lists its props as you've put them (see above: a list replaces the whole list). Pick **🏙️ Cadde** in ⚙️ Settings to go back to the street as it comes. The offices themselves (their walls, and the furniture inside them, which is built in code) aren't moved by it yet.
