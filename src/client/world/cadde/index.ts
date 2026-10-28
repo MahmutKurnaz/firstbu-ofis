@@ -14,7 +14,9 @@ import { agentConsole, buildBenches, buildBriefing, placeSetting } from '../stat
 import { dress, furnish, skyline } from './kaykit';
 import { caddeKit } from './kit';
 import { paintOffice, type OfficeView } from './offices';
+import { buildNpcs } from './npcs';
 import { streetLife } from './passersby';
+import { meshy } from './meshy';
 import { buildDesks, furnishSuite } from './suite';
 import { TEAM_COLORS, themeOffice } from './interiors';
 import { PROPS } from './props';
@@ -63,10 +65,12 @@ export function buildCadde(plan: MapPlan): World {
     overflow.set(def.id, it);
   }
   for (const def of plan.stations) kit.desks.set(def.id, agentConsole(kit, def));
-  const briefing = buildBriefing(kit, '🤝 Toplantı');
+  // Its own table: a round walnut one, 2.2 m across and 76 cm high.
+  const briefing = buildBriefing(kit, '🤝 Toplantı', (t) => meshy(t, 'konsey-masasi', { replaces: [...t.children] }));
   const boardMeshes = buildBoards(kit);
   const herald = buildBarista(kit);
   const life = streetLife(kit);
+  const npcs = buildNpcs(kit, herald?.person);
   group.add(mergeByMaterial(kit.still));
 
   // Walking about: in through the gateway and out again, round what's in the way.
@@ -135,6 +139,7 @@ export function buildCadde(plan: MapPlan): World {
       kit.gong?.update(dt);
       herald?.person.update(dt, t, false, false);
       life.update(t, dt);
+      npcs.update(dt);
     },
     mood(lights, daylight) {
       // Out of doors: the sky's own light, warmer toward dusk; at night the lamps, the offices' ceilings and the city's windows come on.
@@ -180,6 +185,7 @@ export function buildCadde(plan: MapPlan): World {
       }
       for (const v of views) v.accent.dispose();
       life.dispose();
+      npcs.dispose();
       for (const m of [kit.street.glass, kit.mats.glow, kit.mats.accent, kit.mats.lamp, kit.mats.warn, kit.mats.glass]) m.dispose();
     },
   };

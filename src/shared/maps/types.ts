@@ -192,7 +192,7 @@ export interface MapConfig {
   /** Just inside the way in and out, where workers come in and go home. */
   door: Place;
   /** Your seat of honour, on a dais against a wall. */
-  throne?: (Place & { dais?: { width: number; depth: number; height: number; steps: number } | null; label?: string }) | null;
+  throne?: (Place & { dais?: { width: number; depth: number; height: number; steps: number } | null; label?: string; /** Where your hips sit over the floor, as the seat's cushion has it (0.74 on the castle's throne). */ hips?: number }) | null;
   /** Whoever stands by the throne and sends new workers out when you speak to them. */
   herald?: (Place & { name?: string; says?: string; ask?: string; button?: string }) | null;
   /** Where workers waiting on someone line up: the first spot, each next one `step` further on, `count` of them, facing `rotY`. */

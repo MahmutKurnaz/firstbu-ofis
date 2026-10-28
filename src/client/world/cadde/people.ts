@@ -1,3 +1,4 @@
+import { meshy } from './meshy';
 import * as THREE from 'three';
 import { THRONE_SIZE } from '../../../shared/maps';
 import { Person } from '../character';
@@ -21,7 +22,9 @@ export function buildArmchair(kit: CaddeKit): Interactable | undefined {
   g.add(mesh(roundedBox(1.15, 0.9, 0.22, 0.1), leather, 0, 0.85, -0.42));
   for (const sx of [-1, 1]) g.add(mesh(roundedBox(0.2, 0.36, 0.95, 0.08), leather, sx * 0.5, 0.65, 0));
   for (const sx of [-1, 1]) for (const sz of [-1, 1]) g.add(mesh(box(0.06, 0.1, 0.06), kit.street.frame, sx * 0.5, 0.05, sz * 0.4, false));
-  kit.still.add(g);
+  // Its own armchair (a café's, 0.9 m across, the seat 0.5 m up), in place of the stand-in.
+  meshy(g, 'kafe-koltuk', { scale: 1.1, replaces: [...g.children] });
+  kit.group.add(g);
   collide(kit, t.x - Math.sin(t.rotY) * 0.2, t.z - Math.cos(t.rotY) * 0.2, THRONE_SIZE.width * 0.7, THRONE_SIZE.depth * 0.7, t.rotY, 99);
   const seat: Interactable = { kind: 'seat', seatId: t.id, x: t.x, y: t.y, z: t.z, radius: 1.7 };
   kit.interactables.push(seat);

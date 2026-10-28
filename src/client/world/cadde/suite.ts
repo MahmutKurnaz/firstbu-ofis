@@ -151,21 +151,8 @@ export function furnishSuite(kit: CaddeKit, p: PropConfig) {
   const [cx, cz] = at(10.4, -2.4);
   kit.interactables.push({ kind: 'coffee', label: '☕ Yönetim kahvesi', x: cx, z: cz, radius: 1.8 } satisfies Interactable);
 
-  // The meeting room (12 x 5.4): a long walnut table with ten chairs, a screen on the back wall and a whiteboard on the side.
-  const table = placed(...at(19, -2.2), o.rotY);
-  // Ten at a table 3.8 x 1.4 m, 76 cm of it a person, 76 cm high (blender/furniture.json).
-  table.add(mesh(roundedBox(3.8, 0.06, 1.4, 0.03), toon(WOOD), 0, 0.73, 0));
-  table.add(mesh(box(3.6, 0.02, 0.04), brass, 0, 0.765, 0, false));
-  for (const e of [-1, 1]) table.add(mesh(roundedBox(0.4, 0.7, 0.9, 0.03), toon('#3b251a'), e * 1.3, 0.35, 0));
-  kit.group.add(table);
-  solid(19, -2.2, 3.8, 1.4, 0.76);
-  for (let i = 0; i < 5; i++) {
-    const u = 19 + (i - 2) * 0.76;
-    put('toplanti-sandalye', u, -3.3, 0);
-    put('toplanti-sandalye', u, -1.1, Math.PI);
-  }
-  g.add(mesh(box(5.2, 2.5, 0.1), toon('#16191e'), 19, 2.35, back + 0.1));
-  g.add(mesh(box(4.9, 2.2, 0.02), lit('#24527a'), 19, 2.35, back + 0.17, false));
+  // The meeting room (12 x 5.4): the live meeting table is in it (the plan's council: shared/maps/cadde.ts), its screen on the
+  // wall behind; a whiteboard on the side.
   g.add(mesh(box(0.06, 1.4, 3.2), toon('#f7f5f0'), 24.9, 1.9, -2.2));
   put('fikus', 24.4, back + 0.5);
   put('fikus', 13.6, back + 0.5);

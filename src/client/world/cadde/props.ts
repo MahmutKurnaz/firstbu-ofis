@@ -29,7 +29,7 @@ function tree(kit: CaddeKit, p: PropConfig) {
   t.rotation.y = (p.x * 7 + p.z * 3) % 6.28;
   g.add(t);
   // Its own tree, in its own round bed, in their place (a 4 m street tree, its bed 2.2 m across: blender/furniture.json).
-  meshy(g, 'agac', { scale: s, turn: t.rotation.y, replaces: [...g.children] });
+  meshy(g, Math.floor(Math.abs(p.x * 7 + p.z * 3)) % 3 === 0 ? 'agac-ince' : 'agac-genis', { scale: s, turn: t.rotation.y, replaces: [...g.children] });
   kit.group.add(g);
   kit.colliders.push({ minX: p.x - 0.3, maxX: p.x + 0.3, minZ: p.z - 0.3, maxZ: p.z + 0.3, top: 99 });
 }
@@ -172,7 +172,7 @@ export const PROPS: Record<CaddePropKind, (kit: CaddeKit, p: PropConfig, index: 
     STATION_PROPS.dispenser(kit, p);
     // Its own coffee machine in place of the dispenser's box (the cup from it is still the same E).
     const made = [...kit.group.children, ...kit.still.children].filter((c) => !before.has(c));
-    for (const g of made) meshy(g, 'kahve-makinesi', { scale: 1, replaces: g.children.filter((c) => (c as THREE.Mesh).isMesh) });
+    for (const g of made) meshy(g, 'kiosk', { scale: 1, replaces: g.children.filter((c) => (c as THREE.Mesh).isMesh) });
   },
   table: STATION_PROPS.table,
 };

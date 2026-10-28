@@ -129,7 +129,7 @@ export function agentConsole(kit: Kit, def: DeskDef): DeskView {
 }
 
 /** The round briefing table, its chairs, and the display on a stand with the meeting's board and sign. */
-export function buildBriefing(kit: Kit, name = '🤝 Briefing room'): { board?: THREE.Mesh; sign?: THREE.Mesh } {
+export function buildBriefing(kit: Kit, name = '🤝 Briefing room', dress?: (table: THREE.Group) => void): { board?: THREE.Mesh; sign?: THREE.Mesh } {
   const cp = kit.plan.council;
   if (!cp) return {};
   const { mats } = kit;
@@ -142,6 +142,7 @@ export function buildBriefing(kit: Kit, name = '🤝 Briefing room'): { board?: 
   // A projector let into the middle of it.
   t.add(mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.012, 24), mats.black, 0, COUNCIL.height + 0.006, 0, false));
   t.add(mesh(new THREE.TorusGeometry(0.3, 0.018, 6, 28).rotateX(Math.PI / 2), mats.glow, 0, COUNCIL.height + 0.012, 0, false));
+  dress?.(t);
   kit.group.add(t);
   // A square inside the round top, so its corners don't stick out past the edge.
   const r = COUNCIL.radius * Math.SQRT1_2;

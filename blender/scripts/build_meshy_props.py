@@ -51,9 +51,10 @@ def piece(path, key):
     ob = bpy.context.view_layer.objects.active
     bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
     n = aokit.tris(ob)
-    if n > TRIS:
+    budget = SPEC[key].get("tris", TRIS)
+    if n > budget:
         m = ob.modifiers.new("d", 'DECIMATE')
-        m.ratio = TRIS / n
+        m.ratio = budget / n
         aokit.apply_modifier(ob, "d")
     ob.name = key
     ob.data.name = key
@@ -105,6 +106,7 @@ def bake_occlusion(ob, floor):
     path = os.path.join(tempfile.gettempdir(), f"meshy_{ob.name}.jpg")
     base.filepath_raw = path
     base.file_format = 'JPEG'
+    bpy.context.scene.render.image_settings.quality = 78
     base.save()
     tex.image = bpy.data.images.load(path)
     tex.image.pack()

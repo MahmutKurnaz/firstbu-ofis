@@ -112,7 +112,7 @@ export const SUITE = {
     { id: 'bug', label: '🐰 Hata avı müdürü', from: -1, to: 3, door: 1, team: 4 },
     { id: 'verify', label: '🦌 Doğrulama müdürü', from: 3, to: 7, door: 5, team: 5 },
     { id: 'coffee', label: '☕ Kahve köşesi', from: 7, to: 13, door: null, team: -1 },
-    { id: 'meeting', label: '🤝 Toplantı odası · 10 kişilik', from: 13, to: 25, door: 19, team: -1 },
+    { id: 'meeting', label: '🤝 Toplantı odası', from: 13, to: 25, door: 19, team: -1 },
     { id: 'archive', label: '🗄️ Arşiv', from: 25, to: 29.8, door: 27.4, team: 1 },
   ] as SuiteRoom[],
   /** The assistant's room opens into the lead's too: a doorway in the wall between them, from v to v. */

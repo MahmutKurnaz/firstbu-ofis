@@ -18,8 +18,20 @@ from meshy_props import call, data_uri, key, load, save  # noqa: E402
 # The clips every character gets (Meshy's library ids): idle, walk, sit at a desk, drink.
 CLIPS = [0, 30, 33, 343]
 # Each one's own: what it does when its work starts or waits (docs/karakterler.md).
-OWN = {"kizil-panda": 47, "susamuru": 11, "kaplan": 25, "tavsan": 2, "geyik": 2}
-HEIGHT = {"kizil-panda": 1.55, "susamuru": 1.65, "kaplan": 1.95, "tavsan": 1.7, "geyik": 1.95}
+OWN = {"kizil-panda": 47, "susamuru": 11, "kaplan": 25, "tavsan": 2, "geyik": 2,
+       "mirket": 336, "tilki": 36, "koala": 38, "panda": 28, "sincap": 49, "ceylan": 25, "penguen": 2, "baykus": 333,
+       "npc-barista": 28, "npc-bekci": 2, "npc-cicekci": 28, "npc-kurye": 16, "npc-dede": 11, "npc-rehber": 28, "npc-karsilayici": 28}
+HEIGHT = {"kizil-panda": 1.55, "susamuru": 1.65, "kaplan": 1.95, "tavsan": 1.7, "geyik": 1.95,
+          "mirket": 1.30, "tilki": 1.75, "koala": 1.60, "panda": 1.90, "sincap": 1.40, "ceylan": 1.80, "penguen": 1.50, "baykus": 1.60,
+          "kurt": 1.85, "ayi": 2.00, "fil": 2.00, "zurafa": 2.10, "kedi": 1.65, "golden": 1.80, "kunduz": 1.55, "kartal": 1.85, "bukalemun": 1.60, "kanguru": 1.90,
+          "npc-barista": 1.55, "npc-bekci": 1.70, "npc-cicekci": 1.20, "npc-kurye": 1.80, "npc-dede": 1.20, "npc-rehber": 1.90, "npc-karsilayici": 1.50}
+
+
+def clips_for(name):
+    """The clips a character gets: roles the base four and their own, spares the base four, an NPC walks, idles and does its own (no desk)."""
+    if name.startswith("npc-"):
+        return [0, 30, OWN[name]]
+    return CLIPS + ([OWN[name]] if name in OWN else [])
 
 
 def models(folder, picks):
@@ -83,7 +95,7 @@ if __name__ == "__main__":
     elif c == "rig" and len(sys.argv) > 2:
         step(sys.argv[2], "rig", "rig", "/rigging", lambda n, it: {"input_task_id": it["model"], "height_meters": HEIGHT[n]})
     elif c == "anim" and len(sys.argv) > 2:
-        step(sys.argv[2], "anim", "anim", "/animations", lambda n, it: {"rig_task_id": it["rig"], "action_ids": CLIPS + [OWN[n]]})
+        step(sys.argv[2], "anim", "anim", "/animations", lambda n, it: {"rig_task_id": it["rig"], "action_ids": clips_for(n)})
     elif c == "fetch" and len(sys.argv) > 2:
         fetch(sys.argv[2])
     else:

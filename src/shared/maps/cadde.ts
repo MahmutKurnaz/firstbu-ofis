@@ -78,6 +78,8 @@ const props: PropConfig[] = [
   { kind: 'counter', x: -4.2, z: -9.4, width: 4, rotY: 0 },
   { kind: 'dispenser', x: 4.2, z: -9.6, rotY: 0 },
   { kind: 'gong', x: 6.6, z: -6.4, rotY: east },
+  // Where the meeting table stood: two more café tables.
+  ...[-3.6, 3.6].map((x) => ({ kind: 'parasol', x, z: 14.5 })),
   // Benches and planters toward the way in.
   ...[-1, 1].map((side) => ({ kind: 'bench', x: side * 7.8, z: 18.5, rotY: west })),
   ...[-1, 1].map((side) => ({ kind: 'planter', x: side * 4.6, z: 30, width: 3.2 })),
@@ -94,7 +96,7 @@ export const CADDE: MapConfig = {
   spawn: { x: -2.4, z: -2.6, rotY: Math.PI },
   door: { x: 0, z: L / 2 - 1.6 },
   // Your seat, at the head of the café, looking down the street.
-  throne: { x: 0, z: -6.6, rotY: 0, dais: null, label: '☕ Senin koltuğun' },
+  throne: { x: 0, z: -6.6, rotY: 0, dais: null, hips: 0.62, label: '☕ Senin koltuğun' },
   herald: { x: 2.4, z: -6.1, rotY: -0.35, name: 'Karşılayıcı', says: 'Yeni bir ajan için benimle konuş', ask: 'Yeni ajan ne yapsın?', button: 'İşe başlasın ☕' },
   lineup: { x: 0, z: -4.6, rotY: Math.PI, step: [0, 1.2], count: 6 },
   tables: TABLES,
@@ -103,8 +105,8 @@ export const CADDE: MapConfig = {
     queue: { x: -KIOSK_X, z: 4, rotY: -Math.PI / 2 },
     pulls: { x: KIOSK_X, z: -4, rotY: Math.PI / 2 },
   },
-  // The meeting table, out on the street south of the café.
-  council: { x: 0, z: 14.5, rotY: Math.PI },
+  // The meeting table, in the suite's meeting room (its screen on the wall behind it).
+  council: { x: 19, z: -33.2, rotY: 0 },
   boards: {
     issues: { x: -BOARD_X, y: 2.3, z: -4, rotY: west, width: 3.2, height: 2, label: '🐞 Konular' },
     queue: { x: -BOARD_X, y: 2.3, z: 4, rotY: west, width: 3.2, height: 2, label: '📋 İş sırası' },

@@ -25,6 +25,20 @@ export const MESHY_KEYS = [
   'kitaplik',
   'fikus',
   'toplanti-sandalye',
+  'agac-genis',
+  'agac-ince',
+  'cali',
+  'cop-kutusu',
+  'hidrant',
+  'kafe-koltuk',
+  'kiosk',
+  'gong',
+  'kapi',
+  'konsey-masasi',
+  'kursu',
+  'pano-cercevesi',
+  'buzdolabi',
+  'menu-sehpasi',
 ] as const;
 export type MeshyKey = (typeof MESHY_KEYS)[number];
 
@@ -93,4 +107,14 @@ export function meshy(parent: THREE.Object3D, key: MeshyKey, o: MeshyOptions = {
     for (const old of o.replaces ?? []) old.removeFromParent();
   });
   return g;
+}
+
+/** A model standing at (x, z) on the street, turned `rotY`, `scale` times its real size: a group in the street's, the model coming into it once loaded. */
+export function standMeshy(kit: { group: THREE.Group }, key: MeshyKey, x: number, z: number, rotY = 0, scale = 1, y = 0): THREE.Group {
+  const holder = new THREE.Group();
+  holder.position.set(x, y, z);
+  holder.rotation.y = rotY;
+  kit.group.add(holder);
+  meshy(holder, key, { scale });
+  return holder;
 }

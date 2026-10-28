@@ -33,6 +33,9 @@ REMAKE = (
     "render, soft studio lighting, smooth simple shapes suitable for 3D modelling, no tiny details. {detail}"
 )
 
+# Trees get more triangles than the rest (their leaves are most of what you see).
+POLY = {"agac-genis": 30000, "agac-ince": 24000}
+
 # anahtar: (ne, ayrıntı, referans var mı)
 ESYA = {
     "agac": ("street tree in a round planter bed", "Lush layered green canopy on a slim trunk, a low round stone curb with dark soil and a few small plants around the base.", True),
@@ -51,7 +54,23 @@ ESYA = {
     "kitaplik": ("tall bookcase", "Walnut wood filled with books and a few small decor objects, brass edge details.", False),
     "fikus": ("potted fiddle-leaf fig plant", "Big glossy leaves, white ceramic pot on a small stand.", False),
     "toplanti-sandalye": ("conference room chair", "Black leather with chrome armrests and a slim base, modern.", False),
+    # The street's second round (docs/nesne-envanteri.md): premium versions of what stood in code or was drawn poorly.
+    "agac-genis": ("broad plane street tree with its planter bed", "Highly detailed realistic stylized foliage: many layered clusters of leaves of several greens, a thick textured trunk with visible branches, a low round stone tree pit with dark soil and ground cover.", False),
+    "agac-ince": ("slim columnar street tree with its planter bed", "Highly detailed realistic stylized foliage, narrow upright oval crown of layered leaf clusters in several greens, a textured trunk, a low square stone tree pit with dark soil.", False),
+    "cali": ("clipped boxwood shrub in a low stone planter", "A dense rounded boxwood ball with fine leaf texture, in a small square stone planter.", False),
+    "cop-kutusu": ("street litter bin", "Modern brushed stainless steel cylinder with a dark wooden slat band, a black lid with a round opening, short black base.", False),
+    "hidrant": ("fire hydrant", "Realistic red painted cast-iron street fire hydrant with two side caps and a top cap, brass chain details.", False),
+    "kafe-koltuk": ("premium cafe armchair", "Cognac brown tufted leather, slim brass legs, soft rounded back and arms, a small matching cushion.", False),
+    "kiosk": ("premium self-service drinks kiosk", "Brushed steel and walnut standing cabinet, a glowing amber touch screen, a recessed cup alcove with a chrome spout, brass trim, a slim base.", False),
+    "gong": ("ceremonial gong on a stand", "A large bronze gong disc with concentric rings hanging from a red lacquered wooden frame with brass fittings, a padded mallet hanging beside it.", False),
+    "kapi": ("street gateway arch", "A wide black steel portal arch of two posts and a top beam with a blank dark sign panel in the middle (no text), brass caps, lantern lights.", False),
+    "konsey-masasi": ("round meeting table", "A round walnut table with a brass inlay ring and a flat dark circular screen set into the middle, on a sculpted pedestal base.", False),
+    "kursu": ("standing lectern kiosk", "A slim walnut lectern with a slanted dark glass top, brass trim and a slim base.", False),
+    "pano-cercevesi": ("wall-mounted digital information board", "A thin black bezel with brass corner caps around a large blank dark screen, slim wall bracket, no text.", False),
+    "buzdolabi": ("premium glass-door beverage fridge", "A tall slim fridge with a glass door showing bottles on lit shelves, brushed steel frame, a small brass handle.", False),
+    "menu-sehpasi": ("cafe A-frame menu stand", "An A-frame wooden sidewalk menu stand with a black chalkboard panel (blank), brass hinges.", False),
 }
+
 
 
 def key():
@@ -147,7 +166,7 @@ def models(folder, picks):
             continue
         img = os.path.join(folder, f"{a}_{n}.png")
         r = call("POST", "/image-to-3d", k, {"image_url": data_uri(img), "ai_model": "meshy-7.1", "should_texture": True, "enable_pbr": False,
-                                             "topology": "triangle", "target_polycount": 8000, "should_remesh": True})
+                                             "topology": "triangle", "target_polycount": POLY.get(a, 8000), "should_remesh": True})
         state[a] = {"id": r["result"], "pick": int(n)}
         save(folder, "models.json", state)
         print(f"  {a}: {r['result']}")

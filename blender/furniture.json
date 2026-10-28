@@ -263,6 +263,154 @@
         "chair-zoro"
       ],
       "verified": "sources"
+    },
+    "agac-genis": {
+      "w": 3.0,
+      "d": 3.0,
+      "h": 4.5,
+      "kind": "street",
+      "range": "Broad street tree, 4.5 m (planted stock 3-3.6 m, grows on); its bed a little wider than a 1.5 m pit.",
+      "src": [
+        "tree-honolulu",
+        "tree-sydney",
+        "tree-stock"
+      ],
+      "verified": "sources",
+      "tris": 15000
+    },
+    "agac-ince": {
+      "w": 1.6,
+      "d": 1.6,
+      "h": 4.8,
+      "kind": "street",
+      "range": "Columnar street tree, 4.8 m and slim, for the narrow edges.",
+      "src": [
+        "tree-honolulu",
+        "tree-sydney",
+        "tree-stock"
+      ],
+      "verified": "sources",
+      "tris": 12000
+    },
+    "cali": {
+      "w": 0.9,
+      "d": 0.9,
+      "h": 1.0,
+      "kind": "street",
+      "range": "Boxwood ball in a small stone planter, 1.0 m. (Common practice.)",
+      "src": [
+        "planter-pots"
+      ],
+      "verified": "partly"
+    },
+    "cop-kutusu": {
+      "w": 0.5,
+      "d": 0.5,
+      "h": 0.95,
+      "kind": "street",
+      "range": "Street litter bin, about 0.9-1.0 m high, 0.4-0.5 m across. (Common practice.)",
+      "src": [],
+      "verified": "partly"
+    },
+    "hidrant": {
+      "w": 0.45,
+      "d": 0.4,
+      "h": 0.8,
+      "kind": "street",
+      "range": "Fire hydrant, about 0.75-0.9 m above the pavement. (Common practice.)",
+      "src": [],
+      "verified": "partly"
+    },
+    "kafe-koltuk": {
+      "w": 0.8,
+      "d": 0.8,
+      "h": 0.82,
+      "kind": "street",
+      "range": "Café armchair: seat 43-48 cm, 0.8 m across.",
+      "src": [
+        "sofa-castlery",
+        "chair-branch"
+      ],
+      "verified": "sources",
+      "seat": 0.46
+    },
+    "kiosk": {
+      "w": 0.9,
+      "d": 0.7,
+      "h": 1.85,
+      "kind": "street",
+      "range": "Self-service drinks kiosk, like a vending cabinet, 1.85 m. (No standard found.)",
+      "src": [
+        "machine-ggm"
+      ],
+      "verified": "partly"
+    },
+    "gong": {
+      "w": 2.0,
+      "d": 0.7,
+      "h": 2.2,
+      "kind": "street",
+      "range": "Ceremonial gong on its frame: a 2.2 m frame, a disc 0.9 m across. (No standard: common practice.)",
+      "src": [],
+      "verified": "partly"
+    },
+    "kapi": {
+      "w": 7.0,
+      "d": 0.6,
+      "h": 4.6,
+      "kind": "street",
+      "range": "Street gateway: 7 m between its posts, 4.6 m high, clear of vehicles (4.5 m). (Common practice.)",
+      "src": [],
+      "verified": "partly"
+    },
+    "konsey-masasi": {
+      "w": 2.2,
+      "d": 2.2,
+      "h": 0.76,
+      "kind": "street",
+      "range": "Round meeting table for five or six: 2.2 m across, 76 cm high.",
+      "src": [
+        "conference-of2go",
+        "desk-din"
+      ],
+      "verified": "sources",
+      "top": 0.76
+    },
+    "kursu": {
+      "w": 0.6,
+      "d": 0.5,
+      "h": 1.1,
+      "kind": "street",
+      "range": "Standing lectern / kiosk top: 1.0-1.2 m. (Common practice.)",
+      "src": [],
+      "verified": "partly"
+    },
+    "pano-cercevesi": {
+      "w": 3.3,
+      "d": 0.12,
+      "h": 2.1,
+      "kind": "street",
+      "range": "Wall information board: 3.3 x 2.1 m, the street boards (shared/maps/cadde.ts).",
+      "src": [],
+      "verified": "partly"
+    },
+    "buzdolabi": {
+      "w": 0.7,
+      "d": 0.7,
+      "h": 1.9,
+      "kind": "street",
+      "range": "Glass-door beverage fridge: 1.8-2.0 m. (Common practice.)",
+      "src": [],
+      "verified": "partly"
+    },
+    "menu-sehpasi": {
+      "w": 0.6,
+      "d": 0.7,
+      "h": 1.0,
+      "kind": "street",
+      "range": "Sidewalk A-frame menu board: about 1.0 m. (Common practice.)",
+      "src": [],
+      "verified": "partly"
     }
   }
 }

@@ -39,7 +39,7 @@ export const BENCH_OUT = 0.52;
  * `tome` is the book at each place: its size next to the model's, and how far toward its chair it
  * lies from the place. Five of them open round the table take a table this big to lie clear of each other.
  */
-export const COUNCIL = { radius: 1.3, height: 0.78, place: 0.85, chairs: 1.7, easel: 3.1, tome: { scale: 0.85, z: 0.04 } } as const;
+export const COUNCIL = { radius: 1.3, height: 0.76, place: 0.85, chairs: 1.7, easel: 3.1, tome: { scale: 0.85, z: 0.04 } } as const;
 /** The throne's footprint. */
 export const THRONE_SIZE = { width: 1.9, depth: 1.9 } as const;
 
@@ -282,7 +282,7 @@ export function planMap(input: unknown): MapPlan {
       : { ...DEFAULT_DAIS };
     if (!Number.isInteger(dais.steps)) throw new MapError('throne.dais.steps should be a whole number');
     const label = typeof c.throne.label === 'string' && c.throne.label.trim() ? c.throne.label.trim().slice(0, 40) : '👑 Throne';
-    throne = { id: 'throne', label, x: p.x, y: dais.height, z: p.z, rotY: p.rotY, places: [0], hips: 0.74, depth: 0.12, out: 1.1 };
+    throne = { id: 'throne', label, x: p.x, y: dais.height, z: p.z, rotY: p.rotY, places: [0], hips: c.throne.hips === undefined ? 0.74 : num(c.throne.hips, 'throne.hips', 0.3, 1.2), depth: 0.12, out: 1.1 };
     seating.push(throne);
     rects.push(boxFootprint(p.x, p.z - Math.cos(p.rotY) * 0.2, THRONE_SIZE.width, THRONE_SIZE.depth, p.rotY));
   }
