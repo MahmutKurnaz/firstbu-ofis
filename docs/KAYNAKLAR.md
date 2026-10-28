@@ -92,3 +92,16 @@ Onay: Mahmut, 2026-10-28 ("Hepsi, ~1.860"). Betikler: `blender/scripts/meshy_pro
 - **14 sokak eşyası** (agac-genis, agac-ince, cali, cop-kutusu, hidrant, kafe-koltuk, kiosk, gong, kapi, konsey-masasi, kursu, pano-cercevesi, buzdolabi, menu-sehpasi): 14 × 2 görsel = 168, 14 × 3D = 420 → 588 kredi. Ağaçlar 30k/24k üçgenle istendi, pakette 15k/12k.
 - **24 karakter** (8 rol, 10 yedek hayvan, 6 NPC) + karşılayıcı ördek: 3D 24 × 30 + konsept 12 + iskelet 25 × 5 + klipler (8 × 5, 10 × 4, 7 × 3 klip × 3 kredi) → yaklaşık 1.150 kredi.
 - Bakiye 4.035 → 2.257. Kullanılmayan: gong (animasyonlu kod gong'u yerinde kaldı), kürsü ve pano çerçevesi (üretildi, yerleştirilmedi).
+
+## Eşya turu 3 ve 4 (Meshy, doğrudan) — kafe, lounge, şezlong, istasyon, kale
+
+Onay: Mahmut, 2026-10-28 ("onlara üret", "Hepsini yapmaya başla"; ~600 krediye kadar). Betikler: `blender/scripts/meshy_props.py`, `build_meshy_props.py`. Ölçüler ve kaynakları: `blender/furniture.json`, `docs/mobilya-olculeri.md`.
+
+| Tarih | Ne | Kredi |
+| --- | --- | --- |
+| 2026-10-28 | Tur 3: sehpa, ayaklı lamba, puf, kafe tabure, yuvarlak bistro masası, şemsiye (6 × 2 görsel + 6 × 3D) | 252 |
+| 2026-10-28 | Tur 4: şezlong, ateş çukuru, istasyon bankı, kargo sandığı, kale masası, heykel (6 × 2 görsel + 6 × 3D) | 252 |
+
+Bakiye 2.115 → 1.611 (bu iki tur; Tuğer işi ayrıca, yerel dalda). Yerleştirilenler: tur 3'ten kafe seti ve takım ofisi lounge'u; tur 4'ten çatı şezlongları, kale heykelleri, istasyon sandıkları. Hazır ama yerleştirilmeyenler: puf, ateş çukuru, istasyon bankı, kale masası (haritaların masaları plandan çiziliyor).
+
+Binalar (8 yeni cadde binası) Blender'da elle modellendi, kredi harcanmadı: `blender/scripts/build_buildings.py`.
