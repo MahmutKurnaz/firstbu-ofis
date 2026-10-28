@@ -21,3 +21,6 @@ export function freeName(wanted: string, used: Set<string>): string {
 export function roleFields(opts: SpawnOpts): { role?: string; agentFile?: string; roleTask?: string } {
   return { ...(opts.role ? { role: opts.role } : {}), ...(opts.agentFile ? { agentFile: opts.agentFile } : {}), ...(opts.roleTask ? { roleTask: opts.roleTask } : {}) };
 }
+
+// The manager's other small helpers live beside their own topic; it takes them from here to keep its imports short.
+export { markExited } from './subagents.js';

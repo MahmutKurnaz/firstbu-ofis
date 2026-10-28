@@ -69,6 +69,8 @@ interface Courtier {
   stepIn: number;
   /** m/s, before its age slows it down. */
   pace: number;
+  /** Where it's headed in front of you, when it's coming to you. */
+  target?: Stand;
 }
 
 const wrap = (a: number) => Math.atan2(Math.sin(a), Math.cos(a));
@@ -145,6 +147,14 @@ export class Court {
     return c && c.state !== 'seated' && 'spot' in c.goal ? c.goal.spot : -1;
   }
 
+  /** Where `id` is while it's up out of its seat. */
+  whereIs(id: string): Pt | undefined {
+    const c = this.people.get(id);
+    if (!c || c.state === 'seated') return undefined;
+    const p = c.model.root.position;
+    return [p.x, p.z];
+  }
+
   /** Whether `id` has come to you (or is on its way). */
   seeking(id: string): boolean {
     const c = this.people.get(id);
@@ -166,14 +176,18 @@ export class Court {
     const here = waiting.filter((id) => this.people.has(id));
     const seekers = this.anchor ? here.filter((id) => asking.has(id)).slice(0, SEEKERS) : [];
     const order = here.filter((id) => !seekers.includes(id)).slice(0, this.plan.lineup.length);
-    this.routedAt = this.anchor;
-    this.stands = this.anchor ? seekSpots(this.anchor, seekers.length) : [];
+    // Where they stand is worked out from where you were when they last set off, until you've moved on
+    // (see follow): every other worker's news calls this too, and mustn't keep moving the goalposts.
+    this.routedAt = !this.anchor ? null : moved || !this.routedAt ? this.anchor : this.routedAt;
+    this.stands = this.routedAt ? seekSpots(this.routedAt, seekers.length) : [];
     for (const c of this.people.values()) {
       const k = seekers.indexOf(c.id);
       const i = order.indexOf(c.id);
       const goal: Goal = k >= 0 ? { seek: k } : i >= 0 ? { spot: i } : { seat: true };
-      // Come to you already, or on its way, and you've moved on: it sets off again after you.
-      if (k >= 0 && moved && sameGoal(goal, c.goal) && c.state !== 'seated') {
+      // Coming to you already, and where it's to stand has changed (you've moved on, or someone else
+      // has come or gone and they've shuffled up): it sets off again for its new spot.
+      const t = this.stands[k];
+      if (k >= 0 && sameGoal(goal, c.goal) && c.state !== 'seated' && (!c.target || Math.hypot(t.x - c.target.x, t.z - c.target.z) > 0.3)) {
         this.walkTo(c, goal);
         continue;
       }
@@ -249,6 +263,7 @@ export class Court {
     c.goal = goal;
     c.model.stopDancing();
     const stand = 'spot' in goal ? this.plan.lineup[goal.spot] : 'seek' in goal ? this.stands[goal.seek] : undefined;
+    c.target = 'seek' in goal ? stand : undefined;
     const target: Pt | null = stand ? [stand.x, stand.z] : null;
     if (c.state === 'seated') {
       if (!target) return;

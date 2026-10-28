@@ -30,12 +30,21 @@ export function noteSubagent(info: Pick<WorkerInfo, 'subagents'>, event: string,
       info.subagents = next.length ? next : undefined;
       return true;
     }
-    case 'Stop':
     case 'SessionStart':
+      // A compaction starts the session over mid-turn, with its subagents still running.
+      if (p.source === 'compact') return false;
+    // falls through
+    case 'Stop':
       if (!list.length) return false;
       info.subagents = undefined;
       return true;
     default:
       return false;
   }
+}
+
+/** Its process ended: it's `exited`, and whatever subagents it had went with it (no Stop hook comes then). */
+export function markExited(info: Pick<WorkerInfo, 'status' | 'subagents'>) {
+  info.status = 'exited';
+  info.subagents = undefined;
 }

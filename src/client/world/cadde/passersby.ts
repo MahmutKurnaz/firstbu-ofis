@@ -33,8 +33,8 @@ const WALKERS = [
   { color: '#2a9d8f', look: { skin: 2, hair: 2, style: 5 }, lane: 2, offset: 3 },
 ];
 
-/** Puts up the passers-by and the steam; returns what moves them, each frame. */
-export function streetLife(kit: CaddeKit): (t: number, dt: number) => void {
+/** Puts up the passers-by and the steam; returns what moves them each frame, and what frees the steam. */
+export function streetLife(kit: CaddeKit): { update(t: number, dt: number): void; dispose(): void } {
   const people = WALKERS.map((w) => {
     const p = new Person('', w.color, w.look);
     kit.group.add(p.root);
@@ -58,7 +58,7 @@ export function streetLife(kit: CaddeKit): (t: number, dt: number) => void {
       }
     }
   }
-  return (t, dt) => {
+  const update = (t: number, dt: number) => {
     for (const w of people) {
       const s = strollAt(w.lane, t + w.offset);
       w.p.root.position.set(s.x, 0, s.z);
@@ -72,4 +72,5 @@ export function streetLife(kit: CaddeKit): (t: number, dt: number) => void {
       f.mat.opacity = 0.35 * Math.sin(k * Math.PI);
     }
   };
+  return { update, dispose: () => puffs.forEach((f) => f.mat.dispose()) };
 }

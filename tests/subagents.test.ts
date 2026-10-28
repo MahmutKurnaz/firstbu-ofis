@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { MAX_SUBAGENTS, noteSubagent } from '../src/server/workers/subagents.js';
+import { MAX_SUBAGENTS, markExited, noteSubagent } from '../src/server/workers/subagents.js';
+import { markExited as reExported } from '../src/server/workers/spawn-opts.js';
 import { claude } from '../src/server/providers/claude.js';
 import type { WorkerInfo } from '../src/shared/protocol.js';
 import type { WorkerHandle } from '../src/server/workers/types.js';
@@ -110,5 +111,27 @@ test('the Claude adapter takes SubagentStart and SubagentStop through its hook',
   assert.deepEqual(info.subagents?.map((s) => [s.id, s.type]), [['a1', 'Explore']]);
   assert.ok(emits > 0, 'a change is announced');
   hook('SubagentStop', { agent_id: 'a1' });
+  assert.equal(info.subagents, undefined);
+});
+
+test('a compaction (SessionStart, source compact) keeps the list; other starts clear it', () => {
+  const info = fresh();
+  start(info, 'a1', 'Explore', 1);
+  assert.equal(noteSubagent(info, 'SessionStart', { source: 'compact' }), false);
+  assert.equal(info.subagents!.length, 1);
+  for (const payload of [{}, { source: 'clear' }, { source: 'startup' }]) {
+    const i = fresh();
+    start(i, 'a1', 'Explore', 1);
+    assert.equal(noteSubagent(i, 'SessionStart', payload), true, JSON.stringify(payload));
+    assert.equal(i.subagents, undefined);
+  }
+});
+
+test('markExited: the worker is exited and its subagents are gone', () => {
+  assert.equal(reExported, markExited);
+  const info: Pick<WorkerInfo, 'status' | 'subagents'> = { status: 'working' };
+  start(info, 'a1', 'Explore', 1);
+  markExited(info);
+  assert.equal(info.status, 'exited');
   assert.equal(info.subagents, undefined);
 });

@@ -127,7 +127,7 @@ export function buildCadde(plan: MapPlan): World {
       }
       kit.gong?.update(dt);
       herald?.person.update(dt, t, false, false);
-      life(t, dt);
+      life.update(t, dt);
     },
     mood(lights, daylight) {
       // Out of doors: the sky's own light, warmer toward dusk; at night the lamps, the offices' ceilings and the city's windows come on.
@@ -169,6 +169,7 @@ export function buildCadde(plan: MapPlan): World {
         g.mat.dispose();
       }
       for (const v of views) v.accent.dispose();
+      life.dispose();
       for (const m of [kit.street.glass, kit.mats.glow, kit.mats.accent, kit.mats.lamp, kit.mats.warn, kit.mats.glass]) m.dispose();
     },
   };
