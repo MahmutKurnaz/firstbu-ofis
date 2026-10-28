@@ -135,7 +135,7 @@ test('clipOf maps model clip names, ignoring case', () => {
 
 test('clipOf returns undefined for clips it does not drive', () => {
   assert.equal(clipOf('wave'), undefined);
-  assert.equal(clipOf('sit'), undefined);
+  assert.equal(clipOf('sit'), 'sit');
   assert.equal(clipOf(''), undefined);
 });
 

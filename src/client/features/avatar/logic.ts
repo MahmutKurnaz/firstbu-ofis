@@ -44,7 +44,7 @@ export const RUN_PACE = 6;
 export const STILL = 0.3;
 export const WALK_UP_TO = 2.4;
 
-export type Clip = 'idle' | 'walk' | 'run' | 'jump';
+export type Clip = 'idle' | 'walk' | 'run' | 'jump' | 'sit';
 
 /**
  * Which clip to play at `speed` (m/s over the ground), and how fast to play it so the feet keep up with the floor
@@ -61,5 +61,5 @@ export function gaitFor(speed: number, grounded: boolean): { clip: Clip; rate: n
 /** Which clip a name in the model is, by what it contains (the model's own: idle, walk, run, jump, wave, sit). */
 export function clipOf(name: string): Clip | undefined {
   const n = name.toLowerCase();
-  return n.includes('jump') ? 'jump' : n.includes('run') ? 'run' : n.includes('walk') ? 'walk' : n.includes('idle') ? 'idle' : undefined;
+  return n.includes('jump') ? 'jump' : n.includes('run') ? 'run' : n.includes('walk') ? 'walk' : n.includes('sit') ? 'sit' : n.includes('idle') ? 'idle' : undefined;
 }

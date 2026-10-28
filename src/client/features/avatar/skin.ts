@@ -31,6 +31,7 @@ export class PlayerAvatar {
   private mixer: THREE.AnimationMixer;
   private actions = new Map<Clip, THREE.AnimationAction>();
   private playing: Clip | null = null;
+  private hips: THREE.Object3D | undefined;
 
   constructor(model: Model) {
     const body = model.scene;
@@ -49,6 +50,9 @@ export class PlayerAvatar {
       for (const mat of Array.isArray(m.material) ? m.material : [m.material]) mat.userData.outlineParameters = { visible: false };
     });
     this.root.add(body);
+    body.traverse((o) => {
+      if (!this.hips && /hips/i.test(o.name) && (o as THREE.Bone).isBone) this.hips = o;
+    });
     this.mixer = new THREE.AnimationMixer(body);
     for (const clip of model.clips) {
       const key = clipOf(clip.name);
@@ -64,8 +68,10 @@ export class PlayerAvatar {
   }
 
   /** `speed` is how fast you're moving over the ground (m/s), `grounded` whether your feet are on it. */
-  update(dt: number, speed: number, grounded: boolean) {
-    const { clip: want, rate } = gaitFor(speed, grounded);
+  /** `seated`: sitting on a seat, which `seatOn` then puts its hips on. */
+  update(dt: number, speed: number, grounded: boolean, seated = false) {
+    const gait = gaitFor(speed, grounded);
+    const { clip: want, rate } = seated ? { clip: 'sit' as Clip, rate: 1 } : gait;
     const next = this.actions.has(want) ? want : this.actions.has('idle') ? 'idle' : null;
     if (next && next !== this.playing) {
       const to = this.actions.get(next)!;
@@ -76,6 +82,14 @@ export class PlayerAvatar {
     }
     if (this.playing) this.actions.get(this.playing)!.timeScale = rate;
     this.mixer.update(dt);
+  }
+
+  /** Moves it so its hips are at `at` (world): on the seat's cushion, whatever the clip's own chair was. Call after update, at its seat. */
+  seatOn(at: THREE.Vector3) {
+    if (!this.hips) return;
+    this.root.updateMatrixWorld(true);
+    const now = this.hips.getWorldPosition(new THREE.Vector3());
+    this.root.position.add(at).sub(now);
   }
 
   dispose() {
