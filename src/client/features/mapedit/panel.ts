@@ -37,10 +37,19 @@ export function createPanel(act: PanelActions) {
   const el = document.createElement('div');
   el.style.cssText =
     'position:fixed;left:12px;top:70px;z-index:50;width:290px;max-height:calc(100vh - 100px);overflow:auto;padding:10px 12px;border-radius:12px;background:rgba(20,24,32,.94);color:#eef3f8;font:13px/1.45 system-ui,sans-serif;box-shadow:0 4px 18px #0006;display:none';
+  // What each piece looks like (blender/scripts/render_thumbs.py makes the pictures), beside its name.
+  const thumb = (id: string) => new URL(`./thumbs/${id.replace(/^meshy-/, '')}.png`, import.meta.url).href;
+  const CARD = 'display:flex;flex-direction:column;align-items:center;gap:2px;border:0;border-radius:10px;padding:5px 3px;background:#2c3644;color:#eef3f8;font:inherit;font-size:11px;line-height:1.2;cursor:pointer;min-width:0';
   const items = GROUPS.map(
     (g) =>
-      `<div style="margin:8px 0 2px;opacity:.75">${g.title}</div>` +
-      g.ids.map((id) => `<button data-a="choose" data-i="${CATALOG.findIndex((c) => c.id === id)}" style="${BTN}">${CATALOG.find((c) => c.id === id)?.label ?? id}</button>`).join(''),
+      `<div style="margin:8px 0 3px;opacity:.75">${g.title}</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">` +
+      g.ids
+        .map((id) => {
+          const label = esc(CATALOG.find((c) => c.id === id)?.label ?? id);
+          return `<button data-a="choose" data-i="${CATALOG.findIndex((c) => c.id === id)}" title="${label}" style="${CARD}"><img src="${thumb(id)}" alt="" width="64" height="64" loading="lazy" style="width:64px;height:64px;object-fit:contain;pointer-events:none"><span>${label}</span></button>`;
+        })
+        .join('') +
+      '</div>',
   ).join('');
   el.innerHTML =
     '<div style="display:flex;justify-content:space-between;align-items:center"><b>✏️ Düzenleme modu</b><button data-a="leave" title="Kapat (J)" style="border:0;background:none;color:#eef3f8;font-size:18px;cursor:pointer">✕</button></div>' +

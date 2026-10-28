@@ -2,8 +2,8 @@
 // turning, deleting and copying one makes of the list. Pure, so it can be tested; the list is never changed in place.
 
 import { BENCH_OUT, THRONE_SIZE } from '../../../shared/maps';
-import { CADDE_SIZE, treeLook } from '../../../shared/maps/cadde-props';
-import type { TableConfig } from '../../../shared/maps/types';
+import { CADDE_SIZE, streetFurniture, treeLook } from '../../../shared/maps/cadde-props';
+import type { PropConfig, TableConfig } from '../../../shared/maps/types';
 
 export type Prop = Record<string, unknown> & {
   kind: string;
@@ -158,6 +158,7 @@ export const CATALOG: readonly CatalogItem[] = [
     width: 0.9,
     length: 0.7,
   },
+  { id: 'meshy-buzdolabi', label: 'Buzdolabı', width: 0.8, length: 0.8 },
   { id: 'meshy-heykel', label: 'Heykel', width: 0.9, length: 0.9 },
   { id: 'meshy-kargo-sandik', label: 'Sandık', width: 1.2, length: 0.8 },
   { id: 'meshy-menu-sehpasi', label: 'Menü tabelası', width: 0.6, length: 0.7 },
@@ -176,7 +177,7 @@ export const GROUPS: readonly { title: string; ids: readonly string[] }[] = [
   },
   {
     title: '☕ Kafe',
-    ids: ['meshy-kafe-koltuk', 'meshy-kafe-masasi-yuvarlak', 'meshy-kafe-tabure', 'meshy-kahve-makinesi'],
+    ids: ['meshy-kafe-koltuk', 'meshy-kafe-masasi-yuvarlak', 'meshy-kafe-tabure', 'meshy-kahve-makinesi', 'meshy-buzdolabi'],
   },
   {
     title: '🛋️ Oturma ve salon',
@@ -316,12 +317,14 @@ export class History {
 }
 
 /** What the editor works on: the map's props, and its tables that aren't desks as `table` props (with `tableIndex` into the map's list of tables). */
-export function editables(config: { props?: readonly Prop[]; tables?: readonly TableConfig[]; throne?: { x: number; z: number; rotY?: number; label?: string } | null }): Prop[] {
+export function editables(config: { props?: readonly Prop[]; tables?: readonly TableConfig[]; throne?: { x: number; z: number; rotY?: number; label?: string } | null; furnished?: boolean }): Prop[] {
   const tables = (config.tables ?? []).flatMap((t, i): Prop[] =>
     t.look ? [] : [{ kind: 'table', x: t.x, z: t.z, rotY: t.rotY ?? 0, length: t.length, width: t.width ?? 1.4, name: t.name ?? `Masa ${i + 1}`, tableIndex: i }],
   );
   const throne: Prop[] = config.throne ? [{ kind: 'throne', x: config.throne.x, z: config.throne.z, rotY: config.throne.rotY ?? 0, name: config.throne.label ?? 'Senin koltuğun' }] : [];
-  return [...(config.props ?? []).map((p) => ({ ...p })), ...tables, ...throne];
+  // A map that hasn't been edited has its street furniture in code: here it's props, saved with the first change.
+  const furniture: Prop[] = config.furnished ? [] : streetFurniture((config.props ?? []) as readonly PropConfig[]).map((p) => ({ ...p }) as Prop);
+  return [...(config.props ?? []).map((p) => ({ ...p })), ...furniture, ...tables, ...throne];
 }
 
 /** The editor's list split for saving: the real props, where each table was put, and where the throne is. */

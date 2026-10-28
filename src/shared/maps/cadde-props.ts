@@ -58,6 +58,38 @@ export function treeLook(p: { x: number; z: number; model?: unknown }): { key: '
   const h = p.x * 7 + p.z * 3;
   return { key: Math.floor(Math.abs(h)) % 3 === 0 ? 'agac-ince' : 'agac-genis', turn: h % 6.28 };
 }
+/**
+ * The street's own furniture as props, where its builder puts it when a map isn't `furnished`: a bush either side of each
+ * office's door, a hydrant and a bin by the benches toward the way in, the café's fridge and its menu stand by its counter.
+ * The editor puts them in the map's props when it first saves it, so they can be moved like the rest.
+ */
+export function streetFurniture(props: readonly PropConfig[]): PropConfig[] {
+  const glb = (model: string, x: number, z: number, size: number, rotY?: number): PropConfig => ({ kind: 'glb', model: `meshy-${model}`, x: Math.round(x * 1000) / 1000, z: Math.round(z * 1000) / 1000, width: size, length: size, ...(rotY ? { rotY: Math.round(rotY * 1e4) / 1e4 } : {}) });
+  const out: PropConfig[] = [];
+  for (const p of props.filter((q) => q.kind === 'office')) {
+    const o = officeBox(p);
+    for (const side of [-1, 1]) {
+      const [x, z] = officePoint(p, side * (o.width / 2 - 0.8), o.length / 2 + 1.1);
+      out.push(glb('cali', x, z, 0.9));
+    }
+  }
+  for (const side of [-1, 1]) {
+    out.push(glb('hidrant', side * 8.6, 22, 0.5));
+    out.push(glb('cop-kutusu', side * 8.4, 16.6, 0.5));
+  }
+  const c = props.find((q) => q.kind === 'counter');
+  if (c) {
+    const r = c.rotY ?? 0;
+    const by = (across: number, out2: number): [number, number] => [c.x + Math.cos(r) * across + Math.sin(r) * out2, c.z - Math.sin(r) * across + Math.cos(r) * out2];
+    const w = (c.width ?? 4) * (c.scale ?? 1);
+    const fridge = by(-w / 2 + 0.2, -1.2);
+    out.push(glb('buzdolabi', fridge[0], fridge[1], 0.8, r));
+    const menu = by(w / 2 + 0.2, 1.8);
+    out.push(glb('menu-sehpasi', menu[0], menu[1], 0.6, r + 0.5));
+  }
+  return out;
+}
+
 /** How wide the doorway in an office's front is, and how thick its walls are. */
 export const OFFICE_DOOR = 2.4;
 export const OFFICE_WALL = 0.2;

@@ -181,6 +181,8 @@ export interface MapConfig {
   /** One emoji for Settings. */
   icon?: string;
   description?: string;
+  /** The street's own furniture (the bushes at the office doors, the hydrants, the bins, the café's fridge and menu stand) is in `props`, to be moved: the editor sets it (see streetFurniture). Without it, the street's builder puts them where it always has. */
+  furnished?: boolean;
   /** Another map's id to start from: everything given here replaces its part (objects are merged, lists replaced). */
   extends?: string;
   /** Which builder puts it up: 'castle', 'station' or 'cadde' (see MAP_STYLES). */

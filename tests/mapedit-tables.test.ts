@@ -109,7 +109,7 @@ test('a tree that is moved keeps its look: same key, same total turn', () => {
 });
 
 test('editables / split: tables that are not desks become table props and split gives them back', () => {
-  const config = { props: structuredClone(CADDE.props) as Prop[], tables: CADDE.tables };
+  const config = { props: structuredClone(CADDE.props) as Prop[], tables: CADDE.tables, furnished: true };
   const list = editables(config);
   const tableProps = list.filter((p) => p.kind === 'table');
   const plain = CADDE.tables.map((t, i) => [t, i] as const).filter(([t]) => !t.look);
@@ -134,10 +134,10 @@ test('editables / split: tables that are not desks become table props and split 
 
 test('editables copies props and tolerates a config without props or tables', () => {
   const props: Prop[] = [{ kind: 'tree', x: 1, z: 1 }];
-  const out = editables({ props });
+  const out = editables({ props, furnished: true });
   assert.deepEqual(out, props);
   assert.notEqual(out[0], props[0]);
-  assert.deepEqual(editables({}), []);
+  assert.deepEqual(editables({ furnished: true }), []);
   assert.deepEqual(split([]), { props: [], tables: [] });
 });
 

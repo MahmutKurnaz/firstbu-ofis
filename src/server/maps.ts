@@ -112,6 +112,8 @@ export class Maps {
       icon: '✏️',
       description: 'Caddenin senin yerleştirdiğin hâli (düzenleme modu).',
       extends: 'cadde',
+      // The editor's list has the street's furniture in it (see streetFurniture), so the builder doesn't put its own up as well.
+      furnished: true,
       props: clean,
       ...(seatMoved ? { throne: { ...CADDE.throne, ...seat } } : {}),
       ...(changed ? { tables: CADDE.tables.map((t, i) => (moved.has(i) ? movedTable(t, moved.get(i)!.x, moved.get(i)!.z, moved.get(i)!.rotY) : t)) } : {}),

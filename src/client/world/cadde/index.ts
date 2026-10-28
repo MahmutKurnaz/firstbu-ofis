@@ -57,7 +57,7 @@ export function buildCadde(plan: MapPlan): World {
     furnish(kit, p, i);
     themeOffice(kit, p, i, TEAM_COLORS[i] ?? '#8a94a6');
   });
-  dress(kit, c.props ?? []);
+  dress(kit, c.props ?? [], c.furnished === true);
   skylineOwn(kit, shell.near);
   buildArmchair(kit);
   // Its own long table and benches, a module of 2.5 m each along the table (a plain top and rails stand in until they've loaded), in the street's group.

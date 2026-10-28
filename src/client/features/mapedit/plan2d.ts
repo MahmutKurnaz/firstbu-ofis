@@ -328,6 +328,18 @@ export function createPlan2d(h: PlanHandlers) {
       g.fill();
       label(g, herald.name ?? 'Karşılayıcı', herald.x, herald.z - 0.8, DIM, k > 12 ? 11 : 0);
     }
+    // The gate at the way in.
+    const door = s.plan.config?.door;
+    if (door) {
+      const [dx0, dy0] = toScreen(door.x, door.z);
+      g.strokeStyle = DIM;
+      g.lineWidth = 3;
+      g.beginPath();
+      g.moveTo(dx0 - k * 1.8, dy0);
+      g.lineTo(dx0 + k * 1.8, dy0);
+      g.stroke();
+      label(g, 'Giriş kapısı', door.x, door.z - 0.9, DIM, k > 8 ? 11 : 0);
+    }
     g.strokeStyle = '#7fd3a8';
     for (const bd of Object.values(s.plan.boards)) {
       frame(g, bd.x, bd.z, bd.rotY, () => {

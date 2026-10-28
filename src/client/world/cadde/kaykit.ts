@@ -111,8 +111,9 @@ export function furnish(kit: CaddeKit, p: PropConfig, index: number) {
 }
 
 /** The street's furniture: bushes by the office doors, hydrants and bins by the benches, the café's fridge, menu and crate by its counter. */
-export function dress(kit: CaddeKit, props: PropConfig[]) {
-  for (const p of props.filter((q) => q.kind === 'office')) {
+export function dress(kit: CaddeKit, props: PropConfig[], furnished = false) {
+  // A `furnished` map has them as props of its own (see streetFurniture), put up with the rest.
+  for (const p of furnished ? [] : props.filter((q) => q.kind === 'office')) {
     const o = officeBox(p);
     for (const side of [-1, 1]) {
       // Out on the pavement, clear of the glass: a bush is about a meter across and two high.
@@ -121,7 +122,7 @@ export function dress(kit: CaddeKit, props: PropConfig[]) {
       solid(kit, x, z, 0.8, 0.8, 1.0);
     }
   }
-  for (const side of [-1, 1]) {
+  for (const side of furnished ? [] : [-1, 1]) {
     standMeshy(kit, 'hidrant', side * 8.6, 22);
     standMeshy(kit, 'cop-kutusu', side * 8.4, 16.6);
     solid(kit, side * 8.6, 22, 0.5, 0.5, 0.8);
@@ -134,10 +135,12 @@ export function dress(kit: CaddeKit, props: PropConfig[]) {
   const by = (across: number, out: number): [number, number] => [c.x + Math.cos(r) * across + Math.sin(r) * out, c.z - Math.sin(r) * across + Math.cos(r) * out];
   const w = (c.width ?? 4) * (c.scale ?? 1);
   const fridge = by(-w / 2 + 0.2, -1.2);
-  standMeshy(kit, 'buzdolabi', fridge[0], fridge[1], r);
-  solid(kit, ...fridge, 0.8, 0.8, 1.9, r);
+  if (!furnished) {
+    standMeshy(kit, 'buzdolabi', fridge[0], fridge[1], r);
+    solid(kit, ...fridge, 0.8, 0.8, 1.9, r);
+  }
   kay(kit, 'kaykit-cafe', 'crate_carrots', ...by(w / 2, -1.2), r + 0.3, 0.6);
-  standMeshy(kit, 'menu-sehpasi', ...by(w / 2 + 0.2, 1.8), r + 0.5);
+  if (!furnished) standMeshy(kit, 'menu-sehpasi', ...by(w / 2 + 0.2, 1.8), r + 0.5);
 }
 
 /** The city's nearer row: KayKit buildings facing the street from beyond its edges, at `scale` their street size. */

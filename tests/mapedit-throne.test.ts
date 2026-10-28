@@ -37,7 +37,7 @@ test('isThrone is true only for kind throne', () => {
 });
 
 test('editables: the throne goes last, named by label or by default; none when null or missing', () => {
-  const cfg = { props: [{ kind: 'tree', x: 1, z: 1 }], tables: [{ x: 0, z: 0, length: 3, seats: 2 }] };
+  const cfg = { props: [{ kind: 'tree', x: 1, z: 1 }], tables: [{ x: 0, z: 0, length: 3, seats: 2 }], furnished: true };
   const e = editables({ ...cfg, throne: { x: 2, z: 3, rotY: 0.4, label: 'Tahtım' } });
   assert.deepEqual(e[e.length - 1], { kind: 'throne', x: 2, z: 3, rotY: 0.4, name: 'Tahtım' });
   assert.equal(e.filter(isThrone).length, 1);
@@ -46,8 +46,8 @@ test('editables: the throne goes last, named by label or by default; none when n
   assert.equal(d[d.length - 1].rotY, 0);
   assert.equal(editables({ ...cfg, throne: null }).some(isThrone), false);
   assert.equal(editables(cfg).some(isThrone), false);
-  assert.equal(editables({ props: [], throne: { x: 0, z: 0 } }).length, 1);
-  const c = editables(CADDE);
+  assert.equal(editables({ props: [], throne: { x: 0, z: 0 }, furnished: true }).length, 1);
+  const c = editables({ ...CADDE, furnished: true });
   assert.equal(c[c.length - 1].kind, 'throne');
   assert.equal(c[c.length - 1].x, T.x);
 });
@@ -60,7 +60,7 @@ test('split: throne comes out as {x,z,rotY}, not in props; absent means no thron
   const n = split([tree]);
   assert.ok(!('throne' in n));
   assert.deepEqual(split([{ kind: 'throne', x: 1, z: 2 }]).throne, { x: 1, z: 2, rotY: 0 });
-  const rt = split(editables(CADDE));
+  const rt = split(editables({ ...CADDE, furnished: true }));
   assert.deepEqual(rt.throne, { x: T.x, z: T.z, rotY: T.rotY ?? 0 });
   assert.equal(rt.props.length, CADDE.props.length);
   assert.ok(!rt.props.some(isThrone));
