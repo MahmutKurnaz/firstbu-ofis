@@ -10,6 +10,8 @@ export interface PlanState {
   plan: MapPlan;
   props: readonly Prop[];
   selected: number;
+  /** The ones picked together, when there are several. */
+  group: number[];
   hovered: number;
   /** Where the selected one is being dragged to, and what's about to be put down where the pointer is. */
   ghost: [number, number] | null;
@@ -23,7 +25,9 @@ export interface PlanState {
 
 export interface PlanHandlers {
   /** A press at (x, z): true when it took something (it's being dragged), false for bare ground (then it pans). */
-  press(at: [number, number]): boolean;
+  press(at: [number, number], o: { shift: boolean }): boolean;
+  /** A box drawn with Shift held, from one corner to the other. */
+  marquee(a: [number, number], b: [number, number]): void;
   move(at: [number, number], o: { alt: boolean; within: number }): void;
   align(): void;
   release(): void;
@@ -55,6 +59,8 @@ export function createPlan2d(h: PlanHandlers) {
   let cx = 0;
   let cz = 0;
   let panning: { x: number; y: number } | null = null;
+  /** The box being drawn (Shift + drag on bare ground), in the world. */
+  let box: { a: [number, number]; b: [number, number] } | null = null;
   let dragging = false;
 
   const size = () => ({ w: cv.clientWidth, h: cv.clientHeight });
@@ -106,7 +112,8 @@ export function createPlan2d(h: PlanHandlers) {
   );
   cv.addEventListener('pointerdown', (e) => {
     cv.setPointerCapture(e.pointerId);
-    if (e.button === 0 && h.press(at(e))) dragging = true;
+    if (e.button === 0 && h.press(at(e), { shift: e.shiftKey })) dragging = true;
+    else if (e.button === 0 && e.shiftKey) box = { a: at(e), b: at(e) };
     else panning = { x: e.clientX, y: e.clientY };
   });
   cv.addEventListener('pointermove', (e) => {
@@ -115,10 +122,18 @@ export function createPlan2d(h: PlanHandlers) {
       cz -= (e.clientY - panning.y) / k;
       panning = { x: e.clientX, y: e.clientY };
       if (state) draw(state);
+    } else if (box) {
+      box.b = at(e);
+      if (state) draw(state);
     } else h.move(at(e), { alt: e.altKey, within: Math.min(0.5, 8 / k) });
   });
   const up = () => {
     panning = null;
+    if (box) {
+      const done = box;
+      box = null;
+      h.marquee(done.a, done.b);
+    }
     if (dragging) {
       dragging = false;
       h.release();
@@ -268,8 +283,10 @@ export function createPlan2d(h: PlanHandlers) {
     s.plan.tables.forEach((t, i) => {
       const j = s.props.findIndex((p) => p.kind === 'table' && p.tableIndex === i);
       const mine = s.props[j];
-      const x = j === s.selected && s.ghost ? s.ghost[0] : (mine?.x ?? t.x);
-      const z = j === s.selected && s.ghost ? s.ghost[1] : (mine?.z ?? t.z);
+      const lead = s.props[s.selected];
+      const along = s.ghost && lead && s.group.includes(j) && j !== s.selected ? [s.ghost[0] - lead.x, s.ghost[1] - lead.z] : [0, 0];
+      const x = j === s.selected && s.ghost ? s.ghost[0] : (mine?.x ?? t.x) + along[0];
+      const z = j === s.selected && s.ghost ? s.ghost[1] : (mine?.z ?? t.z) + along[1];
       frame(g, x, z, Number(mine?.rotY ?? t.rotY), () => {
         g.strokeStyle = t.look ? DIM : INK;
         rect(g, t.width, t.length, t.look ? undefined : 'rgba(120,170,220,.14)');
@@ -324,10 +341,10 @@ export function createPlan2d(h: PlanHandlers) {
     // The props, the editable ones; the table pseudo-props are the tables above, drawn lit when they're picked.
     s.props.forEach((p, i) => {
       if (p.kind === 'office') return;
-      const sel = i === s.selected;
+      const sel = i === s.selected || s.group.includes(i);
       const hov = i === s.hovered;
-      const dragged = sel && s.ghost;
-      const shown = dragged ? { ...p, x: s.ghost![0], z: s.ghost![1] } : p;
+      const lead = s.props[s.selected];
+      const shown = sel && s.ghost && lead ? { ...p, x: i === s.selected ? s.ghost[0] : p.x + s.ghost[0] - lead.x, z: i === s.selected ? s.ghost[1] : p.z + s.ghost[1] - lead.z } : p;
       const color = sel ? '#ffb547' : hov ? '#6cc4ff' : INK;
       if (p.kind === 'table' && typeof p.tableIndex === 'number') {
         if (sel || hov) {
@@ -347,6 +364,18 @@ export function createPlan2d(h: PlanHandlers) {
     // Where the dragged one came from.
     const was = s.props[s.selected];
     if (was && s.ghost) symbol(g, was, 'rgba(160,160,160,.6)', 'rgba(160,160,160,.08)');
+    // The box being drawn.
+    if (box) {
+      const [ax, ay] = toScreen(box.a[0], box.a[1]);
+      const [bx2, by2] = toScreen(box.b[0], box.b[1]);
+      g.fillStyle = 'rgba(255,181,71,.12)';
+      g.strokeStyle = '#ffb547';
+      g.lineWidth = 1;
+      g.setLineDash([4, 3]);
+      g.fillRect(Math.min(ax, bx2), Math.min(ay, by2), Math.abs(bx2 - ax), Math.abs(by2 - ay));
+      g.strokeRect(Math.min(ax, bx2), Math.min(ay, by2), Math.abs(bx2 - ax), Math.abs(by2 - ay));
+      g.setLineDash([]);
+    }
     // The lines the dragged one is lined up on.
     g.save();
     g.strokeStyle = '#ff4fd8';

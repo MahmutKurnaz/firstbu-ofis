@@ -14,6 +14,14 @@ import {
   History,
   added,
   alignTo,
+  aligned as alignedList,
+  centered,
+  distributed,
+  frozen,
+  inBox,
+  removedMany,
+  snap,
+  type AlignMode,
   type Guide,
   duplicated,
   editables,
@@ -73,6 +81,10 @@ export function installMapEdit(ctx: Ctx) {
   let on = false;
   let props: Prop[] = [];
   let selected = -1;
+  /** Several picked together (Shift+click, or a box drawn on the plan): the indexes, `selected` among them; empty for one or none. */
+  let group: number[] = [];
+  /** Where the group's main one was when it was taken, while the group is dragged. */
+  let origin: [number, number] | null = null;
   let hovered = -1;
   let dragging = false;
   let ghost: [number, number] | null = null;
@@ -92,6 +104,16 @@ export function installMapEdit(ctx: Ctx) {
   const hoverMark = makeMark('#6cc4ff');
   const originMark = makeMark('#aaaaaa');
   ctx.scene.add(selMark, hoverMark, originMark);
+  /** What the rest of a group is outlined with, made as they're needed. */
+  const groupMarks: THREE.Group[] = [];
+  const groupMark = (n: number) => {
+    while (groupMarks.length <= n) {
+      const m = makeMark('#ffb547');
+      ctx.scene.add(m);
+      groupMarks.push(m);
+    }
+    return groupMarks[n];
+  };
 
   const tag = (color: string) => {
     const d = document.createElement('div');
@@ -126,13 +148,25 @@ export function installMapEdit(ctx: Ctx) {
       show();
     },
     swap: () => pick >= 0 && selected >= 0 && commit(swapped(props, selected, CATALOG[pick])),
+    align: (mode) => lineUp(alignedList(props, group, mode)),
+    spread: (axis) => lineUp(distributed(props, group, axis)),
+    center: (axis) => lineUp(centered(props, group, axis, ctx.plan().bounds)),
+    fill: (axis) => lineUp(centered(distributed(props, group, axis), group, axis, ctx.plan().bounds)),
   });
+
+  /** The group lined up as `next` has it (a table or your seat that ends outside the hall is pulled back in), the group kept. */
+  function lineUp(next: Prop[]) {
+    let list = next;
+    for (const i of group) list = fitted(list, i, ctx.plan().bounds);
+    commit(list, true);
+  }
 
   /** A table that was put or turned where its ends or benches would be outside the hall is pulled back in. */
   const fit = (list: Prop[]) => (selected >= 0 ? fitted(list, selected, ctx.plan().bounds) : list);
 
   const plan2d = createPlan2d({
     press,
+    marquee,
     move: (at, o) => hover(at, o),
     release,
     close: () => togglePlan(false),
@@ -150,6 +184,7 @@ export function installMapEdit(ctx: Ctx) {
     plan: ctx.plan(),
     props,
     selected,
+    group,
     hovered,
     ghost: dragging ? ghost : null,
     pick,
@@ -173,10 +208,14 @@ export function installMapEdit(ctx: Ctx) {
 
   function show() {
     const p = props[selected] ?? null;
-    panel.render(on, { selected: p, pick, canUndo: history.canUndo });
+    panel.render(on, { selected: p, group: group.length, pick, canUndo: history.canUndo });
     ctx.renderer.domElement.style.cursor = !on ? '' : dragging ? 'grabbing' : pick >= 0 ? 'copy' : hovered >= 0 ? 'grab' : '';
     mark(selMark, on ? p : null, dragging ? ghost : null);
     mark(originMark, on && dragging ? p : null);
+    // The rest of a group, moving with the one that's being dragged.
+    const [gx, gz] = dragging && origin && ghost ? [ghost[0] - origin[0], ghost[1] - origin[1]] : [0, 0];
+    groupMarks.forEach((m) => (m.visible = false));
+    group.filter((i) => i !== selected).forEach((i, n) => mark(groupMark(n), on && props[i] ? props[i] : null, [props[i].x + gx, props[i].z + gz]));
     // What's about to be put down is shown where the pointer is; else what's under the pointer.
     const putting = on && pick >= 0 && pointer ? made(CATALOG[pick], pointer[0], pointer[1]) : null;
     const under = on && !dragging && pick < 0 && candidate() >= 0 && candidate() !== selected ? props[candidate()] : null;
@@ -188,7 +227,8 @@ export function installMapEdit(ctx: Ctx) {
   }
 
   /** The list is now `next`: remembered, shown, and saved for everyone. */
-  function commit(next: Prop[]) {
+  function commit(next: Prop[], keepGroup = false) {
+    if (!keepGroup) group = [];
     // Nothing changed (a key on something that can't be scaled or taken away): nothing to remember or save.
     if (JSON.stringify(next) === JSON.stringify(props)) return;
     history.push(props);
@@ -213,6 +253,7 @@ export function installMapEdit(ctx: Ctx) {
     const back = redo ? history.redo(props) : history.undo(props);
     if (!back) return;
     props = back;
+    group = [];
     selected = Math.min(selected, props.length - 1);
     save();
   }
@@ -225,6 +266,12 @@ export function installMapEdit(ctx: Ctx) {
     show();
   }
   function remove() {
+    if (group.length > 1) {
+      commit(removedMany(props, group));
+      selected = -1;
+      hovered = -1;
+      return show();
+    }
     if (selected < 0 || !props[selected] || props[selected].kind === 'office' || (props[selected].kind === 'table' && typeof props[selected].tableIndex === 'number') || props[selected].kind === 'throne') return;
     commit(removed(props, selected));
     selected = -1;
@@ -243,6 +290,7 @@ export function installMapEdit(ctx: Ctx) {
     }
     props = editables(ctx.plan().config as Parameters<typeof editables>[0]);
     selected = hovered = pick = -1;
+    group = [];
     on = true;
     ctx.player.setView('third');
     show();
@@ -263,7 +311,7 @@ export function installMapEdit(ctx: Ctx) {
   });
 
   /** A press at (x, z) on the ground, in 3D or on the plan: puts the chosen catalog item down, or picks what's there up. True when the editor took it. */
-  function press(at: [number, number]): boolean {
+  function press(at: [number, number], o: { shift?: boolean } = {}): boolean {
     if (pick >= 0) {
       // A catalog item is chosen: this click puts it down here.
       const next = added(props, made(CATALOG[pick], at[0], at[1]));
@@ -275,6 +323,18 @@ export function installMapEdit(ctx: Ctx) {
       return true;
     }
     const i = pickProp(props, at[0], at[1]);
+    if (o.shift) {
+      // Shift: adds to the group or takes out of it; nothing is dragged.
+      if (i < 0) return false;
+      const was = group.length ? group : selected >= 0 ? [selected] : [];
+      group = was.includes(i) ? was.filter((k) => k !== i) : [...was, i];
+      selected = group.includes(i) ? i : (group[group.length - 1] ?? -1);
+      if (group.length < 2) group = [];
+      show();
+      return true;
+    }
+    // On one of a group's: the group is dragged. On another: just that one.
+    if (!(i >= 0 && group.includes(i))) group = [];
     selected = i;
     if (i < 0) {
       show();
@@ -282,14 +342,22 @@ export function installMapEdit(ctx: Ctx) {
     }
     dragging = true;
     ghost = [props[i].x, props[i].z];
+    origin = group.length > 1 ? [props[i].x, props[i].z] : null;
     show();
     return true;
+  }
+  /** The box drawn on the plan: whatever has its middle in it is picked together. */
+  function marquee(a: [number, number], b: [number, number]) {
+    const ids = inBox(props, a[0], a[1], b[0], b[1]);
+    group = ids.length > 1 ? ids : [];
+    selected = ids[0] ?? -1;
+    show();
   }
   function hover(at: [number, number] | null, o: { alt?: boolean; within?: number } = {}) {
     if (at) pointer = at;
     if (!dragging) hovered = at && pick < 0 ? pickProp(props, at[0], at[1]) : -1;
     else if (at) {
-      const a = align && !o.alt && selected >= 0 ? alignTo(props, selected, at[0], at[1], o.within ?? 0.3) : null;
+      const a = align && !o.alt && selected >= 0 && group.length < 2 ? alignTo(props, selected, at[0], at[1], o.within ?? 0.3) : null;
       ghost = a?.aligned ? [a.x, a.z] : at;
       guides = a?.guides ?? [];
       aligned = !!a?.aligned;
@@ -301,6 +369,19 @@ export function installMapEdit(ctx: Ctx) {
     dragging = false;
     const to = ghost;
     ghost = null;
+    const from = origin;
+    origin = null;
+    if (group.length > 1 && to && from) {
+      // The group goes as far as its main one was taken, on the grid.
+      const dx = Math.round((snap(to[0]) - from[0]) * 1000) / 1000;
+      const dz = Math.round((snap(to[1]) - from[1]) * 1000) / 1000;
+      guides = [];
+      aligned = false;
+      if (Math.hypot(dx, dz) <= 0.15) return show();
+      let list: Prop[] = props.map((q, k) => (group.includes(k) && q.kind !== 'office' ? { ...frozen(q), x: Math.round((q.x + dx) * 1000) / 1000, z: Math.round((q.z + dz) * 1000) / 1000 } : q));
+      for (const k of group) list = fitted(list, k, ctx.plan().bounds);
+      return commit(list, true);
+    }
     // A click that didn't take it anywhere only selects it.
     const next = to && selected >= 0 ? moved(props, selected, to[0], to[1], !aligned) : null;
     guides = [];
@@ -316,7 +397,7 @@ export function installMapEdit(ctx: Ctx) {
     (e) => {
       if (!on || e.button !== 0) return;
       const at = point(e);
-      if (!at || !press(at)) return;
+      if (!at || !press(at, { shift: e.shiftKey })) return;
       // Taken over from the camera: this click is the editor's.
       e.stopImmediatePropagation();
       e.preventDefault();
@@ -350,7 +431,12 @@ export function installMapEdit(ctx: Ctx) {
           swallow();
           return togglePlan(false);
         }
-        // First Esc puts the chosen catalog item back, the next leaves.
+        // First Esc lets go of a group, or puts the chosen catalog item back; the next leaves.
+        if (group.length > 1) {
+          swallow();
+          group = [];
+          return show();
+        }
         if (pick < 0) return leave();
         swallow();
         pick = -1;
@@ -371,7 +457,8 @@ export function installMapEdit(ctx: Ctx) {
         show();
       } else if (e.code === 'KeyR' && selected >= 0 && !mod) {
         swallow();
-        commit(fit(turned(props, selected, e.shiftKey ? -TURN : TURN)));
+        if (group.length > 1) lineUp(group.reduce((l, i) => turned(l, i, e.shiftKey ? -TURN : TURN), props));
+        else commit(fit(turned(props, selected, e.shiftKey ? -TURN : TURN)));
       } else if ((e.code === 'BracketRight' || e.code === 'BracketLeft') && selected >= 0) {
         swallow();
         commit(scaled(props, selected, e.code === 'BracketRight' ? 1.1 : 1 / 1.1));
@@ -386,6 +473,7 @@ export function installMapEdit(ctx: Ctx) {
     if (planOk()) props = editables(ctx.plan().config as Parameters<typeof editables>[0]);
     // Someone else's edit moved the indexes: what was selected can't be told any more.
     if (props.length !== before) selected = -1;
+    group = [];
     selected = Math.min(selected, props.length - 1);
     hovered = -1;
     show();

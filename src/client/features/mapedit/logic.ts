@@ -400,3 +400,90 @@ export function alignTo(props: readonly Prop[], i: number, x: number, z: number,
   const nz = z + best(z, hz, 'z');
   return { x: nx, z: nz, guides, aligned: guides.length > 0 };
 }
+
+/** Where a group of props is lined up: their left, middle or right sides (x), or their back, middle or front (z). */
+export type AlignMode = 'left' | 'hcenter' | 'right' | 'top' | 'vcenter' | 'bottom';
+
+/** The indexes in `ids` that can be moved (not an office, nothing missing), once each, in the list's order. */
+function movable(props: readonly Prop[], ids: readonly number[]): number[] {
+  return [...new Set(ids)].filter((i) => props[i] && !FIXED.has(props[i].kind)).sort((a, b) => a - b);
+}
+
+/**
+ * The list with the props `ids` lined up on one side, the way a drawing program does: on the left of the one furthest left,
+ * on the right of the one furthest right, or centred on the middle of all of them (and the same across the street for
+ * top, middle and bottom). Each keeps its own size, so the sides meet and not the middles. Fewer than two: as it was.
+ */
+export function aligned(props: readonly Prop[], ids: readonly number[], mode: AlignMode): Prop[] {
+  const use = movable(props, ids);
+  if (use.length < 2) return props.slice();
+  const x = mode === 'left' || mode === 'hcenter' || mode === 'right';
+  const box = use.map((i) => {
+    const [hx, hz] = extent(props[i]);
+    const c = x ? props[i].x : props[i].z;
+    const h = x ? hx : hz;
+    return { i, c, h };
+  });
+  const lo = Math.min(...box.map((b) => b.c - b.h));
+  const hi = Math.max(...box.map((b) => b.c + b.h));
+  const to = new Map(box.map((b) => [b.i, mode === 'left' || mode === 'top' ? lo + b.h : mode === 'right' || mode === 'bottom' ? hi - b.h : (lo + hi) / 2]));
+  const r = (v: number) => Math.round(v * 1000) / 1000;
+  return props.map((p, k) => (to.has(k) ? { ...frozen(p), [x ? 'x' : 'z']: r(to.get(k)!) } : p));
+}
+
+/**
+ * The list with the props `ids` spread evenly along x or z: the first and last stay, and the ones between them are put
+ * so the gaps between their sides are all the same. Fewer than three: as it was.
+ */
+export function distributed(props: readonly Prop[], ids: readonly number[], axis: 'x' | 'z'): Prop[] {
+  const use = movable(props, ids);
+  if (use.length < 3) return props.slice();
+  const half = (i: number) => extent(props[i])[axis === 'x' ? 0 : 1];
+  const at = (i: number) => (axis === 'x' ? props[i].x : props[i].z);
+  const order = use.slice().sort((a, b) => at(a) - at(b));
+  const first = order[0];
+  const last = order[order.length - 1];
+  const span = at(last) - half(last) - (at(first) + half(first));
+  // The first and last stay where they are, so only the ones between them take up room in the span.
+  const sizes = order.slice(1, -1).reduce((n, i) => n + half(i) * 2, 0);
+  const gap = (span - sizes) / (order.length - 1);
+  const to = new Map<number, number>();
+  let edge = at(first) + half(first);
+  order.slice(1, -1).forEach((i) => {
+    to.set(i, edge + gap + half(i));
+    edge += gap + half(i) * 2;
+  });
+  const r = (v: number) => Math.round(v * 1000) / 1000;
+  return props.map((p, k) => (to.has(k) ? { ...frozen(p), [axis]: r(to.get(k)!) } : p));
+}
+
+/** The indexes of the movable props whose middle is in the box between (x0, z0) and (x1, z1). */
+export function inBox(props: readonly Prop[], x0: number, z0: number, x1: number, z1: number): number[] {
+  const [ax, bx] = [Math.min(x0, x1), Math.max(x0, x1)];
+  const [az, bz] = [Math.min(z0, z1), Math.max(z0, z1)];
+  return props.flatMap((p, i) => (!FIXED.has(p.kind) && p.x >= ax && p.x <= bx && p.z >= az && p.z <= bz ? [i] : []));
+}
+
+/** The list without the props `ids` (what can't be taken away stays). */
+export function removedMany(props: readonly Prop[], ids: readonly number[]): Prop[] {
+  const gone = new Set(ids.filter((i) => props[i] && !pinned(props[i])));
+  return props.filter((_, i) => !gone.has(i));
+}
+
+/**
+ * The list with the props `ids` moved together, as they are among themselves, so that the middle of the whole group is the
+ * middle of the hall across (x) or along (z) it. With `distributed`: three in a row, the same gap between each, the whole row
+ * in the very middle. Fewer than one that can move: as it was.
+ */
+export function centered(props: readonly Prop[], ids: readonly number[], axis: 'x' | 'z', b: { minX: number; maxX: number; minZ: number; maxZ: number }): Prop[] {
+  const use = movable(props, ids);
+  if (!use.length) return props.slice();
+  const half = (i: number) => extent(props[i])[axis === 'x' ? 0 : 1];
+  const at = (i: number) => (axis === 'x' ? props[i].x : props[i].z);
+  const lo = Math.min(...use.map((i) => at(i) - half(i)));
+  const hi = Math.max(...use.map((i) => at(i) + half(i)));
+  const mid = axis === 'x' ? (b.minX + b.maxX) / 2 : (b.minZ + b.maxZ) / 2;
+  const by = mid - (lo + hi) / 2;
+  const r = (v: number) => Math.round(v * 1000) / 1000;
+  return props.map((p, k) => (use.includes(k) ? { ...frozen(p), [axis]: r(p[axis] + by) } : p));
+}

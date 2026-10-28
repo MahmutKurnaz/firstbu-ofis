@@ -1,9 +1,11 @@
 // The map editor's panel (features/mapedit): what's selected, buttons for what can be done to it, and the catalog
 // to click an item out of. It only draws and reports clicks; index.ts holds the state.
-import { CATALOG, GROUPS, footprint, nameOf, type Prop } from './logic';
+import { CATALOG, GROUPS, footprint, nameOf, type AlignMode, type Prop } from './logic';
 
 export interface PanelState {
   selected: Prop | null;
+  /** How many are picked together (0 for one or none). */
+  group: number;
   /** The catalog item chosen to put down (an index into CATALOG), or -1. */
   pick: number;
   canUndo: boolean;
@@ -17,6 +19,11 @@ export interface PanelActions {
   undo(): void;
   leave(): void;
   plan(): void;
+  align(mode: AlignMode): void;
+  spread(axis: 'x' | 'z'): void;
+  center(axis: 'x' | 'z'): void;
+  /** Equal gaps, and the whole row in the middle of the hall. */
+  fill(axis: 'x' | 'z'): void;
   choose(i: number): void;
   swap(): void;
 }
@@ -60,6 +67,13 @@ export function createPanel(act: PanelActions) {
     else if (a === 'swap') act.swap();
     else if (a === 'leave') act.leave();
     else if (a === 'plan') act.plan();
+    else if (a === 'spread-x') act.spread('x');
+    else if (a === 'spread-z') act.spread('z');
+    else if (a === 'center-x') act.center('x');
+    else if (a === 'center-z') act.center('z');
+    else if (a === 'fill-x') act.fill('x');
+    else if (a === 'fill-z') act.fill('z');
+    else if (a?.startsWith('align-')) act.align(a.slice(6) as AlignMode);
   });
   document.body.appendChild(el);
   const sel = el.querySelector('[data-sel]') as HTMLElement;
@@ -74,7 +88,21 @@ export function createPanel(act: PanelActions) {
     const btn = (a: string, text: string, off = false) => `<button data-a="${a}" ${off ? 'disabled' : ''} style="${BTN}${off ? ';opacity:.4;cursor:default' : ''}">${text}</button>`;
     let h = '';
     if (chosen) h += `<div style="color:#8fe39a">➕ Seçtiğin: <b>${esc(chosen.label)}</b>. Haritada boş bir yere tıkla, oraya koyulur.</div>`;
-    if (p) {
+    if (s.group > 1) {
+      h +=
+        `<div style="color:#ffb547;margin-top:4px"><b>${s.group} eşya seçili</b></div>` +
+        '<div style="opacity:.75;font-size:12px">Hizala (en dıştaki eşyaya göre):</div>' +
+        btn('align-left', '⇤ Sola') + btn('align-hcenter', '⇔ Ortala') + btn('align-right', '⇥ Sağa') +
+        btn('align-top', '⤒ Üste') + btn('align-vcenter', '⇕ Ortala') + btn('align-bottom', '⤓ Alta') +
+        '<div style="opacity:.75;font-size:12px;margin-top:4px">Eşit aralıkla diz (3 ya da daha fazla):</div>' +
+        btn('spread-x', '↔ Yatay') + btn('spread-z', '↕ Dikey') +
+        '<div style="opacity:.75;font-size:12px;margin-top:4px">Hepsini birlikte salonun tam ortasına al:</div>' +
+        btn('center-x', '🎯 Yatay ortala') + btn('center-z', '🎯 Dikey ortala') +
+        '<div style="opacity:.75;font-size:12px;margin-top:4px">Eşit aralıkla diz ve ortala (3 eşya: tam orta, tam boşluk):</div>' +
+        btn('fill-x', '✨ Yatay') + btn('fill-z', '✨ Dikey') +
+        '<br>' + btn('remove', '🗑 Hepsini sil') + btn('undo', '↶ Geri al', !s.canUndo) +
+        '<div style="opacity:.65;font-size:12px">Birini sürüklersen hepsi birlikte gider. R hepsini döndürür. Esc seçimi bırakır.</div>';
+    } else if (p) {
       const [w, l] = footprint(p);
       const table = (p.kind === 'table' && typeof p.tableIndex === 'number') || p.kind === 'throne';
       h +=
@@ -84,7 +112,7 @@ export function createPanel(act: PanelActions) {
           : btn('turn', '↻ Döndür') + btn('smaller', '− Küçült') + btn('bigger', '+ Büyüt') + btn('copy', '⧉ Kopyala') + btn('remove', '🗑 Sil') + btn('undo', '↶ Geri al', !s.canUndo)) +
         (chosen && !table ? `<br>${btn('swap', `🔁 Bunu «${esc(chosen.label)}» yap`)}` : table ? '' : '<div style="opacity:.65;font-size:12px">Sürükleyip bırakarak taşı.</div>');
     } else if (!chosen)
-      h += `<div style="opacity:.75;margin-top:4px">Hiçbir şey seçili değil. Haritadaki bir eşyaya tıkla ya da yanına yürü (mavi çerçeveli olanı <b>Enter</b> seçer), sürükleyip taşı.</div>${btn('undo', '↶ Geri al', !s.canUndo)}`;
+      h += `<div style="opacity:.75;margin-top:4px">Hiçbir şey seçili değil. Haritadaki bir eşyaya tıkla ya da yanına yürü (mavi çerçeveli olanı <b>Enter</b> seçer), sürükleyip taşı. Birkaçını birden seçmek için <b>Shift</b>+tıkla, planda <b>Shift</b>+sürükleyip kutu çiz.</div>${btn('undo', '↶ Geri al', !s.canUndo)}`;
     if (h !== shown) {
       shown = h;
       sel.innerHTML = h;
