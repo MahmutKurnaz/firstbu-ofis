@@ -20,6 +20,9 @@ export interface PanelActions {
   swap(): void;
 }
 
+/** A map's own words (a prop's kind or model) go into the panel's HTML, so they're escaped. */
+const esc = (t: string) => t.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
+
 const BTN = 'border:0;border-radius:8px;padding:5px 9px;margin:2px 3px 2px 0;background:#2c3644;color:#eef3f8;font:inherit;cursor:pointer';
 
 export function createPanel(act: PanelActions) {
@@ -64,18 +67,18 @@ export function createPanel(act: PanelActions) {
     const chosen = s.pick >= 0 ? CATALOG[s.pick] : null;
     const btn = (a: string, text: string, off = false) => `<button data-a="${a}" ${off ? 'disabled' : ''} style="${BTN}${off ? ';opacity:.4;cursor:default' : ''}">${text}</button>`;
     let h = '';
-    if (chosen) h += `<div style="color:#8fe39a">➕ Seçtiğin: <b>${chosen.label}</b>. Haritada boş bir yere tıkla, oraya koyulur.</div>`;
+    if (chosen) h += `<div style="color:#8fe39a">➕ Seçtiğin: <b>${esc(chosen.label)}</b>. Haritada boş bir yere tıkla, oraya koyulur.</div>`;
     if (p) {
       const [w, l] = footprint(p);
       h +=
-        `<div style="color:#ffb547;margin-top:4px">Seçili: <b>${nameOf(p)}</b><br><span style="opacity:.85">konum ${p.x.toFixed(1)}, ${p.z.toFixed(1)} · ${w.toFixed(1)}×${l.toFixed(1)} m${p.rotY ? ` · ${(Number(p.rotY) * 57.3).toFixed(0)}°` : ''}</span></div>` +
+        `<div style="color:#ffb547;margin-top:4px">Seçili: <b>${esc(nameOf(p))}</b><br><span style="opacity:.85">konum ${p.x.toFixed(1)}, ${p.z.toFixed(1)} · ${w.toFixed(1)}×${l.toFixed(1)} m${p.rotY ? ` · ${(Number(p.rotY) * 57.3).toFixed(0)}°` : ''}</span></div>` +
         btn('turn', '↻ Döndür') +
         btn('smaller', '− Küçült') +
         btn('bigger', '+ Büyüt') +
         btn('copy', '⧉ Kopyala') +
         btn('remove', '🗑 Sil') +
         btn('undo', '↶ Geri al', !s.canUndo) +
-        (chosen ? `<br>${btn('swap', `🔁 Bunu «${chosen.label}» yap`)}` : '<div style="opacity:.65;font-size:12px">Sürükleyip bırakarak taşı.</div>');
+        (chosen ? `<br>${btn('swap', `🔁 Bunu «${esc(chosen.label)}» yap`)}` : '<div style="opacity:.65;font-size:12px">Sürükleyip bırakarak taşı.</div>');
     } else if (!chosen)
       h += `<div style="opacity:.75;margin-top:4px">Hiçbir şey seçili değil. Haritadaki bir eşyaya tıkla ya da yanına yürü (mavi çerçeveli olanı <b>Enter</b> seçer), sürükleyip taşı.</div>${btn('undo', '↶ Geri al', !s.canUndo)}`;
     sel.innerHTML = h;
