@@ -10,6 +10,7 @@ changing its script and running it again.
 | `scripts/aokit.py` | The kit every script uses: shapes, one smooth skin, painted patches, rigs and clips, export, review renders |
 | `scripts/build_<name>.py` | One model (or a small set), exported as `src/client/models/<name>.glb` |
 | `scripts/build_kaykit.py` | The street's CC0 drafts: pieces of Kay Lousberg's KayKit packs (City Builder, Furniture and Restaurant Bits, CC0), exported as `kaykit-city.glb`, `kaykit-furniture.glb` and `kaykit-cafe.glb`. The packs aren't in the repo: clone them from github.com/KayKit-Game-Assets and pass `-- --src <dir>`. They keep their texture atlas and their own materials, an exception to rule 2 below |
+| `scripts/merge_clips.mjs` | Our own characters (F4): Meshy's rigged model and its one-clip-per-file animations gathered into one `.glb` (`aslan.glb`: `idle`, `walk`, `sit`), copied at the glTF level so the clips aren't resampled; Node, not Blender (a Blender round trip lost them). The generations are listed in `docs/KAYNAKLAR.md`. Check one with `src/client/lab/character.html` |
 | `scripts/build_dog.py`, `scripts/dog_breeds.py` | The office dog in every breed (the presets are in `dog_breeds.py`), each exported as `src/client/models/dog-<breed>.glb` with the same bones, sockets, materials and clips |
 
 A helper only one model needs lives in that model's script. One that several need can join the kit, as a new

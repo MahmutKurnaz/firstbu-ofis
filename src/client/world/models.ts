@@ -1,6 +1,8 @@
 import * as THREE from 'three';
 import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { clone } from 'three/examples/jsm/utils/SkeletonUtils.js';
+import aslanUrl from '../models/aslan.glb?url';
+import aslanSevimliUrl from '../models/aslan-sevimli.glb?url';
 import deskPropsUrl from '../models/desk_props.glb?url';
 import dogCorgiUrl from '../models/dog-corgi.glb?url';
 import dogDachshundUrl from '../models/dog-dachshund.glb?url';
@@ -29,6 +31,9 @@ const MODELS = {
   'dog-pomeranian': { url: dogPomeranianUrl, preload: false },
   desk_props: { url: deskPropsUrl, preload: true },
   kitchen: { url: kitchenUrl, preload: true },
+  // Our own characters (blender/scripts/build_aslan.py): only a worker wearing one loads it.
+  aslan: { url: aslanUrl, preload: false },
+  'aslan-sevimli': { url: aslanSevimliUrl, preload: false },
   // The street's CC0 drafts (KayKit, see blender/scripts/build_kaykit.py): only the street loads them.
   'kaykit-city': { url: kaykitCityUrl, preload: false },
   'kaykit-furniture': { url: kaykitFurnitureUrl, preload: false },

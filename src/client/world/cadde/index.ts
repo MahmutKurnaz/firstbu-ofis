@@ -34,7 +34,7 @@ import { buildShell } from './shell';
 export function buildCadde(plan: MapPlan): World {
   const c = plan.config!;
   const b = plan.bounds;
-  const pal = { hull: '#f3efe8', panel: '#d9d2c5', metal: '#4a4f57', glow: '#ffb547', paving: '#cfc8bc', frame: '#2f343b', ...(c.palette ?? {}) };
+  const pal = { hull: '#f3efe8', panel: '#d9d2c5', metal: '#a7adb5', glow: '#ffb547', paving: '#cfc8bc', frame: '#2f343b', ...(c.palette ?? {}) };
   const kit = caddeKit(plan, pal) as ReturnType<typeof caddeKit> & { offices?: OfficeView[] };
   const group = kit.group;
 
@@ -133,7 +133,10 @@ export function buildCadde(plan: MapPlan): World {
       // Out of doors: the sky's own light, warmer toward dusk; at night the lamps, the offices' ceilings and the city's windows come on.
       const dark = 1 - daylight;
       lights.sun.color.copy(day).lerp(dusk, Math.min(1, dark * 1.6));
-      lights.hemi.intensity = Math.max(lights.hemi.intensity, 0.55);
+      // Bright enough under the offices' roofs (which shade them from the sun) to see faces and furniture,
+      // by day and, with their ceiling lights on, by night.
+      lights.hemi.intensity = Math.max(lights.hemi.intensity, 1.05);
+      lights.ambient.intensity = Math.max(lights.ambient.intensity, 0.7);
       for (const g of kit.night.glows) {
         const k = g.day + (g.night - g.day) * dark;
         if ('emissiveIntensity' in g.mat) g.mat.emissiveIntensity = k;

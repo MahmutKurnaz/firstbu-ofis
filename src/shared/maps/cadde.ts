@@ -104,5 +104,5 @@ export const CADDE: MapConfig = {
   props,
   agents: { outfit: 'none', ageMinutes: 0 },
   // Desks and their metal (the station's furniture, in a street's colors), the pavement and the frames.
-  palette: { hull: '#f3efe8', panel: '#d9d2c5', metal: '#4a4f57', glow: '#ffb547', paving: '#cfc8bc', frame: '#2f343b' },
+  palette: { hull: '#f3efe8', panel: '#d9d2c5', metal: '#a7adb5', glow: '#ffb547', paving: '#cfc8bc', frame: '#2f343b' },
 };
