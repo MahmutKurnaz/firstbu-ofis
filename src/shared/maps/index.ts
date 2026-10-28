@@ -181,13 +181,15 @@ export function planMap(input: unknown): MapPlan {
     const right = [Math.cos(r), -Math.sin(r)];
     for (const end of [-1, 1]) inside(x + (along[0] * len * end) / 2, z + (along[1] * len * end) / 2, `the end of ${what}`);
     // The side facing the middle of the hall is the inner one.
-    const rightInner = right[0] * x + right[1] * z <= 0;
+    if (t.flip !== undefined && typeof t.flip !== 'boolean') throw new MapError(`${what}.flip should be true or false`);
+    if (t.look !== undefined && t.look !== 'desk') throw new MapError(`${what}.look should be "desk"`);
+    const rightInner = (right[0] * x + right[1] * z <= 0) !== (t.flip === true);
     const sides = t.sides ?? 'both';
     if (sides !== 'both' && sides !== 'inner' && sides !== 'outer') throw new MapError(`${what}.sides should be "both", "inner" or "outer"`);
     const table = typeof t.name === 'string' && t.name.trim() ? t.name.trim().slice(0, 40) : `Table ${i + 1}`;
     rects.push(boxFootprint(x, z, w, len, r));
     const seated: (1 | -1)[] = [];
-    tables.push({ x, z, length: len, width: w, rotY: r, seats: n, sides: seated, name: table });
+    tables.push({ x, z, length: len, width: w, rotY: r, seats: n, sides: seated, name: table, ...(t.look ? { look: t.look } : {}) });
     for (const s of [1, -1] as const) {
       const isInner = (s === 1) === rightInner;
       if (sides !== 'both' && (sides === 'inner') !== isInner) continue;
@@ -327,9 +329,10 @@ export function planMap(input: unknown): MapPlan {
     opt(p.y, `${what}.y`, 0, 100);
     opt(p.rotY, `${what}.rotY`, -1e4, 1e4);
     opt(p.scale, `${what}.scale`, 0.2, 5);
-    opt(p.width, `${what}.width`, 0.3, 20);
+    opt(p.width, `${what}.width`, 0.3, 60);
     opt(p.height, `${what}.height`, 0.3, 20);
     opt(p.length, `${what}.length`, 0.3, 120);
+    if (p.style !== undefined && (p.kind !== 'office' || p.style !== 'yonetim')) throw new MapError(`${what}.style can only be "yonetim", on an office`);
     if (p.light !== undefined && typeof p.light !== 'boolean') throw new MapError(`${what}.light should be true or false`);
     // Its walls are what's in the way, box by box, so they have to be square to the hall.
     if (style === 'cadde' && p.kind === 'office' && !quarterTurn(p.rotY)) throw new MapError(`${what} (an office) has to face along x or z: its rotY should be 0, 1.5708, 3.1416 or -1.5708`);

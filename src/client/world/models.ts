@@ -16,6 +16,7 @@ import kaykitFurnitureUrl from '../models/kaykit-furniture.glb?url';
 import kitchenUrl from '../models/kitchen.glb?url';
 import mahmutUrl from '../models/mahmut.glb?url';
 import loungeUrl from '../models/lounge.glb?url';
+import meshyPropsUrl from '../models/meshy-props.glb?url';
 import plantsUrl from '../models/plants.glb?url';
 import { toon } from './toon';
 
@@ -41,6 +42,8 @@ const MODELS = {
   'kaykit-city': { url: kaykitCityUrl, preload: false },
   'kaykit-furniture': { url: kaykitFurnitureUrl, preload: false },
   'kaykit-cafe': { url: kaykitCafeUrl, preload: false },
+  // The street's own furniture, made with Meshy (world/cadde/meshy.ts).
+  'meshy-props': { url: meshyPropsUrl, preload: false },
   lounge: { url: loungeUrl, preload: true },
   plants: { url: plantsUrl, preload: true },
 } satisfies Record<string, { url: string; preload: boolean }>;

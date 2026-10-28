@@ -16,6 +16,8 @@ import { BENCH_TOP, TABLE_TOP, box, collide, lit, xz, type Kit } from './kit';
 export function buildBenches(kit: Kit) {
   const { mats } = kit;
   for (const t of kit.plan.tables) {
+    // A map's own desks are furnished by its builder (the street's executive suite).
+    if (t.look === 'desk') continue;
     const g = new THREE.Group();
     g.position.set(t.x, 0, t.z);
     g.rotation.y = t.rotY;

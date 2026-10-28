@@ -79,6 +79,42 @@ export function officePoint(p: PropConfig, side: number, out: number): [number, 
   return [p.x + Math.sin(r) * out + Math.cos(r) * side, p.z + Math.cos(r) * out - Math.sin(r) * side];
 }
 
+/**
+ * The executive suite (an `office` with style `yonetim`, 44 m across and 10 deep: see shared/maps/cadde.ts): three rooms
+ * and a meeting room along its back, glass between them, and a lobby along its front. In the office's own frame
+ * (u across, v from its middle toward its door): the rooms are v -4.8..0, the lobby 0..5.
+ */
+export const SUITE = {
+  /** The partitions between the rooms and the lobby (v = 0), as [from, to] across: what's left between them are the doors and the open coffee corner. */
+  fronts: [
+    [-21.8, -18],
+    [-16, -7],
+    [-5, 0],
+    [8, 14],
+    [16, 21.8],
+  ] as [number, number][],
+  /** The walls between the rooms, across (they run from the back wall to v = 0). */
+  dividers: [-12, 0, 8],
+  /** Where the doors are, across: Mahmut's room, the lead's room, the meeting room. */
+  doors: { you: -17, lead: -6, meeting: 15 },
+  thick: 0.12,
+  back: -4.8,
+} as const;
+
+/** The suite's partitions as ground, in the office's own frame turned into the world's. */
+function suiteWalls(p: PropConfig): Rect[] {
+  const o = officeBox(p);
+  const at = (side: number, out: number, w: number, d: number) => {
+    const [x, z] = officePoint(p, side, out);
+    return boxFootprint(x, z, w, d, o.rotY);
+  };
+  const run = SUITE.back / 2;
+  return [
+    ...SUITE.fronts.map(([a, b]) => at((a + b) / 2, 0, b - a, SUITE.thick)),
+    ...SUITE.dividers.map((u) => at(u, run, SUITE.thick, -SUITE.back)),
+  ];
+}
+
 /** An office's walls, as the ground they take: the back, the two sides, and the front either side of the door. */
 export function officeWalls(p: PropConfig): Rect[] {
   const o = officeBox(p);
@@ -95,6 +131,7 @@ export function officeWalls(p: PropConfig): Rect[] {
     piece(hw - t / 2, 0, t, o.length),
     piece(-hw + leaf / 2, hl - t / 2, leaf, t),
     piece(hw - leaf / 2, hl - t / 2, leaf, t),
+    ...(p.style === 'yonetim' ? suiteWalls(p) : []),
   ];
 }
 

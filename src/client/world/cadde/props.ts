@@ -8,6 +8,7 @@ import { box, collide, placed } from '../station/kit';
 import type { Interactable } from '../types';
 import { mesh, roundedBox, textPlane, toon } from '../toon';
 import { MAX_LAMPS, glow, lightOnly, type CaddeKit } from './kit';
+import { meshy } from './meshy';
 import { buildOffice } from './offices';
 
 // The props a street-style map places (see shared/maps/cadde-props.ts): its offices (./offices.ts),
@@ -27,6 +28,8 @@ function tree(kit: CaddeKit, p: PropConfig) {
   const t = streetTree(0.72 * s);
   t.rotation.y = (p.x * 7 + p.z * 3) % 6.28;
   g.add(t);
+  // Its own tree, in its own round bed, in their place; its bed's as wide as the curb was.
+  meshy(g, 'agac', { scale: ((CADDE_SIZE.tree * s * 2) / 3.2) * 1.05, turn: t.rotation.y, replaces: [...g.children] });
   kit.still.add(g);
   kit.colliders.push({ minX: p.x - 0.3, maxX: p.x + 0.3, minZ: p.z - 0.3, maxZ: p.z + 0.3, top: 99 });
 }
@@ -43,6 +46,8 @@ function lamp(kit: CaddeKit, p: PropConfig) {
   g.add(mesh(new THREE.SphereGeometry(0.17, 12, 8), glow(kit, '#ffd89a', 0.05, 1.2), 0, H - 0.27, 0.9, false));
   const halo = mesh(new THREE.SphereGeometry(0.38, 12, 8), lightOnly(kit, '#ffcf8a'), 0, H - 0.3, 0.9, false);
   g.add(halo);
+  // Its own lamp, its arm out over the street where the globe was; the light stays at the globe.
+  meshy(g, 'lamba', { scale: H / 4.4, turn: Math.PI / 2, replaces: g.children.filter((c) => c !== halo) });
   kit.group.add(g);
   kit.colliders.push({ minX: p.x - 0.18, maxX: p.x + 0.18, minZ: p.z - 0.18, maxZ: p.z + 0.18, top: 99 });
   if (p.light && kit.night.lamps.length < MAX_LAMPS) {
@@ -63,6 +68,7 @@ function planter(kit: CaddeKit, p: PropConfig) {
   g.add(mesh(box(w - 0.12, 0.05, d - 0.12), kit.street.soil, 0, 0.53, 0, false));
   const n = Math.max(2, Math.round(w / 0.7));
   for (let i = 0; i < n; i++) g.add(mesh(new THREE.SphereGeometry(0.34, 10, 8), toon(i % 2 ? '#4f9d58' : '#3f8a4a'), -w / 2 + (i + 0.5) * (w / n), 0.78, 0));
+  meshy(g, 'saksi', { scale: w / 3.2, replaces: [...g.children] });
   kit.still.add(g);
   collide(kit, p.x, p.z, w, d, p.rotY ?? 0, 0.55);
 }
@@ -79,6 +85,8 @@ function bench(kit: CaddeKit, p: PropConfig) {
     g.add(mesh(box(0.06, 0.45, d - 0.1), kit.street.frame, sx * (w / 2 - 0.15), 0.22, 0));
     g.add(mesh(box(0.06, 0.5, 0.06), kit.street.frame, sx * (w / 2 - 0.15), 0.65, -0.31));
   }
+  // Its own bench: the seat faces +z, like the one it replaces (its back at -z).
+  meshy(g, 'bank', { scale: w / 1.9, replaces: [...g.children] });
   kit.still.add(g);
   collide(kit, p.x, p.z, w * s, d * s, p.rotY ?? 0, 0.45);
 }
@@ -99,6 +107,8 @@ function parasol(kit: CaddeKit, p: PropConfig) {
     const a = (i / 3) * Math.PI * 2 + 0.4;
     g.add(mesh(new THREE.CylinderGeometry(0.2, 0.17, 0.45, 12), kit.street.wood, Math.sin(a) * 0.85, 0.225, Math.cos(a) * 0.85));
   }
+  // Its own table under a striped parasol, stools round it.
+  meshy(g, 'kafe-masasi', { replaces: [...g.children] });
   kit.still.add(g);
   kit.colliders.push({ minX: p.x - 0.55 * s, maxX: p.x + 0.55 * s, minZ: p.z - 0.55 * s, maxZ: p.z + 0.55 * s, top: 0.76 });
 }
@@ -118,6 +128,8 @@ function counter(kit: CaddeKit, p: PropConfig): Interactable {
   menu.position.set(0, 2.2, -d / 2 - 0.05);
   g.add(menu);
   for (const sx of [-1, 1]) g.add(mesh(box(0.06, 2.3, 0.06), kit.street.frame, sx * (w / 2 - 0.2), 1.15, -d / 2 - 0.08));
+  // Its own counter, with its espresso machine, cups and menu board, in place of all that.
+  meshy(g, 'kahve-tezgahi', { scale: w / 4.4, replaces: [...g.children] });
   kit.group.add(g);
   const r = p.rotY ?? 0;
   collide(kit, p.x, p.z, w, d, r, 1.06);
@@ -155,6 +167,12 @@ export const PROPS: Record<CaddePropKind, (kit: CaddeKit, p: PropConfig, index: 
   counter: (kit, p) => kit.interactables.push(counter(kit, p)),
   glb,
   gong: STATION_PROPS.gong,
-  dispenser: STATION_PROPS.dispenser,
+  dispenser: (kit, p) => {
+    const before = new Set([...kit.group.children, ...kit.still.children]);
+    STATION_PROPS.dispenser(kit, p);
+    // Its own coffee machine in place of the dispenser's box (the cup from it is still the same E).
+    const made = [...kit.group.children, ...kit.still.children].filter((c) => !before.has(c));
+    for (const g of made) meshy(g, 'kahve-makinesi', { scale: 0.95, replaces: g.children.filter((c) => (c as THREE.Mesh).isMesh) });
+  },
   table: STATION_PROPS.table,
 };

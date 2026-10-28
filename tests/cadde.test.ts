@@ -17,8 +17,8 @@ import { hireRole } from '../src/server/ordu/hire.js';
 import type { Floor } from '../src/server/floor.js';
 import type { WorkerInfo } from '../src/shared/protocol.js';
 
-/** The templates' role counts per office, in office order (ordu/sablonlar/yazilim.json). */
-const ROLE_COUNTS = [2, 2, 3, 2, 2, 2, 2];
+/** The seats each office needs, in office order: the suite's six (the lead, his assistant and four managers, whose `desk`s are in ordu/sablonlar/yazilim.json), then the teams' own. */
+const ROLE_COUNTS = [6, 2, 2, 1, 1, 1, 2];
 
 const inRect = (r: Rect, x: number, z: number) => x >= r[0] && x <= r[1] && z >= r[2] && z <= r[3];
 const inAny = (rs: Rect[], x: number, z: number) => rs.some((r) => inRect(r, x, z));

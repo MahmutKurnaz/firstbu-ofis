@@ -1,0 +1,95 @@
+"""The world's own furniture and street things (world/cadde/meshy.ts): the 16 props made with Meshy
+(blender/scripts/meshy_props.py), shrunk (about 3000 triangles each, 512 px texture) and put in one file,
+src/client/models/meshy-props.glb. Each piece is a root of its own, named by its key (`agac`, `bank`…),
+standing on the floor at the origin, centred, its front toward +z, sized in meters as in SIZE below.
+Those names are a contract with world/cadde/meshy.ts and tests/meshy-props.test.ts.
+
+    blender --background --factory-startup --python blender/scripts/build_meshy_props.py -- --src <dir with the <key>.glb files>
+"""
+import os
+import sys
+
+import bpy
+
+sys.path.insert(0, os.path.dirname(__file__))
+import aokit  # noqa: E402
+
+# key: (which side to size by: 'h' height, 'w' width (x), 'd' depth (y in Blender), meters)
+SIZE = {
+    "agac": ("h", 4.2),
+    "lamba": ("h", 4.4),
+    "bank": ("w", 1.9),
+    "kafe-masasi": ("h", 2.7),
+    "kahve-tezgahi": ("w", 4.4),
+    "kahve-makinesi": ("h", 1.9),
+    "saksi": ("w", 3.2),
+    "ofis-masa": ("w", 1.6),
+    "cicek-saksi": ("h", 0.9),
+    "ofis-sandalye": ("h", 1.0),
+    "yonetici-masa": ("w", 2.2),
+    "yonetici-koltuk": ("h", 1.25),
+    "kanepe": ("w", 2.2),
+    "kitaplik": ("h", 2.2),
+    "fikus": ("h", 1.6),
+    "toplanti-sandalye": ("h", 0.95),
+}
+TRIS = 3000
+TEX = 512
+
+
+def piece(path, key):
+    before = set(bpy.data.objects)
+    bpy.ops.import_scene.gltf(filepath=path)
+    new = [o for o in bpy.data.objects if o not in before]
+    meshes = [o for o in new if o.type == 'MESH']
+    for o in new:
+        if o.type != 'MESH':
+            bpy.data.objects.remove(o, do_unlink=True)
+    bpy.ops.object.select_all(action='DESELECT')
+    for o in meshes:
+        o.select_set(True)
+        o.matrix_world = o.matrix_world.copy()
+        o.parent = None
+    bpy.context.view_layer.objects.active = meshes[0]
+    if len(meshes) > 1:
+        bpy.ops.object.join()
+    ob = bpy.context.view_layer.objects.active
+    bpy.ops.object.transform_apply(location=True, rotation=True, scale=True)
+    n = aokit.tris(ob)
+    if n > TRIS:
+        m = ob.modifiers.new("d", 'DECIMATE')
+        m.ratio = TRIS / n
+        aokit.apply_modifier(ob, "d")
+    ob.name = key
+    ob.data.name = key
+    # In Blender z is up: the model is y-up in the file, so its height is z here.
+    vs = [v.co for v in ob.data.vertices]
+    mn = [min(v[i] for v in vs) for i in range(3)]
+    mx = [max(v[i] for v in vs) for i in range(3)]
+    side, meters = SIZE[key]
+    extent = {"h": mx[2] - mn[2], "w": mx[0] - mn[0], "d": mx[1] - mn[1]}[side]
+    k = meters / extent
+    for v in ob.data.vertices:
+        v.co.x = (v.co.x - (mn[0] + mx[0]) / 2) * k
+        v.co.y = (v.co.y - (mn[1] + mx[1]) / 2) * k
+        v.co.z = (v.co.z - mn[2]) * k
+    for mat in ob.data.materials:
+        for node in mat.node_tree.nodes:
+            if node.type == 'TEX_IMAGE' and node.image and max(node.image.size) > TEX:
+                node.image.scale(TEX, TEX)
+    print(f"  {key}: {(mx[0]-mn[0])*k:.2f} x {(mx[1]-mn[1])*k:.2f} x {(mx[2]-mn[2])*k:.2f} m, {aokit.tris(ob)} tris")
+    return ob
+
+
+def main():
+    a = aokit.args()
+    src = a[a.index("--src") + 1] if "--src" in a else None
+    if not src:
+        raise SystemExit("--src <dir with the Meshy props>")
+    aokit.clear()
+    for key in SIZE:
+        piece(os.path.join(src, key + ".glb"), key)
+    print("  ->", aokit.export("meshy-props", uvs=True))
+
+
+main()

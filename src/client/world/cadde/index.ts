@@ -15,6 +15,7 @@ import { dress, furnish, skyline } from './kaykit';
 import { caddeKit } from './kit';
 import { paintOffice, type OfficeView } from './offices';
 import { streetLife } from './passersby';
+import { buildDesks, furnishSuite } from './suite';
 import { PROPS } from './props';
 import { buildShell } from './shell';
 
@@ -43,11 +44,12 @@ export function buildCadde(plan: MapPlan): World {
   for (const p of c.props ?? []) PROPS[p.kind as CaddePropKind](kit, p, p.kind === 'office' ? offices++ : 0);
   // The CC0 drafts, which come in once they've loaded.
   const officeProps = (c.props ?? []).filter((p) => p.kind === 'office');
-  officeProps.forEach((p, i) => furnish(kit, p, i));
+  officeProps.forEach((p, i) => (p.style === 'yonetim' ? furnishSuite(kit, p) : furnish(kit, p, i)));
   dress(kit, c.props ?? []);
   skyline(kit, shell.near);
   buildArmchair(kit);
   buildBenches(kit);
+  buildDesks(kit);
   const overflow = new Map<string, Interactable>();
   for (const def of plan.desks) kit.desks.set(def.id, placeSetting(kit, def, false).view);
   for (const def of plan.overflow) {

@@ -54,6 +54,10 @@ export interface TableConfig {
   sides?: 'both' | 'inner' | 'outer';
   /** What its seats are called: "West table, seat 2". */
   name?: string;
+  /** Which side counts as the one toward the middle of the hall, turned round: an executive's seat on the far side of the desk (first in line, then, like the rest). */
+  flip?: boolean;
+  /** `desk`: not the long bench the workers share, but desks and chairs the map's builder furnishes (a street's executive suite). */
+  look?: 'desk';
 }
 
 /**
@@ -76,6 +80,8 @@ export interface PropConfig {
   light?: boolean;
   /** Which of the office's own .glb models a `glb` prop is (a street's: see cadde-props.ts). */
   model?: string;
+  /** What an `office` is for: `yonetim` is the executive suite (rooms for the lead and for you, a meeting room, a lobby: see cadde-props.ts). */
+  style?: 'yonetim';
 }
 
 /**
@@ -252,7 +258,7 @@ export interface MapPlan {
   herald?: { x: number; z: number; rotY: number; name: string; says: string; ask: string; button: string };
   door: { x: number; z: number };
   /** The tables as checked, with what was left out filled in: the sides with seats (1 is the table's right, -1 its left). */
-  tables: { x: number; z: number; length: number; width: number; rotY: number; seats: number; sides: (1 | -1)[]; name: string }[];
+  tables: { x: number; z: number; length: number; width: number; rotY: number; seats: number; sides: (1 | -1)[]; name: string; look?: 'desk' }[];
   /** The meeting table's middle, and which side the head of the table is on (see MapConfig.council). */
   council?: { x: number; z: number; rotY: number };
   boards: Record<BoardKey, BoardDef>;
