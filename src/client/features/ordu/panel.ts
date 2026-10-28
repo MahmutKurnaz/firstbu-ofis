@@ -50,16 +50,14 @@ export class OrduPanel {
       out.push(h('p.ordu-note', {}, 'Bu projede rol yok. ordu/sablonlar/ içinden bir şablonu projenin .agent-office/ordu.json dosyası olarak kopyala.'));
       return out;
     }
-    let office = '';
-    let officeIndex = -1;
+    let office = -1;
     let team = '';
     let teamEl: HTMLElement | null = null;
     for (const row of roleRows(view, workers)) {
-      if (row.office !== office) {
-        office = row.office;
-        officeIndex++;
+      if (row.officeIndex !== office) {
+        office = row.officeIndex;
         team = '';
-        out.push(h('h4.ordu-office', { 'data-office': String(officeIndex) }, `🏢 ${office}`));
+        out.push(h('h4.ordu-office', { 'data-office': String(office) }, `🏢 ${row.office}`));
       }
       if (row.team !== team) {
         team = row.team;

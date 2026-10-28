@@ -25,7 +25,7 @@ export function defineOrduDoors(ctx: Ctx, focusOffice: (index: number) => void) 
     hint: (it) => {
       const office = store.ordu?.config.offices[it.zone ?? -1];
       if (!office) return { k: `none:${it.zone}`, parts: [hintTitle(`🏢 Ofis ${(it.zone ?? 0) + 1}`), aside('ordu.json’da bu sırada ofis yok')] };
-      const rows = roleRows(store.ordu!, store.workers.values()).filter((r) => r.office === office.name);
+      const rows = roleRows(store.ordu!, store.workers.values()).filter((r) => r.officeIndex === it.zone);
       const busy = rows.filter((r) => r.worker && r.worker.status === 'working').length;
       const here = rows.filter((r) => r.worker).length;
       const what = `${rows.length} rol · ${here} masada · ${busy} çalışıyor`;

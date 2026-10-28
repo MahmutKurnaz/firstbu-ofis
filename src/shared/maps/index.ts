@@ -2,7 +2,7 @@ import { BEANBAGS, BOARDS, DESKS, ELEVATOR, ELEVATOR_CAR, EXIT_DOOR, FLOOR, MEET
 import type { Circle, Rect } from '../nav.js';
 import { planAirlock, wallOpenings } from './airlock.js';
 import { CADDE } from './cadde.js';
-import { CADDE_PROP_KINDS, caddeFootprint, caddeTop } from './cadde-props.js';
+import { CADDE_PROP_KINDS, caddeFootprint, caddeTop, quarterTurn } from './cadde-props.js';
 import { CASTLE } from './castle.js';
 import { MapError, isObj, num, str } from './check.js';
 import { overlaps, planDungeon, planSendHome } from './dungeon.js';
@@ -331,6 +331,8 @@ export function planMap(input: unknown): MapPlan {
     opt(p.height, `${what}.height`, 0.3, 20);
     opt(p.length, `${what}.length`, 0.3, 120);
     if (p.light !== undefined && typeof p.light !== 'boolean') throw new MapError(`${what}.light should be true or false`);
+    // Its walls are what's in the way, box by box, so they have to be square to the hall.
+    if (style === 'cadde' && p.kind === 'office' && !quarterTurn(p.rotY)) throw new MapError(`${what} (an office) has to face along x or z: its rotY should be 0, 1.5708, 3.1416 or -1.5708`);
     if (p.model !== undefined && (typeof p.model !== 'string' || !/^[a-z0-9][a-z0-9_-]{0,39}$/.test(p.model))) throw new MapError(`${what}.model should be a model's name: lowercase letters, digits, - and _`);
     // What hangs on a wall, or from the roof, has to fit under the walls' top.
     const top = kinds.top(p);

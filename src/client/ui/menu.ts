@@ -55,6 +55,8 @@ export interface Hud {
   /** Redraws the top bar for a change the store doesn't announce (voice, hanging a picture). */
   refresh(): void;
   toggleMenu(): void;
+  /** Shows a panel that was put away, as turning it on in the ☰ menu does (and remembers it). */
+  showPanel(id: HudPanel): void;
 }
 
 /**
@@ -282,5 +284,5 @@ export function mountHud(actions: HudAction[], settings: Settings, save: () => v
   for (const t of ['workers', 'peers', 'issues', 'pulls', 'services', 'queue', 'meeting', 'upgrade', 'me', 'floors', 'signins'] as Topic[]) store.on(t, render);
   applyPanels();
   render();
-  return { refresh: render, toggleMenu };
+  return { refresh: render, toggleMenu, showPanel: (id) => setPanel(id, true) };
 }

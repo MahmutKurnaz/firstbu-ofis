@@ -35,7 +35,7 @@ A tree-lined pedestrian street in the middle of a city, a glass office for each 
 
 - **Your seat.** An armchair at the head of the café, looking down the street. You arrive in it (if nobody else is sitting there). The barista beside it (**E**) sends out a new worker, as the castle's herald does.
 - **The line.** A worker that's done or waiting on you walks out of its office and lines up in front of your armchair, as in the castle.
-- **The offices.** Seven glass offices, the lead's at the head of the street and three down each side. Each one is a *zone*: the offices of the floor's `.agent-office/ordu.json` go into them in order (its first office into the lead's, the second into the first on the west side, then east, row by row), and each takes that office's name over its door and its first team's color round its roof and on its back wall. A role hired from the Ekipler panel, or by the lead, sits at a free seat in its own office (unless its `desk` says otherwise), and only goes elsewhere once those are all taken. **E** at an office's door brings that office up in the Ekipler panel (see [docs/ordu.md](ordu.md)).
+- **The offices.** Seven glass offices, the lead's at the head of the street and three down each side. Each one is a *zone*: the offices of the floor's `.agent-office/ordu.json` go into them in order (its first office into the lead's, the second into the first on the west side, then east, row by row), and each takes that office's name over its door and its first team's color round its roof and on its back wall. A role hired from the Ekipler panel, or by the lead, sits at a free seat in its own office (unless its `desk` says otherwise), and only goes elsewhere once those are all taken (its office's spare seats, which come out like bean bags, count as its own). **E** at an office's door brings that office up in the Ekipler panel (see [docs/ordu.md](ordu.md)).
 - **The rest.** The boards stand on the pavement either side of the café, the board agents' consoles in front of them; the meeting table is out on the street to the south; the coffee is at the café's counter; workers come in and go home through the gateway at the south end, which has the project's name on it.
 
 
@@ -196,7 +196,7 @@ A street's (`"style": "cadde"`):
 
 | `kind` | What it is |
 | --- | --- |
-| `office` | A team's glass office, `width` across its front and `length` deep (14 by 16 m unless you say), `height` tall (4.2 m), its door in the middle of its front, facing `rotY`. Each one is a zone: the nth `office` in `props` is the nth office of the floor's `ordu.json`, and the seats inside it are its. |
+| `office` | A team's glass office, `width` across its front and `length` deep (14 by 16 m unless you say), `height` tall (4.2 m), its door in the middle of its front, facing `rotY` (a quarter turn: 0, 1.5708, 3.1416 or -1.5708). Each one is a zone: the nth `office` in `props` is the nth office of the floor's `ordu.json`, and the seats inside it are its. |
 | `tree` | A street tree in a round bed. |
 | `lamp` | A street lamp, its arm reaching toward `rotY`. |
 | `planter` | A long planter of shrubs, `width` long. |

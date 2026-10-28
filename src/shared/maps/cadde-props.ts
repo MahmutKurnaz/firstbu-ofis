@@ -53,6 +53,12 @@ export const CADDE_SIZE = {
 export const OFFICE_DOOR = 2.4;
 export const OFFICE_WALL = 0.2;
 
+/** Whether `rotY` is a quarter turn (0, ±π/2, π…): an office's walls are only ever square to the street. */
+export function quarterTurn(rotY = 0): boolean {
+  const k = rotY / (Math.PI / 2);
+  return Math.abs(k - Math.round(k)) < 1e-3;
+}
+
 /** Where an office is and how big: its middle, its front's width, its depth, and the way its door faces. */
 export function officeBox(p: PropConfig): { x: number; z: number; width: number; length: number; height: number; rotY: number } {
   const s = p.scale ?? 1;

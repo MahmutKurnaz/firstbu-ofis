@@ -153,6 +153,13 @@ export function buildCadde(plan: MapPlan): World {
           freed.add(mat);
         }
       });
+      // And the street's own materials without a picture: what glows at night, the offices' colors, the glass.
+      for (const g of kit.night.glows) {
+        (g.mat as THREE.MeshToonMaterial).emissiveMap?.dispose();
+        g.mat.dispose();
+      }
+      for (const v of views) v.accent.dispose();
+      for (const m of [kit.street.glass, kit.mats.glow, kit.mats.accent, kit.mats.lamp, kit.mats.warn, kit.mats.glass]) m.dispose();
     },
   };
 }

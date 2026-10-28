@@ -24,7 +24,7 @@ export function installOrdu(ctx: Ctx, deps: OrduDeps): OrduPanel {
   panel.redraw = draw;
   // A street office's door: its office in the panel, which comes out if it was put away.
   defineOrduDoors(ctx, (i) => {
-    $('ordu-panel').classList.remove('hud-off');
+    ctx.hud.showPanel('ordu');
     panel.focusOffice(i);
   });
   // A new floor (or the first one): ask for its army.

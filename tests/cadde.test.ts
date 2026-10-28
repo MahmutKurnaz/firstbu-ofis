@@ -250,3 +250,17 @@ test('hireRole without zones is unchanged: the first free seat', (t) => {
   hire(floor, 'b');
   assert.equal(calls[0][0], 'desk-2');
 });
+
+test('quarterTurn: square to the street only', async () => {
+  const { quarterTurn } = await import('../src/shared/maps/cadde-props.js');
+  for (const r of [0, Math.PI / 2, -Math.PI / 2, Math.PI, 3 * Math.PI / 2]) assert.ok(quarterTurn(r), String(r));
+  for (const r of [Math.PI / 4, 0.3, 1]) assert.ok(!quarterTurn(r), String(r));
+  assert.ok(quarterTurn(undefined));
+});
+
+test('planMap: an office must be turned a quarter turn', () => {
+  const office = (rotY: number): PropConfig => ({ kind: 'office', x: 0, z: -31, width: 8, length: 7, rotY });
+  const load = (rotY: number) => planMap({ ...CADDE, id: 'x', props: [...(CADDE.props ?? []).filter((p) => p.kind !== 'office'), office(rotY)] });
+  assert.throws(() => load(Math.PI / 4), (e: unknown) => e instanceof MapError && /rotY/.test((e as Error).message));
+  for (const r of [0, Math.PI / 2, -Math.PI / 2, Math.PI]) assert.doesNotThrow(() => load(r), String(r));
+});
