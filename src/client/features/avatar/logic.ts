@@ -33,7 +33,7 @@ export const nextPreset = (i: number): number => (i + 1) % CAM_PRESETS.length;
 
 /** A stored value as an index into CAM_PRESETS, or the default if it isn't one. */
 export function presetIndex(v: unknown): number {
-  const n = typeof v === 'string' ? Number(v) : typeof v === 'number' ? v : NaN;
+  const n = typeof v === 'string' ? (/^\d+$/.test(v) ? Number(v) : NaN) : typeof v === 'number' ? v : NaN;
   return Number.isInteger(n) && n >= 0 && n < CAM_PRESETS.length ? n : DEFAULT_PRESET;
 }
 
