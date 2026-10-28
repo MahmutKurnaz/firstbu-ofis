@@ -48,7 +48,8 @@ export function placeSetting(kit: Kit, def: DeskDef, overflow: boolean): { view:
   g.rotation.y = def.rotY;
   const laptopAnchor = new THREE.Object3D();
   laptopAnchor.position.set(0, TABLE_TOP, -0.02);
-  laptopAnchor.scale.setScalar(1.2);
+  // A 16 inch laptop: its model is drawn 0.72 m across the screen, so half of that is 0.36 m.
+  laptopAnchor.scale.setScalar(0.5);
   g.add(laptopAnchor);
   // On the bench, facing the table.
   const seatAnchor = new THREE.Object3D();

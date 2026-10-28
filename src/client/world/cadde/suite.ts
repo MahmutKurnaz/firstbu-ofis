@@ -19,7 +19,7 @@ const WOOD = '#5a3a28';
 /** What the rooms are floored in, and how far across each goes. */
 const FLOORS: { from: number; to: number; color: string }[] = [
   { from: -22, to: -12, color: '#d9bd92' },
-  { from: -12, to: 0, color: '#4b2f21' },
+  { from: -12, to: 0, color: '#8a6240' },
   { from: 0, to: 8, color: '#cfc7b8' },
   { from: 8, to: 22, color: '#7c7f86' },
 ];
@@ -36,10 +36,10 @@ export function furnishSuite(kit: CaddeKit, p: PropConfig) {
   const back = SUITE.back;
 
   // Floors: each room its own, and marble in the lobby; rugs under the two desks.
-  for (const f of FLOORS) g.add(mesh(box(f.to - f.from - 0.1, 0.02, -back - 0.1), toon(f.color), (f.from + f.to) / 2, 0.05, back / 2, false));
-  g.add(mesh(box(o.width - 0.5, 0.02, o.length / 2 - 0.1), toon('#ece7dd'), 0, 0.05, o.length / 4, false));
-  g.add(mesh(box(4.2, 0.02, 3.2), toon('#7a2630'), -6, 0.065, -2.6, false));
-  g.add(mesh(box(3.6, 0.02, 2.6), toon('#2d4a5c'), -17, 0.065, -2.6, false));
+  for (const f of FLOORS) g.add(mesh(box(f.to - f.from - 0.1, 0.004, -back - 0.1), toon(f.color), (f.from + f.to) / 2, 0.014, back / 2, false));
+  g.add(mesh(box(o.width - 0.5, 0.004, o.length / 2 - 0.1), toon('#ece7dd'), 0, 0.014, o.length / 4, false));
+  g.add(mesh(box(4.2, 0.004, 3.2), toon('#7a2630'), -6, 0.018, -2.6, false));
+  g.add(mesh(box(3.6, 0.004, 2.6), toon('#2d4a5c'), -17, 0.018, -2.6, false));
 
   // Glass between the rooms and the lobby, a low panel under it, a brass rail on top and brass posts.
   const part = (cx: number, cz: number, len: number, alongX: boolean) => {

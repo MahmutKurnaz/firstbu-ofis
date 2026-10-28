@@ -17,8 +17,8 @@ const FEET = 0.07;
 const SEAT_UP = 0.24;
 /** How far toward its table it sits (m), so its hands reach the keyboard. */
 const SIT_FORWARD = 0.1;
-/** Where its hands go on the keyboard while it works, from its seat's anchor (m): out to each side, up (over the floor), and forward. */
-const KEYS = { side: 0.17, up: 0.82, forward: 0.62 };
+/** Where its hands go on the keyboard while it works, from its seat's anchor (m): out to each side, up (over the floor: the desk's 0.76 m and the laptop's thickness), and forward (a 16 inch laptop's keys). */
+const KEYS = { side: 0.1, up: 0.785, forward: 0.72 };
 /** How tall it is sat down, of its height standing; and how far over its head its name tag goes (m). */
 const SITTING = 0.92;
 const TAG_GAP = 0.2;
