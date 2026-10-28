@@ -1,3 +1,4 @@
+import { meshy } from '../../world/cadde/meshy';
 import * as THREE from 'three';
 import { AXE_LANE } from '../../../shared/bargames';
 import { DANCE_FLOOR, DJ_BOOTH, ELEVATOR, ELEVATOR_FRONT, FIRE_PIT, FLOOR, ROOF_BAR, ROOF_TABLES, SEATING_BY_ID, STAGE, WALL_HEIGHT, WALL_T } from '../../../shared/layout';
@@ -702,9 +703,8 @@ export function buildRooftop(night: NightParts, floors: number): Rooftop {
     const g = new THREE.Group();
     g.add(mesh(new THREE.BoxGeometry(0.72, 0.28, 1.9), frame, 0, 0.14, 0.15));
     g.add(mesh(new THREE.BoxGeometry(0.66, 0.08, 1.3), toon('#f4a261'), 0, 0.32, 0.45));
-    const backrest = mesh(new THREE.BoxGeometry(0.66, 0.08, 0.8), toon('#f4a261'), 0, 0.55, -0.5);
-    backrest.rotation.x = 0.75;
-    g.add(backrest);
+    // Its own sun lounger (teak and cream, 2 m long), in place of the stand-in; the head end toward -z.
+    meshy(g, 'sezlong', { turn: Math.PI, replaces: [...g.children] });
     g.position.set(s.x, 0, s.z);
     seatable(g, s.id, 1.1, interactables);
     group.add(g);

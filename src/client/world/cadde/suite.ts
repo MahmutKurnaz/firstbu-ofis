@@ -7,7 +7,7 @@ import { mesh, roundedBox, textPlane, toon } from '../toon';
 import { TEAM_COLORS } from './interiors';
 import { glow, type CaddeKit } from './kit';
 import { meshy, type MeshyKey } from './meshy';
-import { addTeamBoard, clearTeamBoards } from './teamboard';
+import { addTeamBoard } from './teamboard';
 
 // The executive suite (an office with style `yonetim`, see SUITE in shared/maps/cadde-props.ts): along the
 // back a row of rooms, each sized to who sits in it (the lead's the biggest, then Mahmut's, a manager's a
@@ -77,7 +77,6 @@ export function furnishSuite(kit: CaddeKit, p: PropConfig) {
 
   // The live boards on the back walls (features/teamboards): a manager's shows their team, the lead's every team,
   // the assistant's who's waiting on you, Mahmut's everyone.
-  clearTeamBoards();
   for (const r of SUITE.rooms) {
     const c = (r.from + r.to) / 2;
     const w = r.to - r.from;

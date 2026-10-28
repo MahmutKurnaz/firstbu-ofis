@@ -1,3 +1,4 @@
+import { meshy } from '../cadde/meshy';
 import * as THREE from 'three';
 import type { PropConfig } from '../../../shared/maps';
 import { STATION_SIZE, type StationPropKind } from '../../../shared/maps/station-props';
@@ -161,7 +162,11 @@ function crate(kit: Kit, p: PropConfig) {
   };
   one(size * 0.92, 0, '#d0812f', 0, 0);
   one(size * 0.55, size * 0.92 * 0.8, '#5c7fa3', 0.5, 0.12);
-  kit.still.add(g);
+  // Its own cargo crates, a big one with a small one on it, in place of the stand-ins.
+  const stand = [...g.children];
+  meshy(g, 'kargo-sandik', { scale: (size * 0.92) / 1.2, replaces: stand });
+  meshy(g, 'kargo-sandik', { scale: (size * 0.55) / 1.2, y: size * 0.92 * 0.66, turn: 0.5 });
+  kit.group.add(g);
   collide(kit, p.x, p.z, size * s, size * s, p.rotY ?? 0, 99);
 }
 

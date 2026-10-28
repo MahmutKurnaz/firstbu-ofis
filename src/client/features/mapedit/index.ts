@@ -4,7 +4,9 @@
 // is on it. Only the street, and only admins, for now: the offices' insides are built in code (see docs/maps.md).
 import * as THREE from 'three';
 import type { Ctx } from '../../core/context';
-import { toast } from '../../ui/dom';
+import { isTyping } from '../../player';
+import { store } from '../../state';
+import { modalOpen, toast } from '../../ui/dom';
 import { History, duplicated, moved, nearestProp, removed, scaled, turned, TURN, type Prop } from './logic';
 
 const KEY = 'KeyJ';
@@ -29,11 +31,13 @@ export function installMapEdit(ctx: Ctx) {
   panel.style.cssText = 'position:fixed;left:12px;top:70px;z-index:50;max-width:310px;padding:10px 12px;border-radius:12px;background:rgba(20,24,32,.92);color:#eef3f8;font:13px/1.45 system-ui,sans-serif;box-shadow:0 4px 18px #0006;display:none;pointer-events:none';
   document.body.appendChild(panel);
 
-  const planOk = () => ctx.plan().style === 'cadde' && Array.isArray(ctx.plan().config?.props);
+  const planOk = () => (ctx.plan().id === 'cadde' || ctx.plan().id === 'duzen') && ctx.plan().style === 'cadde' && Array.isArray(ctx.plan().config?.props);
   const point = (e: PointerEvent): [number, number] | null => {
     const r = ctx.renderer.domElement.getBoundingClientRect();
     ray.setFromCamera(new THREE.Vector2(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1), ctx.camera);
-    return ray.ray.intersectPlane(plane, hit) ? [hit.x, hit.z] : null;
+    if (!ray.ray.intersectPlane(plane, hit)) return null;
+    const b = ctx.plan().bounds;
+    return [Math.min(b.maxX - 0.5, Math.max(b.minX + 0.5, hit.x)), Math.min(b.maxZ - 0.5, Math.max(b.minZ + 0.5, hit.z))];
   };
 
   function show() {
@@ -53,12 +57,22 @@ export function installMapEdit(ctx: Ctx) {
     props = next;
     save();
   }
+  /** Saved a moment after the last change, so a key held down (or a quick run of them) is one save and one rebuild. */
+  let saveTimer: ReturnType<typeof setTimeout> | null = null;
   function save() {
-    ctx.net.send({ t: 'map.edit', base: ctx.plan().id, props });
     show();
+    if (saveTimer) clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => {
+      saveTimer = null;
+      ctx.net.send({ t: 'map.edit', base: ctx.plan().id, props });
+    }, 350);
   }
 
   function enter() {
+    if (!store.me.admin) {
+      toast('✏️ Haritayı yalnızca yöneticiler düzenleyebilir');
+      return;
+    }
     if (!planOk()) {
       toast('✏️ Düzenleme şimdilik yalnızca cadde haritasında');
       return;
@@ -108,13 +122,19 @@ export function installMapEdit(ctx: Ctx) {
     dragging = false;
     const to = ghost;
     ghost = null;
-    if (to && selected >= 0) commit(moved(props, selected, to[0], to[1]));
+    // A click that didn't take it anywhere only selects it.
+    const next = to && selected >= 0 ? moved(props, selected, to[0], to[1]) : null;
+    const p = props[selected];
+    if (next && p && (next[selected].x !== p.x || next[selected].z !== p.z) && Math.hypot(to![0] - p.x, to![1] - p.z) > 0.15) commit(next);
     else show();
   });
   window.addEventListener(
     'keydown',
     (e) => {
       if (!on) return;
+      // Typing somewhere, or a window's open: the keys are theirs.
+      if (modalOpen() || isTyping(e)) return;
+      if (e.repeat) return;
       const mod = e.ctrlKey || e.metaKey;
       const swallow = () => {
         e.preventDefault();
@@ -152,7 +172,14 @@ export function installMapEdit(ctx: Ctx) {
     },
     true,
   );
-  // The editor follows the map: when everyone's map is rebuilt (by this edit, or someone else's), what it shows is that.
+  // When the map is rebuilt (by this edit, or someone else's), the list is what the map has now, unless it's being dragged.
+  store.on('map', () => {
+    if (!on || dragging || saveTimer) return;
+    if (planOk()) props = (ctx.plan().config!.props as Prop[]).map((p) => ({ ...p }));
+    selected = Math.min(selected, props.length - 1);
+    show();
+  });
+  // The editor follows the map: if it isn't the street any more, it's over.
   ctx.ticks.add('hud', () => {
     if (!on) return;
     if (!planOk()) return leave();

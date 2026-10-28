@@ -72,14 +72,18 @@ export class Maps {
    */
   saveEdit(base: string, props: unknown, by: string): string | null {
     if (base !== 'cadde' && base !== EDIT_ID) return 'Yalnızca cadde haritası düzenlenebilir';
+    // Someone changed the map to another while this was on its way: it's not for that one.
+    if (this.pick() === 'castle' || this.pick() === 'station') return 'Harita bu arada değişti: düzenleme kaydedilmedi';
     if (!Array.isArray(props) || props.length > 400) return 'Eşya listesi geçersiz';
     const keep = ['kind', 'x', 'z', 'y', 'rotY', 'scale', 'width', 'height', 'length', 'color', 'light', 'model', 'style'];
     const clean = props.map((p) => {
       const o: Record<string, unknown> = {};
       if (typeof p === 'object' && p !== null) for (const k of keep) if ((p as Record<string, unknown>)[k] !== undefined) o[k] = (p as Record<string, unknown>)[k];
+      if (o.color !== undefined && !(typeof o.color === 'string' && /^#[0-9a-fA-F]{3,8}$/.test(o.color))) delete o.color;
       return o;
     });
     const json = { id: EDIT_ID, name: 'Cadde (düzenlenmiş)', icon: '✏️', description: 'Caddenin senin yerleştirdiğin hâli (düzenleme modu).', extends: 'cadde', props: clean };
+    if (JSON.stringify(json).length > MAX_BYTES) return 'Harita çok büyük';
     const [checked] = checkCustomMaps([{ file: `${EDIT_ID}.json`, json }]);
     if (!checked?.config) return checked?.error ?? 'Harita geçersiz';
     try {
@@ -88,6 +92,8 @@ export class Maps {
     } catch {
       return 'Harita dosyası yazılamadı';
     }
+    // (what the folder looked like is by name, size and time: two edits of the same size in the same second look alike)
+    this.stamp = '';
     this.reload();
     return this.set(EDIT_ID, by) ? null : 'Harita yüklenemedi';
   }

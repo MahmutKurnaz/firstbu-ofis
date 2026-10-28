@@ -19,13 +19,18 @@ export interface TeamBoard {
   texture: THREE.CanvasTexture;
 }
 
-/** The boards the street has up now, in the order they were made; `generation` goes up when it's rebuilt. */
-export const teamBoards: TeamBoard[] = [];
-export const boardGeneration = { n: 0 };
+/**
+ * The boards of every street that's been built (the street and its rearranged copy are two worlds, kept
+ * side by side), each redrawn by features/teamboards; one whose world has been put away is dropped (see `forget`).
+ */
+export const teamBoards = new Set<TeamBoard>();
 
-export function clearTeamBoards() {
-  teamBoards.length = 0;
-  boardGeneration.n++;
+/** Drops the boards on `parent` (a world being put away). */
+export function forget(boards: Iterable<TeamBoard>) {
+  for (const b of boards) {
+    teamBoards.delete(b);
+    b.texture.dispose();
+  }
 }
 
 /** Puts a board `w` x `h` m, its middle at (u, y, v), on `parent`; it says it's waiting for the page until it's drawn on. */
@@ -48,6 +53,6 @@ export function addTeamBoard(parent: THREE.Object3D, kind: BoardKind, team: numb
   screen.position.set(u, y, v + 0.005);
   parent.add(screen);
   const board: TeamBoard = { kind, team, title, canvas, texture };
-  teamBoards.push(board);
+  teamBoards.add(board);
   return board;
 }

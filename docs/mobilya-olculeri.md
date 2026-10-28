@@ -66,6 +66,12 @@ Kaynaklar: [desk-din](https://yaasa.com/en/blogs/yaasa-blog/schreibtisch-masse),
 | `kafe-tabure` | cadde | 0.38 × 0.38 × 0.46 | oturak 46 cm | Bistro stool seat 43-48 cm (a 71-76 cm table). | [cafe-bbqguys](https://www.bbqguys.com/a/28806/learn/outdoor-living/buying-guides/furniture/table-chair-height) | kaynaklı |
 | `kafe-masasi-yuvarlak` | cadde | 0.75 × 0.75 × 0.74 | üst 74 cm | Bistro table 71-76 cm, 0.6-0.8 m across. | [cafe-bbqguys](https://www.bbqguys.com/a/28806/learn/outdoor-living/buying-guides/furniture/table-chair-height) | kaynaklı |
 | `semsiye` | cadde | 2.70 × 2.70 × 2.40 | — | 9 ft (2.7 m) market umbrella: 2.3-2.45 m overall. | [umbrella-jeco](https://www.walmart.com/ip/Jeco-UBF92-9-ft-Aluminum-Steel-Umbrella-Fabric-Tan/120360055), [umbrella-golden](https://blog.wellappointedhouse.com/products/9-golden-state-patio-umbrella-in-aruba) | kaynaklı |
+| `sezlong` | cadde | 0.75 × 2.00 × 1.00 | oturak 43 cm | Sun lounger: 1.9-2.0 m long, 0.6-0.75 m wide, seat 0.35-0.45 m. (Common practice.) | — | kısmen |
+| `ates-cukuru` | cadde | 1.10 × 1.10 × 0.55 | — | Fire pit bowl: 0.8-1.2 m across, 0.4-0.6 m high. (Common practice.) | — | kısmen |
+| `istasyon-bank` | ofis | 2.00 × 0.70 × 0.85 | oturak 45 cm | Three-seat bench: 1.8-2.2 m, seat 0.43-0.48 m. | [bench-wabash](https://wabashvalley.com/blogs/blog/standard-bench-dimensions) | kaynaklı |
+| `kargo-sandik` | ofis | 1.20 × 0.80 × 0.80 | — | Cargo crate / small container: 1.2 x 0.8 x 0.8 m. (Common practice.) | — | kısmen |
+| `kale-masa` | ofis | 3.60 × 1.00 × 0.76 | üst 76 cm | Banquet table: 3-4 m long, 0.9-1.1 m wide, 0.76 m high. | [conference-of2go](https://www.officefurniture2go.com/answers/conference-tables/what-size-conference-table-for-10-people.html), [desk-din](https://yaasa.com/en/blogs/yaasa-blog/schreibtisch-masse) | kaynaklı |
+| `heykel` | ofis | 0.90 × 0.90 × 2.40 | — | Hall statue on a plinth: 2.2-2.6 m. (Common practice.) | — | kısmen |
 
 "Kaynaklı": ölçü, listelenen sayfalardaki aralıktan seçildi. "Kısmen": bir standart bulunamadı, yaygın bir ölçü alındı (sayfada belirtildi).
 

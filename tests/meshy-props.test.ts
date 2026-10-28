@@ -63,8 +63,8 @@ test('every image in the pack is a JPEG', () => {
   for (const i of pack.images ?? []) assert.equal(i.mimeType, 'image/jpeg');
 });
 
-test('the pack file is under 26 MB', () => {
-  assert.ok(statSync(new URL(PACK, root)).size < 26 * 1024 * 1024);
+test('the pack file is under 30 MB', () => {
+  assert.ok(statSync(new URL(PACK, root)).size < 30 * 1024 * 1024);
 });
 
 test('TEAM_COLORS are the first team color of each yazilim office, in order', () => {

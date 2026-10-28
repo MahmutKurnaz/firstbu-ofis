@@ -25,6 +25,7 @@ export const HELP_ROWS: readonly (readonly [string, string])[] = [
   ['P', 'Prompt: baktığın masadaki yeni ya da mevcut çalışana görev ver'],
   ['C', 'Değişiklikler: baktığın masadaki çalışanın neyi değiştirdiği — dosyalar ve diff, commit, at, PR aç'],
   ['B', 'Boş bir masada ortak shell aç (dev sunucuları, git, testler)'],
+  ['J', 'Düzenleme modu (cadde, yöneticiler): bir eşyaya tıkla ve sürükle; R döndür, [ ] boyut, Delete sil, Ctrl+D kopyala, Ctrl+Z geri al. Değişiklikler herkes için kaydedilir'],
   ['R', 'Uyuyan çalışanı devam ettir'],
   ['X', 'Çalışanı eve gönder (masayı boşaltır)'],
   ['L', 'Baktığın masanın üstüne büyük bir tabela as ("Operasyon", "Kod temizliği"), ya da oradakini değiştir veya indir'],

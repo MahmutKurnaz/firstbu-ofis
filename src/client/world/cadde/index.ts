@@ -16,6 +16,7 @@ import { caddeKit } from './kit';
 import { paintOffice, type OfficeView } from './offices';
 import { streetDust } from './dust';
 import { buildNpcs } from './npcs';
+import { forget, teamBoards } from './teamboard';
 import { skylineOwn } from './skyline';
 import { streetLife } from './passersby';
 import { meshy } from './meshy';
@@ -41,6 +42,7 @@ export function buildCadde(plan: MapPlan): World {
   const c = plan.config!;
   const b = plan.bounds;
   const pal = { hull: '#f3efe8', panel: '#d9d2c5', metal: '#a7adb5', glow: '#ffb547', paving: '#cfc8bc', frame: '#2f343b', ...(c.palette ?? {}) };
+  const hadBoards = new Set(teamBoards);
   const kit = caddeKit(plan, pal) as ReturnType<typeof caddeKit> & { offices?: OfficeView[] };
   const group = kit.group;
 
@@ -75,6 +77,8 @@ export function buildCadde(plan: MapPlan): World {
     meshy(g, 'pano-cercevesi', { scale: k, y: -(2.1 * k) / 2, replaces: frame });
   });
   const herald = buildBarista(kit);
+  // The boards this street put up (features/teamboards redraws them), to drop with it.
+  const mineBoards = [...teamBoards].filter((b) => !hadBoards.has(b));
   const life = streetLife(kit);
   const npcs = buildNpcs(kit, herald?.person);
   const dust = streetDust(kit);
@@ -198,6 +202,7 @@ export function buildCadde(plan: MapPlan): World {
       life.dispose();
       npcs.dispose();
       dust.dispose();
+      forget(mineBoards);
       for (const m of [kit.street.glass, kit.mats.glow, kit.mats.accent, kit.mats.lamp, kit.mats.warn, kit.mats.glass]) m.dispose();
     },
   };

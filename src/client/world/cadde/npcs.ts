@@ -20,6 +20,7 @@ interface Spot {
 /** Puts them up; returns what animates them each frame. `herald` is the greeter's Person (the plan's herald), whose name tag and bubble stay. */
 export function buildNpcs(kit: CaddeKit, herald?: Person): { update(dt: number): void; dispose(): void } {
   const skins: NpcSkin[] = [];
+  let gone = false;
   const spots: Spot[] = [];
   const counter = kit.plan.config?.props?.find((q) => q.kind === 'counter');
   if (counter) {
@@ -35,7 +36,10 @@ export function buildNpcs(kit: CaddeKit, herald?: Person): { update(dt: number):
 
   const hold = (host: THREE.Object3D, npc: ModelName, height: number, hideBody: boolean) =>
     loadModel(npc)
-      .then((m) => skins.push(new NpcSkin(host, m, height, hideBody)))
+      .then((m) => {
+        // The world was put away while it loaded: nothing to dress.
+        if (!gone) skins.push(new NpcSkin(host, m, height, hideBody));
+      })
       .catch(() => console.warn(`cadde: ${npc} didn't load`));
   if (herald) void hold(herald.root, 'npc-karsilayici', 1.5, true);
   for (const s of spots) {
@@ -49,6 +53,9 @@ export function buildNpcs(kit: CaddeKit, herald?: Person): { update(dt: number):
   }
   return {
     update: (dt) => skins.forEach((s) => s.update(dt, false)),
-    dispose: () => skins.forEach((s) => s.dispose()),
+    dispose: () => {
+      gone = true;
+      skins.forEach((s) => s.dispose());
+    },
   };
 }

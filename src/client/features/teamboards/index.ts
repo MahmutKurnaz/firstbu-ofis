@@ -4,7 +4,7 @@
 // workers change, and every few seconds so the minutes keep counting.
 import type { Ctx } from '../../core/context';
 import { store } from '../../state';
-import { boardGeneration, teamBoards } from '../../world/cadde/teamboard';
+import { teamBoards } from '../../world/cadde/teamboard';
 import { drawEveryone, drawLead, drawTeam, drawWaiting } from './draw';
 import { everyone, rowOf, teamLines, teamRows, waiting, workerOf } from './logic';
 
@@ -13,7 +13,7 @@ const EVERY = 5000;
 export function installTeamBoards(ctx: Ctx) {
   let dirty = true;
   let last = 0;
-  let generation = -1;
+  let size = -1;
   store.on('workers', () => (dirty = true));
   store.on('floor', () => (dirty = true));
 
@@ -37,9 +37,9 @@ export function installTeamBoards(ctx: Ctx) {
   }
 
   ctx.ticks.add('hud', ({ now }) => {
-    if (!teamBoards.length) return;
-    if (generation !== boardGeneration.n) {
-      generation = boardGeneration.n;
+    if (!teamBoards.size) return;
+    if (size !== teamBoards.size) {
+      size = teamBoards.size;
       dirty = true;
     }
     if (dirty || now - last > EVERY) {

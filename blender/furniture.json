@@ -477,6 +477,68 @@
         "umbrella-golden"
       ],
       "verified": "sources"
+    },
+    "sezlong": {
+      "w": 0.75,
+      "d": 2.0,
+      "h": 1.0,
+      "seat": 0.43,
+      "kind": "street",
+      "range": "Sun lounger: 1.9-2.0 m long, 0.6-0.75 m wide, seat 0.35-0.45 m. (Common practice.)",
+      "src": [],
+      "verified": "partly"
+    },
+    "ates-cukuru": {
+      "w": 1.1,
+      "d": 1.1,
+      "h": 0.55,
+      "kind": "street",
+      "range": "Fire pit bowl: 0.8-1.2 m across, 0.4-0.6 m high. (Common practice.)",
+      "src": [],
+      "verified": "partly"
+    },
+    "istasyon-bank": {
+      "w": 2.0,
+      "d": 0.7,
+      "h": 0.85,
+      "seat": 0.45,
+      "kind": "office",
+      "range": "Three-seat bench: 1.8-2.2 m, seat 0.43-0.48 m.",
+      "src": [
+        "bench-wabash"
+      ],
+      "verified": "sources"
+    },
+    "kargo-sandik": {
+      "w": 1.2,
+      "d": 0.8,
+      "h": 0.8,
+      "kind": "office",
+      "range": "Cargo crate / small container: 1.2 x 0.8 x 0.8 m. (Common practice.)",
+      "src": [],
+      "verified": "partly"
+    },
+    "kale-masa": {
+      "w": 3.6,
+      "d": 1.0,
+      "h": 0.76,
+      "top": 0.76,
+      "kind": "office",
+      "range": "Banquet table: 3-4 m long, 0.9-1.1 m wide, 0.76 m high.",
+      "src": [
+        "conference-of2go",
+        "desk-din"
+      ],
+      "verified": "sources"
+    },
+    "heykel": {
+      "w": 0.9,
+      "d": 0.9,
+      "h": 2.4,
+      "kind": "office",
+      "range": "Hall statue on a plinth: 2.2-2.6 m. (Common practice.)",
+      "src": [],
+      "verified": "partly"
     }
   }
 }

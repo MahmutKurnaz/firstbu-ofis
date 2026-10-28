@@ -76,6 +76,13 @@ ESYA = {
     "kafe-tabure": ("cafe stool", "A round seat in light oak with a thin black metal frame, four slim legs with a footrest ring, bistro style.", False),
     "kafe-masasi-yuvarlak": ("round cafe bistro table", "A round white marble top on a black cast-iron pedestal base, small and elegant.", False),
     "semsiye": ("cafe parasol", "A large octagonal canvas parasol in cream and terracotta stripes on a slim wooden pole with a brass tip, open, seen from the side.", False),
+    # The fourth round: the roof, the station and the castle, from the object inventory (docs/nesne-envanteri-2.md).
+    "sezlong": ("outdoor sun lounger", "A teak wooden frame with a thick cream cushion, an adjustable reclined back, slim legs, a rooftop bar lounger.", False),
+    "ates-cukuru": ("outdoor fire pit", "A round black steel bowl on a short stand with a ring of stacked stones around it, glowing orange embers and a small tidy flame, a rooftop fire pit.", False),
+    "istasyon-bank": ("space station bench", "A long sleek white and brushed steel bench with a padded dark grey seat and a thin glowing cyan strip along its front, sci-fi, three seats.", False),
+    "kargo-sandik": ("space station cargo crate", "A rugged rectangular cargo container in white and orange with black corner guards, ribbed sides, a hazard stripe and a handle on each end, sci-fi.", False),
+    "kale-masa": ("medieval long banquet table", "A heavy dark oak plank table with thick turned legs and a stretcher bar, a worn but handsome castle table, rectangular, with a dark red table runner down the middle.", False),
+    "heykel": ("stone knight statue on a plinth", "A weathered grey stone statue of an armoured knight standing with a sword point-down in front of him, on a square stone plinth, castle hall statue.", False),
 }
 
 

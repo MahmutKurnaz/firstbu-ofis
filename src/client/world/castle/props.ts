@@ -1,3 +1,4 @@
+import { meshy } from '../cadde/meshy';
 import * as THREE from 'three';
 import type { PropConfig } from '../../../shared/maps';
 import { PROP_SIZE, type PropKind } from '../../../shared/maps/props';
@@ -255,7 +256,9 @@ function statue(kit: Kit, p: PropConfig) {
     arm.rotation.set(0.7, 0, -sx * 0.5);
     g.add(arm);
   }
-  kit.still.add(g);
+  // Its own statue: a weathered stone knight on his plinth, in place of the stand-in (blender/furniture.json).
+  meshy(g, 'heykel', { scale: 1.45, replaces: [...g.children] });
+  kit.group.add(g);
   collide(kit, p.x, p.z, PROP_SIZE.statue * s, PROP_SIZE.statue * s, p.rotY ?? 0, 99);
 }
 
