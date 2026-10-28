@@ -70,10 +70,10 @@ export class MeetingBoardTexture {
       g.fillStyle = INK;
       g.textAlign = 'center';
       g.font = `900 64px ${FONT}`;
-      g.fillText('🤝 The meeting room is free', W / 2, H / 2 - 10);
+      g.fillText('🤝 Toplantı odası boş', W / 2, H / 2 - 10);
       g.font = `700 36px ${FONT}`;
       g.fillStyle = '#5c5f73';
-      g.fillText('Press E at the table to call a meeting: whatever it writes shows up here.', W / 2, H / 2 + 50);
+      g.fillText('Toplantı çağırmak için masada E’ye bas: yazılanlar burada görünür.', W / 2, H / 2 + 50);
       g.textAlign = 'left';
       this.texture.needsUpdate = true;
       return;
@@ -87,7 +87,7 @@ export class MeetingBoardTexture {
     g.fillText(`📄 ${m.output}`, 24, 48);
     g.font = `800 34px ${FONT}`;
     g.textAlign = 'right';
-    g.fillText(`${p.icon} ${p.label} · ${m.status === 'running' ? meetingStage(m) : m.status === 'done' ? '✅ done' : '⛔ stopped'}`, W - 24, 48);
+    g.fillText(`${p.icon} ${p.label} · ${m.status === 'running' ? meetingStage(m) : m.status === 'done' ? '✅ bitti' : '⛔ durdu'}`, W - 24, 48);
     g.textAlign = 'left';
 
     const text = (m.preview ?? '').replace(/\r/g, '');
@@ -95,7 +95,7 @@ export class MeetingBoardTexture {
       g.fillStyle = '#8d99ae';
       g.font = `800 44px ${FONT}`;
       g.textAlign = 'center';
-      g.fillText(m.status === 'running' ? `Nothing written yet: ${speaking(m).join(', ') || 'the table'} ${speaking(m).length === 1 ? 'is' : 'are'} on it` : m.reason ? `⛔ ${m.reason}` : 'Nothing was written', W / 2, H / 2 + 30);
+      g.fillText(m.status === 'running' ? `Henüz yazılmadı: ${speaking(m).join(', ') || 'masadakiler'} üzerinde çalışıyor` : m.reason ? `⛔ ${m.reason}` : 'Hiçbir şey yazılmadı', W / 2, H / 2 + 30);
       g.textAlign = 'left';
       this.texture.needsUpdate = true;
       return;
@@ -160,15 +160,15 @@ export class MeetingSignTexture {
     g.fillRect(0, 0, W, H);
     g.textBaseline = 'alphabetic';
     // A strip across the top says whether the room is taken.
-    const [strip, label] = !m ? ['#06d6a0', '● FREE'] : m.status === 'running' ? ['#ffd166', '● IN A MEETING'] : m.status === 'done' ? ['#9ef01a', '✅ DONE'] : ['#ffb3c1', '⛔ STOPPED'];
+    const [strip, label] = !m ? ['#06d6a0', '● BOŞ'] : m.status === 'running' ? ['#ffd166', '● TOPLANTIDA'] : m.status === 'done' ? ['#9ef01a', '✅ BİTTİ'] : ['#ffb3c1', '⛔ DURDU'];
     g.fillStyle = strip;
     g.fillRect(0, 0, W, 78);
     g.fillStyle = INK;
     g.font = `900 38px ${FONT}`;
     g.fillText(label, pad, 53);
     if (!m) {
-      let y = lines('🤝 Meeting room', `900 50px ${FONT}`, '#fffaf3', 160, 2, 58);
-      lines('Press E at the table to call a meeting: a debate, lead & team, map-reduce, red / blue or a review panel.', `700 32px ${FONT}`, '#e9ecef', y + 30, 8, 42);
+      let y = lines('🤝 Toplantı odası', `900 50px ${FONT}`, '#fffaf3', 160, 2, 58);
+      lines('Toplantı çağırmak için masada E’ye bas: tartışma, lider ve ekip, map-reduce, kırmızı / mavi ya da inceleme paneli.', `700 32px ${FONT}`, '#e9ecef', y + 30, 8, 42);
       this.texture.needsUpdate = true;
       return;
     }
@@ -181,7 +181,7 @@ export class MeetingSignTexture {
       const who = speaking(m);
       if (who.length) lines(`💬 ${who.join(', ')}`, `700 30px ${FONT}`, '#bde0fe', y + 8, 3, 38);
       // What's been spent, along the bottom.
-      if (m.tokens) lines(`${meetingSpend(m)} so far`, `800 30px ${FONT}`, '#fffaf3', H - 40, 1, 38);
+      if (m.tokens) lines(`şimdiye dek ${meetingSpend(m)}`, `800 30px ${FONT}`, '#fffaf3', H - 40, 1, 38);
     } else {
       // The summary line after the pattern, which is up top already.
       lines(meetingSummary(m).split(' · ').slice(1).join(' · '), `700 30px ${FONT}`, '#e9ecef', y, Math.floor((H - y) / 38), 38);

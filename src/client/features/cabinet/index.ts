@@ -29,12 +29,12 @@ export function installCabinet(ctx: Ctx, deps: CabinetDeps): Cabinet {
       const f = store.cabinetFrame;
       if (c.player && c.player.id !== store.you) {
         const who = c.player.name;
-        return { k: `${who}|${f?.score}`, parts: [hintTitle('🕹️ Arcade'), aside(`▶ ${clip(who, 24)} is playing${f ? ` · ${scoreText(f.score)}` : ''}`), key('E', 'Watch')] };
+        return { k: `${who}|${f?.score}`, parts: [hintTitle('🕹️ Atari'), aside(`▶ ${clip(who, 24)} oynuyor${f ? ` · ${scoreText(f.score)}` : ''}`), key('E', 'İzle')] };
       }
       const left = cabinet.leftAt;
       const best = c.scores[0];
-      const about = left !== null ? `your game's paused at ${scoreText(left)}` : best ? `🏆 ${clip(best.name, 24)} · ${scoreText(best.score)}` : 'no high score yet';
-      return { k: `${left}|${best?.name}|${best?.score}`, parts: [hintTitle(`🕹️ ${GAME}`), aside(about), key('E', left !== null ? 'Carry on' : 'Play')] };
+      const about = left !== null ? `oyunun ${scoreText(left)} skorda duruyor` : best ? `🏆 ${clip(best.name, 24)} · ${scoreText(best.score)}` : 'henüz rekor yok';
+      return { k: `${left}|${best?.name}|${best?.score}`, parts: [hintTitle(`🕹️ ${GAME}`), aside(about), key('E', left !== null ? 'Devam et' : 'Oyna')] };
     },
     use: onE(() => cabinet.play()),
   });

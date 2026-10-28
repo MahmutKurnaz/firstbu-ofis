@@ -35,23 +35,23 @@ export function installSmoke(ctx: Ctx) {
     if (!smokeBreakUntil) return;
     if (!onBalcony()) {
       setSmoking(false);
-      toast('🚭 No smoking inside, so you put it out');
+      toast('🚭 İçeride sigara içilmez, o yüzden söndürdün');
     } else if (now > smokeBreakUntil) {
       setSmoking(false);
-      toast("That one's done. Back to work!");
+      toast('Bu bitti. İşe dön!');
     }
   }
   ctx.ticks.add('world', ({ now }) => checkSmokeBreak(now));
   ctx.interactions.define('smoke', {
     reach: 3,
-    hint: () => ({ k: String(smokeBreakUntil > 0), parts: [hintTitle('🚬 Ashtray'), key('E', smokeBreakUntil ? 'Stub it out' : 'Take a smoke break')] }),
+    hint: () => ({ k: String(smokeBreakUntil > 0), parts: [hintTitle('🚬 Kül tablası'), key('E', smokeBreakUntil ? 'Söndür' : 'Sigara molası ver')] }),
     use: onE(() => {
       if (smokeBreakUntil) {
         setSmoking(false);
-        toast('You stub it out in the ashtray');
+        toast('Sigarayı kül tablasında söndürdün');
       } else {
         setSmoking(true);
-        toast('🚬 Smoke break');
+        toast('🚬 Sigara molası');
       }
     }),
   });

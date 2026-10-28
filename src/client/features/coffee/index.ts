@@ -24,16 +24,16 @@ export function installCoffee(ctx: Ctx) {
     const jittery = caffeine.drink(performance.now() / 1000);
     ctx.sound.coffee();
     if (ctx.player.view === 'first') ctx.hands.sip();
-    if (jittery) toast('☕ One cup too many… you’ve got the jitters!', 'warn');
-    else if (caffeine.cups > 1) toast('☕ Another cup: back to a full minute of buzz');
-    else toast('☕ Fresh coffee! A minute of quicker feet and higher jumps');
+    if (jittery) toast('☕ Bir fincan fazla oldu… elin ayağın titriyor!', 'warn');
+    else if (caffeine.cups > 1) toast('☕ Bir fincan daha: yine tam bir dakika enerji');
+    else toast('☕ Taze kahve! Bir dakika daha hızlı adımlar ve daha yüksek zıplayışlar');
   }
 
   ctx.interactions.define('coffee', {
     reach: 3,
     hint: (it) => {
       const buzzed = caffeine.buzzed(performance.now() / 1000);
-      return { k: String(buzzed), parts: [hintTitle(it.label ?? '☕ Coffee machine'), key('E', buzzed ? 'Another cup' : 'Grab a cup')] };
+      return { k: String(buzzed), parts: [hintTitle(it.label ?? '☕ Kahve makinesi'), key('E', buzzed ? 'Bir fincan daha' : 'Fincan al')] };
     },
     use: onE(() => drinkCoffee()),
   });

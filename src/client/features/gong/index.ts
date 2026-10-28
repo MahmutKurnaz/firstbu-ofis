@@ -43,7 +43,7 @@ export function installGong(ctx: Ctx, deps: GongDeps) {
 
   ctx.interactions.define('gong', {
     reach: 3.5,
-    hint: () => ({ k: '', parts: [hintTitle('🎉 Merge gong'), aside('rings when a PR merges'), key('E', 'Bang it')] }),
+    hint: () => ({ k: '', parts: [hintTitle('🎉 Merge gongu'), aside('PR birleşince çalar'), key('E', 'Vur')] }),
     use: onE(() => hitGong()),
   });
 

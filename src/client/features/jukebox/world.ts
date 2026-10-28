@@ -90,10 +90,10 @@ export function buildJukebox(): JukeboxView {
     g.textBaseline = 'middle';
     g.fillStyle = on ? '#ffd166' : '#8d99ae';
     g.font = '900 44px Nunito, ui-rounded, system-ui, sans-serif';
-    g.fillText(on ? '♪ NOW PLAYING ♪' : 'JUKEBOX', 256, 70);
+    g.fillText(on ? '♪ ŞİMDİ ÇALIYOR ♪' : 'JUKEBOX', 256, 70);
     g.fillStyle = on ? '#ffffff' : '#8d99ae';
     let size = 58;
-    const text = on ? title : 'press E to play';
+    const text = on ? title : 'çalmak için E’ye bas';
     do g.font = `800 ${size--}px Nunito, ui-rounded, system-ui, sans-serif`;
     while (g.measureText(text).width > 470 && size > 26);
     g.fillText(text, 256, 160);

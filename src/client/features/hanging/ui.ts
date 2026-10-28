@@ -21,39 +21,39 @@ function lastFrame(): number {
   }
 }
 
-const TIP = 'Paste a link to an image. Online, right-click any picture and choose “Copy image address”.';
+const TIP = 'Bir resim bağlantısı yapıştır. Çevrimiçi herhangi bir resme sağ tıkla ve “Resim adresini kopyala”yı seç.';
 
 /** Pick an image, a title and a frame. Editing a picture (`initial`) fills them in. */
 export function openHangDialog(opts: { initial?: Decoration; onDone(choice: HangChoice): void }) {
   const init = opts.initial;
-  const urlIn = h('input', { type: 'text', placeholder: 'https://…/picture.png', 'aria-label': 'Image link', spellcheck: 'false', autocomplete: 'off' }) as HTMLInputElement;
-  const titleIn = h('input', { type: 'text', maxlength: 80, placeholder: 'Optional', 'aria-label': 'Title', autocomplete: 'off' }) as HTMLInputElement;
+  const urlIn = h('input', { type: 'text', placeholder: 'https://…/picture.png', 'aria-label': 'Resim bağlantısı', spellcheck: 'false', autocomplete: 'off' }) as HTMLInputElement;
+  const titleIn = h('input', { type: 'text', maxlength: 80, placeholder: 'İsteğe bağlı', 'aria-label': 'Başlık', autocomplete: 'off' }) as HTMLInputElement;
   urlIn.value = init?.url ?? '';
   titleIn.value = init?.title ?? '';
   let frame = init?.frame ?? lastFrame();
-  const frames = h('div.seg', { role: 'radiogroup', 'aria-label': 'Frame' });
+  const frames = h('div.seg', { role: 'radiogroup', 'aria-label': 'Çerçeve' });
   const preview = h('div.hang-preview');
   const status = h('p.hang-status', {}, TIP);
-  const submit = h('button.btn.primary', { type: 'submit', disabled: true }, init ? 'Save' : 'Pick a spot on the wall →') as HTMLButtonElement;
-  const cancel = h('button.btn', { type: 'button' }, 'Cancel');
-  const close = h('button.btn.close', { type: 'button', 'aria-label': 'Close' }, '✕');
+  const submit = h('button.btn.primary', { type: 'submit', disabled: true }, init ? 'Kaydet' : 'Duvarda yer seç →') as HTMLButtonElement;
+  const cancel = h('button.btn', { type: 'button' }, 'Vazgeç');
+  const close = h('button.btn.close', { type: 'button', 'aria-label': 'Kapat' }, '✕');
   const form = h(
     'form.modal.hang',
-    { role: 'dialog', 'aria-label': init ? 'Edit picture' : 'Hang a picture' },
-    h('header', {}, h('h2', {}, init ? '🖼️ Edit picture' : '🖼️ Hang a picture'), close),
+    { role: 'dialog', 'aria-label': init ? 'Resmi düzenle' : 'Resim as' },
+    h('header', {}, h('h2', {}, init ? '🖼️ Resmi düzenle' : '🖼️ Resim as'), close),
     h(
       'div.body',
       {},
-      h('label', {}, 'Image link'),
+      h('label', {}, 'Resim bağlantısı'),
       urlIn,
-      h('label', { style: 'margin-top:12px' }, 'Title'),
+      h('label', { style: 'margin-top:12px' }, 'Başlık'),
       titleIn,
-      h('label', { style: 'margin-top:12px' }, 'Frame'),
+      h('label', { style: 'margin-top:12px' }, 'Çerçeve'),
       frames,
       preview,
       status,
     ),
-    h('footer', {}, h('span.grow', {}, init ? '' : 'Then aim at a wall and click.'), cancel, submit),
+    h('footer', {}, h('span.grow', {}, init ? '' : 'Sonra bir duvara nişan al ve tıkla.'), cancel, submit),
   ) as HTMLFormElement;
 
   let pic: Picture | null = null;
@@ -96,14 +96,14 @@ export function openHangDialog(opts: { initial?: Decoration; onDone(choice: Hang
     const checked = checkImageUrl(raw);
     if ('error' in checked) return setStatus(checked.error, 'error');
     release = holdPicture(checked.url);
-    setStatus('Loading the image…', 'loading');
+    setStatus('Resim yükleniyor…', 'loading');
     loading = true;
     try {
       const p = await loadPicture(checked.url);
       if (my !== seq) return;
       loading = false;
       pic = p;
-      preview.replaceChildren(h('img', { src: p.src, alt: 'Preview' }));
+      preview.replaceChildren(h('img', { src: p.src, alt: 'Önizleme' }));
       setStatus('');
       submit.disabled = false;
       if (submitWhenLoaded) finish();
@@ -135,7 +135,7 @@ export function openHangDialog(opts: { initial?: Decoration; onDone(choice: Hang
   }
 
   const modal = openModal(form, {
-    doing: '🖼️ hanging a picture',
+    doing: '🖼️ resim asıyor',
     onClose: () => {
       seq++;
       clearTimeout(timer);
@@ -168,19 +168,19 @@ export function openPicture(d: Decoration, actions: { move(): void; edit(): void
   const release = holdPicture(d.url);
   const stage = h('div.picture-stage', {}, h('span.spinner'));
   loadPicture(d.url).then(
-    (pic) => stage.replaceChildren(h('img', { src: pic.src, alt: d.title ?? 'Picture' })),
+    (pic) => stage.replaceChildren(h('img', { src: pic.src, alt: d.title ?? 'Resim' })),
     (err) => stage.replaceChildren(h('p.hang-status.error', {}, `⚠️ ${(err as Error).message}`)),
   );
-  const link = h('a', { href: d.url, target: '_blank', rel: 'noopener noreferrer' }, 'Open the original ↗');
-  const close = h('button.btn.close', { type: 'button', 'aria-label': 'Close' }, '✕');
-  const takeDown = h('button.btn.danger', { type: 'button' }, 'Take down');
-  const edit = h('button.btn', { type: 'button' }, '✏️ Edit');
-  const move = h('button.btn.primary', { type: 'button' }, '↔️ Move');
+  const link = h('a', { href: d.url, target: '_blank', rel: 'noopener noreferrer' }, 'Orijinalini aç ↗');
+  const close = h('button.btn.close', { type: 'button', 'aria-label': 'Kapat' }, '✕');
+  const takeDown = h('button.btn.danger', { type: 'button' }, 'İndir');
+  const edit = h('button.btn', { type: 'button' }, '✏️ Düzenle');
+  const move = h('button.btn.primary', { type: 'button' }, '↔️ Taşı');
   const el = h(
     'div.modal.picture',
-    { role: 'dialog', 'aria-label': d.title || 'Picture' },
-    h('header', {}, h('h2', {}, `🖼️ ${d.title || 'A picture'}`), close),
-    h('div.body', {}, stage, h('p.picture-meta', {}, `Hung by ${d.by} · ${timeAgo(d.at)} · `, link)),
+    { role: 'dialog', 'aria-label': d.title || 'Resim' },
+    h('header', {}, h('h2', {}, `🖼️ ${d.title || 'Bir resim'}`), close),
+    h('div.body', {}, stage, h('p.picture-meta', {}, `Asan: ${d.by} · ${timeAgo(d.at)} · `, link)),
     h('footer', {}, takeDown, h('span.grow'), edit, move),
   );
   // Someone else took it down while you were looking.
@@ -203,7 +203,7 @@ export function openPicture(d: Decoration, actions: { move(): void; edit(): void
     actions.edit();
   });
   takeDown.addEventListener('click', () =>
-    confirmDialog('Take this picture down?', 'It comes off the wall for everyone.', 'Take down', () => {
+    confirmDialog('Bu resim indirilsin mi?', 'Herkes için duvardan kalkar.', 'İndir', () => {
       modal.close();
       actions.remove();
     }),

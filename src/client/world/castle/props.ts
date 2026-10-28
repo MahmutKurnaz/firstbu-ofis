@@ -369,14 +369,14 @@ function cask(kit: Kit, p: PropConfig): Interactable {
   }
   // Tankards on the rack.
   for (const x of [-0.72, 0.72]) g.add(mesh(new THREE.CylinderGeometry(0.07, 0.08, 0.18, 10), toon('#8d939c'), x, 1.0, 0.25, false));
-  const sign = textPlane('🍺 Ale', { bg: '#efe3c2', size: 48 });
+  const sign = textPlane('🍺 Bira', { bg: '#efe3c2', size: 48 });
   sign.scale.multiplyScalar(0.55);
   sign.position.set(0, 1.85, 0.2);
   g.add(sign);
   kit.group.add(g);
   const r = p.rotY ?? 0;
   collide(kit, p.x, p.z, PROP_SIZE.cask.width * s, PROP_SIZE.cask.depth * s, r, g.position.y + 1.6 * s);
-  const it: Interactable = { kind: 'coffee', label: '🍺 Ale casks', x: p.x + Math.sin(r) * 1.1, y: g.position.y, z: p.z + Math.cos(r) * 1.1, radius: 1.5 };
+  const it: Interactable = { kind: 'coffee', label: '🍺 Bira fıçıları', x: p.x + Math.sin(r) * 1.1, y: g.position.y, z: p.z + Math.cos(r) * 1.1, radius: 1.5 };
   g.userData.interact = it;
   return it;
 }

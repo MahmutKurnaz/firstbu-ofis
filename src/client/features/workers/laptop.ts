@@ -71,7 +71,7 @@ export function paintScreen(ctx: CanvasRenderingContext2D, w: number, h: number,
     ctx.font = `700 ${Math.round(h / 12)}px ui-monospace, Menlo, monospace`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(placeholder ?? 'booting…', w / 2, h / 2);
+    ctx.fillText(placeholder ?? 'açılıyor…', w / 2, h / 2);
     ctx.textAlign = 'left';
     return;
   }
@@ -130,7 +130,7 @@ export class Laptop {
   private drawnVersion = -1;
   private paintedAt = 0;
   private openT = 0;
-  private placeholder = 'booting…';
+  private placeholder = 'açılıyor…';
   /** Anything else of its own to free (the tome's page). */
   private owned: THREE.Material[] = [];
 

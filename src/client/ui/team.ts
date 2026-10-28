@@ -26,14 +26,14 @@ export function tunnelCommand(t: TeamState, os: Os): string {
 }
 
 function inviteMessage(t: TeamState, os: Os): string {
-  const project = store.project?.name ?? 'our';
+  const project = store.project?.name ?? 'bizim';
   return [
-    `You're invited to the ${project} Agent Office. Run this in a terminal (${OS_LABEL[os]}):`,
+    `${project} Agent Office’e davetlisin. Bunu bir terminalde çalıştır (${OS_LABEL[os]}):`,
     '',
     tunnelCommand(t, os),
     '',
-    `It opens the office at http://localhost:${t.port} — sign in (with the office password, or the account link you get from me) and keep that terminal open while you're in.`,
-    t.fingerprint ? `The first time, ssh asks whether to trust the server. Only say yes if it shows ${t.fingerprint}` : '',
+    `Ofisi http://localhost:${t.port} adresinde açar — giriş yap (ofis parolasıyla ya da benden alacağın hesap bağlantısıyla) ve içerdeyken o terminali açık tut.`,
+    t.fingerprint ? `İlk seferde ssh sunucuya güvenip güvenmediğini sorar. Sadece ${t.fingerprint} gösteriyorsa evet de.` : '',
   ]
     .filter((l, i, all) => l || all[i - 1])
     .join('\n')
@@ -42,11 +42,11 @@ function inviteMessage(t: TeamState, os: Os): string {
 
 /** On an office on a Tailscale network: the link, and how to get onto the network. */
 function tailnetMessage(t: TeamState): string {
-  const project = store.project?.name ?? 'our';
+  const project = store.project?.name ?? 'bizim';
   return [
-    `You're invited to the ${project} Agent Office: https://${t.tailnet}`,
+    `${project} Agent Office’e davetlisin: https://${t.tailnet}`,
     '',
-    "It's on our Tailscale network. If you aren't on it yet: install Tailscale (https://tailscale.com/download), sign in, and accept the invite I send you from Tailscale. Then open the link and sign in with the office password, or the account link you get from me.",
+    "Tailscale ağımızda. Henüz ağda değilsen: Tailscale’i kur (https://tailscale.com/download), giriş yap ve Tailscale’den göndereceğim daveti kabul et. Sonra bağlantıyı aç ve ofis parolasıyla ya da benden alacağın hesap bağlantısıyla giriş yap.",
   ].join('\n');
 }
 
@@ -71,7 +71,7 @@ export async function copy(text: string): Promise<boolean> {
 export function copyButton(label: string, text: () => string, cls = '') {
   const btn = h('button.btn', { type: 'button', class: cls }, label);
   btn.addEventListener('click', async () => {
-    btn.textContent = (await copy(text())) ? '✓ Copied' : 'Copy failed';
+    btn.textContent = (await copy(text())) ? '✓ Kopyalandı' : 'Kopyalanamadı';
     setTimeout(() => (btn.textContent = label), 1600);
   });
   return btn;
@@ -87,14 +87,14 @@ export function openTeam(net: Net) {
   let os = guessOs();
   let status: HTMLElement | null = null;
   const body = h('div.body.team');
-  const close = h('button.btn.close', { 'aria-label': 'Close' }, '✕');
+  const close = h('button.btn.close', { 'aria-label': 'Kapat' }, '✕');
   const message = (t: TeamState) => (t.tailnet ? tailnetMessage(t) : inviteMessage(t, os));
-  const copyMsg = copyButton('✉️ Copy invite message', () => (store.team ? message(store.team) : ''), 'primary');
-  const footer = h('footer', {}, h('span.grow', {}, 'Invited people still need to sign in: the office password, or an account from 🔑 Accounts.'), copyMsg);
-  const el = h('div.modal', { role: 'dialog', 'aria-label': 'Invite teammates', style: 'width:min(680px,100%)' }, h('header', {}, h('h2', {}, '👥 Invite teammates'), close), body, footer);
+  const copyMsg = copyButton('✉️ Davet mesajını kopyala', () => (store.team ? message(store.team) : ''), 'primary');
+  const footer = h('footer', {}, h('span.grow', {}, 'Davet edilenlerin yine de giriş yapması gerekir: ofis parolası ya da 🔑 Hesaplar’dan bir hesap.'), copyMsg);
+  const el = h('div.modal', { role: 'dialog', 'aria-label': 'Ekip arkadaşı davet et', style: 'width:min(680px,100%)' }, h('header', {}, h('h2', {}, '👥 Ekip arkadaşı davet et'), close), body, footer);
 
-  const input = h('input', { type: 'text', maxlength: 40, placeholder: 'GitHub username', 'aria-label': 'GitHub username', autocomplete: 'off', spellcheck: 'false' }) as HTMLInputElement;
-  const inviteBtn = h('button.btn.primary', { type: 'submit' }, 'Invite');
+  const input = h('input', { type: 'text', maxlength: 40, placeholder: 'GitHub kullanıcı adı', 'aria-label': 'GitHub kullanıcı adı', autocomplete: 'off', spellcheck: 'false' }) as HTMLInputElement;
+  const inviteBtn = h('button.btn.primary', { type: 'submit' }, 'Davet et');
   const form = h('form.invite-row', {}, input, inviteBtn) as HTMLFormElement;
   const setStatus = (text: string, kind: 'busy' | 'ok' | 'error') => {
     status = h('p.team-status', { class: kind }, text);
@@ -105,7 +105,7 @@ export function openTeam(net: Net) {
     const github = input.value.trim();
     if (!github) return input.focus();
     inviteBtn.disabled = true;
-    setStatus(`Fetching ${github}'s keys from GitHub…`, 'busy');
+    setStatus(`${github} kullanıcısının anahtarları GitHub’dan alınıyor…`, 'busy');
     net.send({ t: 'team.invite', github });
   });
 
@@ -114,15 +114,15 @@ export function openTeam(net: Net) {
     const t = store.team;
     const typing = document.activeElement === input;
     body.replaceChildren();
-    if (!t) return body.append(h('p.empty', {}, 'Loading…'));
+    if (!t) return body.append(h('p.empty', {}, 'Yükleniyor…'));
     footer.classList.toggle('hidden', !!t.unavailable);
     if (t.unavailable) return body.append(h('p', { style: 'margin:0;font-weight:700' }, t.unavailable));
     if (t.tailnet) return renderTailnet(t);
 
     body.append(
-      h('label', {}, 'Invite someone by their GitHub username'),
+      h('label', {}, 'Birini GitHub kullanıcı adıyla davet et'),
       form,
-      h('p.note', {}, 'Their SSH keys from github.com/<username>.keys can open a tunnel to this office — nothing else: no shell on the machine, no other ports.'),
+      h('p.note', {}, 'github.com/<username>.keys adresindeki SSH anahtarları bu ofise tünel açabilir — başka bir şey değil: makinede shell yok, başka port yok.'),
     );
     if (status) body.append(status);
     if (t.error) body.append(h('p.team-status.error', {}, t.error));
@@ -135,22 +135,22 @@ export function openTeam(net: Net) {
       ),
     );
     body.append(
-      h('div.team-head', {}, h('h4', {}, 'Then send them this'), tabs),
-      h('div.cmd', {}, h('pre', {}, tunnelCommand(t, os)), copyButton('Copy', () => tunnelCommand(t, os))),
+      h('div.team-head', {}, h('h4', {}, 'Sonra bunu gönder'), tabs),
+      h('div.cmd', {}, h('pre', {}, tunnelCommand(t, os)), copyButton('Kopyala', () => tunnelCommand(t, os))),
       h(
         'p.note',
         {},
-        `It opens the tunnel and http://localhost:${t.port} in their browser. They keep the terminal open while they're in. `,
-        t.fingerprint ? h('span', {}, 'The first time, ssh asks whether to trust the server: the fingerprint must be ', h('code', {}, t.fingerprint), '.') : null,
+        `Tüneli açar ve tarayıcılarında http://localhost:${t.port} adresini açar. İçerdeyken terminali açık tutarlar. `,
+        t.fingerprint ? h('span', {}, 'İlk seferde ssh sunucuya güvenip güvenmediğini sorar: parmak izi şu olmalı: ', h('code', {}, t.fingerprint), '.') : null,
       ),
     );
     // Railway's TCP proxy, a Fly.io app's IP address and the port Dokploy or Coolify publishes
     // (addresses with a port of their own) answer every IP; AWS's firewall doesn't.
     if (!t.ssh?.startsWith('ssh://')) {
-      body.append(h('p.note', {}, 'SSH only answers IP addresses you allowed. If theirs isn\'t, run ', h('code', {}, `${t.deploy ?? 'deploy/aws.sh'} allow <their-ip>`), ' (or ', h('code', {}, 'allow anywhere'), ') on your machine.'));
+      body.append(h('p.note', {}, 'SSH sadece izin verdiğin IP adreslerine yanıt verir. Onların adresi izinli değilse şunu çalıştır: ', h('code', {}, `${t.deploy ?? 'deploy/aws.sh'} allow <their-ip>`), ' (ya da ', h('code', {}, 'allow anywhere'), ') kendi makinende.'));
     }
 
-    body.append(h('h4', {}, `Invited `, h('span.count', {}, String(t.members.length))), memberList(t));
+    body.append(h('h4', {}, `Davet edilenler `, h('span.count', {}, String(t.members.length))), memberList(t));
     if (typing || !focused) setTimeout(() => input.focus(), 30);
     focused = true;
   };
@@ -160,43 +160,43 @@ export function openTeam(net: Net) {
     const url = `https://${t.tailnet}`;
     const link = (path: string, text: string) => h('a', { href: `${TAILSCALE_ADMIN}/${path}`, target: '_blank', rel: 'noopener' }, text);
     body.append(
-      h('label', {}, 'Everyone on your Tailscale network opens'),
-      h('div.cmd', {}, h('pre', {}, url), copyButton('Copy', () => url)),
-      h('p.note', {}, 'Nothing to run and no terminal to keep open. It comes over HTTPS, so voice and screen sharing work.'),
-      h('h4', {}, "Someone who isn't on it"),
+      h('label', {}, 'Tailscale ağındaki herkes şunu açar'),
+      h('div.cmd', {}, h('pre', {}, url), copyButton('Kopyala', () => url)),
+      h('p.note', {}, 'Çalıştırılacak bir şey ve açık tutulacak terminal yok. HTTPS üzerinden gelir, yani ses ve ekran paylaşımı çalışır.'),
+      h('h4', {}, 'Ağda olmayan biri'),
       h(
         'p.note',
         {},
-        'Share this one machine with them: on Tailscale\'s ',
-        link('machines', 'Machines'),
-        ' page, open ',
+        'Bu makineyi onlarla paylaş: Tailscale’in ',
+        link('machines', 'Makineler'),
+        ' sayfasında şunu aç: ',
         h('code', {}, t.tailnet!.split('.')[0]),
-        ', choose Share… and send them the link. Once they accept, they reach this machine and nothing else of yours. Or add them to your network under ',
-        link('users', 'Users'),
+        ', Share… seç ve bağlantıyı onlara gönder. Kabul edince bu makineye ulaşırlar, seninkilerden başka hiçbir şeye değil. Ya da ağına şuradan ekle: ',
+        link('users', 'Kullanıcılar'),
         '.',
       ),
     );
     if (status) body.append(status);
     if (t.error) body.append(h('p.team-status.error', {}, t.error));
     // People invited before the office went on the tailnet can still tunnel in, until they're removed.
-    if (t.members.length) body.append(h('h4', {}, 'Invited by SSH key ', h('span.count', {}, String(t.members.length))), memberList(t));
+    if (t.members.length) body.append(h('h4', {}, 'SSH anahtarıyla davet edilenler ', h('span.count', {}, String(t.members.length))), memberList(t));
   };
 
   const memberList = (t: TeamState) => {
     const list = h('ul.team-list');
     for (const m of t.members) {
-      const remove = h('button.btn', { type: 'button', title: `Remove ${m.name}'s access` }, 'Remove');
+      const remove = h('button.btn', { type: 'button', title: `${m.name} erişimini kaldır` }, 'Kaldır');
       remove.addEventListener('click', () =>
         confirmDialog(
-          `Remove ${m.name}?`,
-          `Their keys stop working right away. Every open tunnel drops for a moment too (other teammates just re-run their command). ${m.name} still knows the office password.`,
-          'Remove',
+          `${m.name} kaldırılsın mı?`,
+          `Anahtarları hemen çalışmayı bırakır. Açık her tünel de bir an için kopar (diğer ekip arkadaşları komutlarını yeniden çalıştırır). ${m.name} ofis parolasını hâlâ biliyor.`,
+'Kaldır',
           () => net.send({ t: 'team.remove', name: m.name }),
         ),
       );
-      list.append(h('li', {}, h('span.name', {}, m.name), h('span.keys', {}, `${m.keys} key${m.keys === 1 ? '' : 's'}`), remove));
+      list.append(h('li', {}, h('span.name', {}, m.name), h('span.keys', {}, `${m.keys} anahtar`), remove));
     }
-    if (!t.members.length) list.append(h('li.empty', {}, 'Nobody yet'));
+    if (!t.members.length) list.append(h('li.empty', {}, 'Henüz kimse yok'));
     return list;
   };
 
@@ -204,7 +204,7 @@ export function openTeam(net: Net) {
     inviteBtn.disabled = false;
     if (msg.error) return setStatus(msg.error, 'error');
     input.value = '';
-    setStatus(`✅ ${msg.name} is invited (${msg.keys} key${msg.keys === 1 ? '' : 's'}). Send them the command below.`, 'ok');
+    setStatus(`✅ ${msg.name} davet edildi (${msg.keys} anahtar). Aşağıdaki komutu ona gönder.`, 'ok');
   };
   const unsub = store.on('team', render);
   const modal = openModal(el, {

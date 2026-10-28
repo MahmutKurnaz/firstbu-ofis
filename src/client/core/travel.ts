@@ -88,8 +88,8 @@ export function installTravel(ctx: Ctx, core: CoreState, parts: TravelParts) {
     hint: (it) => {
       const f = store.currentFloor();
       const n = store.floors.length;
-      if (it === office.garageLift.interactable) return { k: `garage|${f?.name}|${n}`, parts: [hintTitle('🛗 Elevator'), aside(f ? `Garage · up to ${clip(f.name, 24)}` : 'Garage'), key('E', 'Choose a floor')] };
-      return { k: `${f?.name}|${n}`, parts: [hintTitle('🛗 Elevator'), f ? aside(`${f.name} · ${n} floor${n === 1 ? '' : 's'}`) : '', key('E', n > 1 ? 'Choose a floor' : 'Floors & projects')] };
+      if (it === office.garageLift.interactable) return { k: `garage|${f?.name}|${n}`, parts: [hintTitle('🛗 Asansör'), aside(f ? `Garaj · ${clip(f.name, 24)} katına` : 'Garaj'), key('E', 'Kat seç')] };
+      return { k: `${f?.name}|${n}`, parts: [hintTitle('🛗 Asansör'), f ? aside(`${f.name} · ${n} kat`) : '', key('E', n > 1 ? 'Kat seç' : 'Katlar ve projeler')] };
     },
     use: onE(() => showElevator()),
   });
@@ -120,7 +120,7 @@ export function installTravel(ctx: Ctx, core: CoreState, parts: TravelParts) {
     if (!inOffice()) {
       if (to === ROOF || to === GARAGE) {
         parts.walking.stopWalkingTo();
-        toast(`There's no ${to === ROOF ? 'rooftop bar' : 'garage'} on this map (${plan().icon} ${plan().name})`, 'warn');
+        toast(`Bu haritada ${to === ROOF ? 'çatı barı' : 'garaj'} yok (${plan().icon} ${plan().name})`, 'warn');
         return;
       }
       // Still up on a roof this map doesn't have: straight down to that floor.

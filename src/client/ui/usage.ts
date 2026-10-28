@@ -6,46 +6,46 @@ import { providerUsageState, providerUsageTracked, resolvedProvider } from './pr
 export { fmtCost, fmtTokens, tokensOf };
 
 function displayedCost(u: Usage): string {
-  return u.costKnown === false ? 'cost unavailable' : fmtCost(u.cost);
+  return u.costKnown === false ? 'maliyet yok' : fmtCost(u.cost);
 }
 
 /** e.g. "$0.42 · 38k tokens"; OpenCode's amount is explicitly an estimate. */
 export function usageLabel(u: Usage, provider: AgentProvider = 'claude'): string {
   const money = provider === 'codex' && u.costKnown !== true
-    ? 'cost unavailable'
+    ? 'maliyet yok'
     : u.costKnown === false
-      ? 'cost unavailable'
-      : `${fmtCost(u.cost)}${provider === 'opencode' ? ' reported' : ''}`;
+      ? 'maliyet yok'
+      : `${fmtCost(u.cost)}${provider === 'opencode' ? ' bildirilen' : ''}`;
   // DeepSeek Harness reports what is in the context window, not a token split.
   if (provider === 'dsh') {
     const window = u.contextSize !== undefined ? ` / ${fmtTokens(u.contextSize)}` : '';
     const spend = u.costKnown === true ? `${fmtCost(u.cost)} · ` : '';
-    return `${u.incomplete ? 'Partial: ' : ''}${spend}${fmtTokens(tokensOf(u))}${window} context`;
+    return `${u.incomplete ? 'Kısmi: ' : ''}${spend}${fmtTokens(tokensOf(u))}${window} bağlam`;
   }
-  return `${u.incomplete ? "Partial: " : ""}${money} · ${fmtTokens(tokensOf(u))} tokens`;
+  return `${u.incomplete ? 'Kısmi: ' : ''}${money} · ${fmtTokens(tokensOf(u))} token`;
 }
 
 /** The breakdown behind a figure, for a tooltip. */
 export function usageTitle(u: Usage, provider: AgentProvider = 'claude'): string {
-  const money = provider === 'codex' && u.costKnown !== true ? 'cost unavailable' : u.costKnown === false ? 'cost unavailable' : fmtCost(u.cost);
+  const money = provider === 'codex' && u.costKnown !== true ? 'maliyet yok' : u.costKnown === false ? 'maliyet yok' : fmtCost(u.cost);
   const calls = provider === 'codex' || u.callsKnown === false
-    ? 'API call count unavailable'
+    ? 'API çağrı sayısı yok'
     : provider === 'opencode'
-      ? `${u.calls} reported call${u.calls === 1 ? '' : 's'}`
-      : `${u.calls} API call${u.calls === 1 ? '' : 's'}`;
-  const dshContext = u.contextSize !== undefined ? `${fmtTokens(tokensOf(u))} of ${fmtTokens(u.contextSize)} context tokens` : `${fmtTokens(tokensOf(u))} context tokens`;
+      ? `${u.calls} bildirilen çağrı`
+      : `${u.calls} API çağrısı`;
+  const dshContext = u.contextSize !== undefined ? `${fmtTokens(u.contextSize)} bağlam token’ının ${fmtTokens(tokensOf(u))} tanesi` : `${fmtTokens(tokensOf(u))} bağlam token’ı`;
   return [
-    ...(u.incomplete ? ['Partial metrics: some session history is still loading or unavailable.'] : []),
+    ...(u.incomplete ? ['Kısmi metrikler: oturum geçmişinin bir kısmı hâlâ yükleniyor ya da yok.'] : []),
     provider === 'codex'
-      ? `Codex root-session metrics; subagent usage is not included; ${money}; ${calls}`
+      ? `Codex ana oturum metrikleri; alt ajan kullanımı dahil değil; ${money}; ${calls}`
       : provider === 'opencode'
-        ? `OpenCode reported estimate ${money}; model/provider estimate, not billing; ${calls}`
+        ? `OpenCode’un bildirdiği tahmin ${money}; model/sağlayıcı tahmini, fatura değil; ${calls}`
         : provider === 'dsh'
-          ? `DeepSeek Harness context usage from ACP: ${dshContext}; session cost ${u.costKnown === true ? money : 'unavailable'}; ${calls}`
-          : `${money} over ${calls}`,
-    `input ${fmtTokens(u.input)} · output ${fmtTokens(u.output)}`,
-    `reasoning ${fmtTokens(u.reasoning ?? 0)}`,
-    `cache write ${fmtTokens(u.cacheWrite)} · cache read ${fmtTokens(u.cacheRead)}`,
+          ? `ACP üzerinden DeepSeek Harness bağlam kullanımı: ${dshContext}; oturum maliyeti ${u.costKnown === true ? money : 'yok'}; ${calls}`
+          : `${money}, ${calls} için`,
+    `girdi ${fmtTokens(u.input)} · çıktı ${fmtTokens(u.output)}`,
+    `akıl yürütme ${fmtTokens(u.reasoning ?? 0)}`,
+    `önbellek yazma ${fmtTokens(u.cacheWrite)} · önbellek okuma ${fmtTokens(u.cacheRead)}`,
   ].join('\n');
 }
 
@@ -144,7 +144,7 @@ export function renderUsage() {
   }
   const head = $('workers-cost');
   head.textContent = now > 0 ? fmtCost(now) : '';
-  head.title = 'Current desks: tracked Claude Code costs plus reported OpenCode and DeepSeek Harness estimates; Codex root-session tokens appear below; sessions with unavailable cost or partial history are excluded.';
+  head.title = 'Mevcut masalar: izlenen Claude Code maliyetleri artı bildirilen OpenCode ve DeepSeek Harness tahminleri; Codex ana oturum token’ları aşağıda görünür; maliyeti olmayan ya da geçmişi kısmi oturumlar hariç.';
 
   const el = $('usage');
   const any = s.total.calls > 0 || s.budget !== undefined || untracked || currentOpenCodeReports > 0 || openCodeWaiting || currentCodexReports > 0 || codexWaiting || currentDshReports > 0 || dshWaiting;
@@ -158,54 +158,54 @@ export function renderUsage() {
       h(
         'div.row',
         {},
-        h('span', {}, '💸 Claude Code today'),
+        h('span', {}, '💸 Claude Code bugün'),
         h('b', { title: usageTitle(s.today, 'claude') }, displayedCost(s.today)),
-        s.budget !== undefined ? h('span.muted', {}, `of ${fmtCost(s.budget)}`) : h('span.muted', {}, `· ${fmtTokens(tokensOf(s.today))} tokens`),
+        s.budget !== undefined ? h('span.muted', {}, `/ ${fmtCost(s.budget)}`) : h('span.muted', {}, `· ${fmtTokens(tokensOf(s.today))} token`),
       ),
     );
   }
   if (s.budget !== undefined) {
     const pct = Math.min(100, (s.today.cost / s.budget) * 100);
-    const state = over ? (s.pauseHiring ? 'Budget spent — no new hires until tomorrow' : 'Budget spent') : `${Math.round(pct)}% of today's budget`;
+    const state = over ? (s.pauseHiring ? 'Bütçe bitti — yarına kadar yeni işe alım yok' : 'Bütçe bitti') : `bugünkü bütçenin %${Math.round(pct)}’i`;
     rows.push(h('div.budget', { class: over ? 'over' : pct >= 80 ? 'near' : '', title: state, role: 'progressbar', 'aria-valuenow': Math.round(pct) }, h('div.fill', { style: `width:${pct}%` })));
   }
-  if (s.total.calls > 0 || s.budget !== undefined) rows.push(h('div.row.muted', { title: usageTitle(s.total, 'claude') }, `Claude Code all time ${displayedCost(s.total)} · ${fmtTokens(tokensOf(s.total))} tokens`));
+  if (s.total.calls > 0 || s.budget !== undefined) rows.push(h('div.row.muted', { title: usageTitle(s.total, 'claude') }, `Claude Code toplam ${displayedCost(s.total)} · ${fmtTokens(tokensOf(s.total))} token`));
   if (currentOpenCodeReports > 0) {
-    const amount = currentOpenCodeCostUnknown ? 'cost unavailable' : `${fmtCost(currentOpenCodeCost)} reported`;
+    const amount = currentOpenCodeCostUnknown ? 'maliyet yok' : `${fmtCost(currentOpenCodeCost)} bildirilen`;
     rows.push(
       h(
         'div.row.muted',
         {
           title: [
-            'OpenCode current-desk metrics are model/provider estimates, not billing.',
-            `input ${fmtTokens(currentOpenCodeInput)} · output ${fmtTokens(currentOpenCodeOutput)}`,
-            `reasoning ${fmtTokens(currentOpenCodeReasoning)}`,
-            `cache write ${fmtTokens(currentOpenCodeCacheWrite)} · cache read ${fmtTokens(currentOpenCodeCacheRead)}`,
+            'OpenCode mevcut masa metrikleri model/sağlayıcı tahminidir, fatura değil.',
+            `girdi ${fmtTokens(currentOpenCodeInput)} · çıktı ${fmtTokens(currentOpenCodeOutput)}`,
+            `akıl yürütme ${fmtTokens(currentOpenCodeReasoning)}`,
+            `önbellek yazma ${fmtTokens(currentOpenCodeCacheWrite)} · önbellek okuma ${fmtTokens(currentOpenCodeCacheRead)}`,
           ].join('\n'),
         },
-        `OpenCode ${currentOpenCodeIncomplete ? "partial" : "current desks"} ${amount} · ${fmtTokens(currentOpenCodeTokens)} tokens`,
+        `OpenCode ${currentOpenCodeIncomplete ? 'kısmi' : 'mevcut masalar'} ${amount} · ${fmtTokens(currentOpenCodeTokens)} token`,
       ),
     );
   }
-  if (openCodeWaiting) rows.push(h('div.row.muted', { title: 'OpenCode usage appears after its first metrics report.' }, 'OpenCode metrics waiting for first report'));
+  if (openCodeWaiting) rows.push(h('div.row.muted', { title: 'OpenCode kullanımı ilk metrik raporundan sonra görünür.' }, 'OpenCode metrikleri ilk raporu bekliyor'));
   if (currentCodexReports > 0) {
-    const amount = currentCodexCostUnknown ? 'cost unavailable' : fmtCost(currentCodexCost);
+    const amount = currentCodexCostUnknown ? 'maliyet yok' : fmtCost(currentCodexCost);
     rows.push(
       h(
         'div.row.muted',
         {
           title: [
-            'Codex current-desk metrics cover the root session only; subagent usage is not included; cost is unavailable.',
-            `input ${fmtTokens(currentCodexInput)} · output ${fmtTokens(currentCodexOutput)}`,
-            `reasoning ${fmtTokens(currentCodexReasoning)}`,
-            `cache write ${fmtTokens(currentCodexCacheWrite)} · cache read ${fmtTokens(currentCodexCacheRead)}`,
+            'Codex mevcut masa metrikleri sadece ana oturumu kapsar; alt ajan kullanımı dahil değil; maliyet yok.',
+            `girdi ${fmtTokens(currentCodexInput)} · çıktı ${fmtTokens(currentCodexOutput)}`,
+            `akıl yürütme ${fmtTokens(currentCodexReasoning)}`,
+            `önbellek yazma ${fmtTokens(currentCodexCacheWrite)} · önbellek okuma ${fmtTokens(currentCodexCacheRead)}`,
           ].join('\n'),
         },
-        `Codex ${currentCodexIncomplete ? 'partial' : 'current desks'} ${amount} · ${fmtTokens(currentCodexTokens)} tokens`,
+        `Codex ${currentCodexIncomplete ? 'kısmi' : 'mevcut masalar'} ${amount} · ${fmtTokens(currentCodexTokens)} token`,
       ),
     );
   }
-  if (codexWaiting) rows.push(h('div.row.muted', { title: 'Codex usage appears after its first root-session metrics report; subagent usage is not included.' }, 'Codex metrics waiting for first report'));
+  if (codexWaiting) rows.push(h('div.row.muted', { title: 'Codex kullanımı ilk ana oturum metrik raporundan sonra görünür; alt ajan kullanımı dahil değil.' }, 'Codex metrikleri ilk raporu bekliyor'));
   if (currentDshReports > 0) {
     const context = currentDshContext > 0 ? ` / ${fmtTokens(currentDshContext)}` : '';
     const spend = currentDshCostKnown ? `${fmtCost(currentDshCost)} · ` : '';
@@ -214,17 +214,17 @@ export function renderUsage() {
         'div.row.muted',
         {
           title: [
-            'DeepSeek Harness reports what is in each session\u2019s context window over ACP after a turn; cost appears only when the harness supplies it, and is never billing.',
-            `${currentDshReports} worker${currentDshReports === 1 ? '' : 's'} · ${fmtTokens(currentDshTokens)}${context} context tokens`,
+            'DeepSeek Harness, her turdan sonra ACP \u00fczerinden her oturumun ba\u011flam penceresindekini bildirir; maliyet sadece harness sa\u011flarsa g\u00f6r\u00fcn\u00fcr ve asla fatura de\u011fildir.',
+            `${currentDshReports} çalışan · ${fmtTokens(currentDshTokens)}${context} bağlam token’ı`,
           ].join('\n'),
         },
-        `DeepSeek Harness current desks ${spend}${fmtTokens(currentDshTokens)}${context} context`,
+        `DeepSeek Harness mevcut masalar ${spend}${fmtTokens(currentDshTokens)}${context} bağlam`,
       ),
     );
   }
-  if (dshWaiting) rows.push(h('div.row.muted', { title: 'DeepSeek Harness usage appears after its first ACP usage update.' }, 'DeepSeek Harness metrics waiting for first report'));
+  if (dshWaiting) rows.push(h('div.row.muted', { title: 'DeepSeek Harness kullanımı ilk ACP kullanım güncellemesinden sonra görünür.' }, 'DeepSeek Harness metrikleri ilk raporu bekliyor'));
   if (untracked) {
-    rows.push(h('div.row.muted', { title: 'Custom provider usage is not reported by the office.' }, 'Custom usage untracked · budget and totals cover Claude Code only'));
+    rows.push(h('div.row.muted', { title: 'Özel sağlayıcı kullanımını ofis bildirmez.' }, 'Özel kullanım izlenmiyor · bütçe ve toplamlar sadece Claude Code’u kapsar'));
   }
   el.replaceChildren(...rows);
 }

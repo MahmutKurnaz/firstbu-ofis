@@ -23,13 +23,13 @@ function taskTitle(t: QueueTask): HTMLElement {
 function outcome(t: QueueTask): string {
   switch (t.outcome) {
     case 'done':
-      return t.pr ? 'finished' : 'finished, no PR found yet';
+      return t.pr ? 'bitti' : 'bitti, henüz PR bulunamadı';
     case 'exited':
-      return t.error ? `stopped: ${t.error}` : 'stopped before finishing';
+      return t.error ? `durdu: ${t.error}` : 'bitmeden durdu';
     case 'killed':
-      return 'sent home';
+      return 'eve gönderildi';
     case 'failed':
-      return `couldn't start: ${t.error ?? 'unknown error'}`;
+      return `başlatılamadı: ${t.error ?? 'bilinmeyen hata'}`;
     default:
       return '';
   }
@@ -37,24 +37,24 @@ function outcome(t: QueueTask): string {
 
 export function openQueue(net: Net, actions: QueueActions) {
   const body = h('div.body.queue');
-  const close = h('button.btn.close', { 'aria-label': 'Close' }, '✕');
+  const close = h('button.btn.close', { 'aria-label': 'Kapat' }, '✕');
   const limitValue = h('b');
-  const minus = h('button.btn', { type: 'button', title: 'Fewer workers at once', 'aria-label': 'Fewer workers at once' }, '−');
-  const plus = h('button.btn', { type: 'button', title: 'More workers at once', 'aria-label': 'More workers at once' }, '+');
-  const limit = h('div.queue-limit', { title: 'How many workers the queue keeps busy at once. 0 pauses it.' }, 'Workers at once', minus, limitValue, plus);
+  const minus = h('button.btn', { type: 'button', title: 'Aynı anda daha az çalışan', 'aria-label': 'Aynı anda daha az çalışan' }, '−');
+  const plus = h('button.btn', { type: 'button', title: 'Aynı anda daha çok çalışan', 'aria-label': 'Aynı anda daha çok çalışan' }, '+');
+  const limit = h('div.queue-limit', { title: 'Kuyruğun aynı anda kaç çalışanı meşgul tuttuğu. 0 duraklatır.' }, 'Aynı anda çalışan', minus, limitValue, plus);
   minus.addEventListener('click', () => net.send({ t: 'queue.limit', maxWorkers: store.queue.maxWorkers - 1 }));
   plus.addEventListener('click', () => net.send({ t: 'queue.limit', maxWorkers: store.queue.maxWorkers + 1 }));
   const el = h(
     'div.modal',
-    { role: 'dialog', 'aria-label': 'Task queue', style: 'width:min(800px,100%)' },
-    h('header', {}, h('h2', {}, '📋 Task queue'), limit, close),
+    { role: 'dialog', 'aria-label': 'Görev kuyruğu', style: 'width:min(800px,100%)' },
+    h('header', {}, h('h2', {}, '📋 Görev kuyruğu'), limit, close),
     body,
-    h('footer', {}, h('span.grow', {}, 'The queue keeps going while you are away. Set “workers at once” to 0 to pause it.')),
+    h('footer', {}, h('span.grow', {}, 'Sen yokken de kuyruk devam eder. Duraklatmak için “aynı anda çalışan” sayısını 0 yap.')),
   );
 
-  const ta = h('textarea', { rows: 2, placeholder: 'Describe a task for the next free worker…', 'aria-label': 'New task' }) as HTMLTextAreaElement;
+  const ta = h('textarea', { rows: 2, placeholder: 'Sıradaki boş çalışan için bir görev yaz…', 'aria-label': 'Yeni görev' }) as HTMLTextAreaElement;
   const provider = providerPicker(store.project, 'queue-provider');
-  const addBtn = h('button.btn.primary', { type: 'submit' }, 'Add to queue');
+  const addBtn = h('button.btn.primary', { type: 'submit' }, 'Kuyruğa ekle');
   const form = h('form.queue-add', {}, dictateField(ta), provider.element, addBtn) as HTMLFormElement;
   form.noValidate = true;
   const submit = () => {
@@ -88,10 +88,10 @@ export function openQueue(net: Net, actions: QueueActions) {
     const meta: string[] = [];
     const buttons: HTMLElement[] = [];
     const badge = modelBadge(t.provider, t.model, t.effort);
-    const model = badge ? ` · initial: ${badge}` : '';
+    const model = badge ? ` · başlangıç: ${badge}` : '';
     const usageSuffix = (provider: AgentProvider | undefined, usage?: Usage) => {
       const state = providerUsageState(provider, store.project, usage);
-      if (state === 'untracked') return ' · usage untracked';
+      if (state === 'untracked') return ' · kullanım izlenmiyor';
       if (state !== 'waiting') return '';
       const waiting = providerWaitingLabel(provider, store.project);
       return waiting ? ` · ${waiting}` : '';
@@ -100,18 +100,18 @@ export function openQueue(net: Net, actions: QueueActions) {
     if (t.status === 'running') {
       const selectedProvider = providerLabel(t.provider ?? w?.provider, store.project);
       meta.push(`⚙️ ${selectedProvider}${model}${usageSuffix(t.provider ?? w?.provider, w?.usage)}`);
-      meta.push(`${t.workerName ?? 'a worker'} · ${w ? STATUS_LABEL[w.status] ?? w.status : 'gone'}`);
+      meta.push(`${t.workerName ?? 'bir çalışan'} · ${w ? STATUS_LABEL[w.status] ?? w.status : 'gitti'}`);
       if (t.branch) meta.push(`🌿 ${t.branch}`);
-      if (t.startedAt) meta.push(`started ${timeAgo(t.startedAt)}`);
-      meta.push(`by ${t.addedBy}`);
+      if (t.startedAt) meta.push(`başladı ${timeAgo(t.startedAt)}`);
+      meta.push(`ekleyen: ${t.addedBy}`);
       if (w) {
         buttons.push(h('button.btn', { type: 'button', onclick: () => actions.openTerminal(w.id) }, '🖥️ Terminal'));
         buttons.push(
           h('button.btn', {
             type: 'button',
-            title: 'Send the worker home; the task counts as stopped',
-            onclick: () => confirmDialog(`Stop ${w.name}?`, `This sends ${w.name} home and stops the task. You can requeue it afterwards.`, 'Stop', () => net.send({ t: 'worker.kill', workerId: w.id })),
-          }, '⏹ Stop'),
+            title: 'Çalışanı eve gönder; görev durdurulmuş sayılır',
+            onclick: () => confirmDialog(`${w.name} durdurulsun mu?`, `Bu, ${w.name} çalışanını eve gönderir ve görevi durdurur. Sonra yeniden kuyruğa alabilirsin.`, 'Durdur', () => net.send({ t: 'worker.kill', workerId: w.id })),
+          }, '⏹ Durdur'),
         );
       }
     } else if (t.status === 'queued') {
@@ -119,20 +119,20 @@ export function openQueue(net: Net, actions: QueueActions) {
       const i = queued.indexOf(t);
       pos = String(i + 1);
       meta.push(`⚙️ ${providerLabel(t.provider, store.project)}${model}${usageSuffix(t.provider, w?.usage)}`);
-      meta.push(`added by ${t.addedBy} ${timeAgo(t.addedAt)}`);
-      buttons.push(h('button.btn', { type: 'button', title: 'Move up', 'aria-label': 'Move up', disabled: i === 0, onclick: () => net.send({ t: 'queue.move', taskId: t.id, delta: -1 }) }, '↑'));
-      buttons.push(h('button.btn', { type: 'button', title: 'Move down', 'aria-label': 'Move down', disabled: i === queued.length - 1, onclick: () => net.send({ t: 'queue.move', taskId: t.id, delta: 1 }) }, '↓'));
-      buttons.push(h('button.btn', { type: 'button', title: 'Remove from the queue', 'aria-label': 'Remove', onclick: () => net.send({ t: 'queue.remove', taskId: t.id }) }, '✕'));
+      meta.push(`ekleyen: ${t.addedBy} ${timeAgo(t.addedAt)}`);
+      buttons.push(h('button.btn', { type: 'button', title: 'Yukarı taşı', 'aria-label': 'Yukarı taşı', disabled: i === 0, onclick: () => net.send({ t: 'queue.move', taskId: t.id, delta: -1 }) }, '↑'));
+      buttons.push(h('button.btn', { type: 'button', title: 'Aşağı taşı', 'aria-label': 'Aşağı taşı', disabled: i === queued.length - 1, onclick: () => net.send({ t: 'queue.move', taskId: t.id, delta: 1 }) }, '↓'));
+      buttons.push(h('button.btn', { type: 'button', title: 'Kuyruktan çıkar', 'aria-label': 'Kaldır', onclick: () => net.send({ t: 'queue.remove', taskId: t.id }) }, '✕'));
     } else {
       meta.push(`⚙️ ${providerLabel(t.provider, store.project)}${model}${usageSuffix(t.provider, w?.usage)}`);
       meta.push(outcome(t));
       if (t.workerName) meta.push(t.workerName);
       if (t.branch) meta.push(`🌿 ${t.branch}`);
       if (t.finishedAt) meta.push(timeAgo(t.finishedAt));
-      if (t.pr) buttons.push(h('a.btn', { href: t.pr.url, target: '_blank', rel: 'noopener', title: t.pr.title }, `🔀 PR #${t.pr.number}${t.pr.state === 'MERGED' ? ' ✓' : t.pr.state === 'DRAFT' ? ' (draft)' : ''}`));
+      if (t.pr) buttons.push(h('a.btn', { href: t.pr.url, target: '_blank', rel: 'noopener', title: t.pr.title }, `🔀 PR #${t.pr.number}${t.pr.state === 'MERGED' ? ' ✓' : t.pr.state === 'DRAFT' ? ' (taslak)' : ''}`));
       if (w) buttons.push(h('button.btn', { type: 'button', onclick: () => actions.openTerminal(w.id) }, '🖥️ Terminal'));
-      buttons.push(h('button.btn', { type: 'button', title: 'Put it back on the queue', onclick: () => net.send({ t: 'queue.retry', taskId: t.id }) }, '↻ Requeue'));
-      buttons.push(h('button.btn', { type: 'button', title: 'Forget it', 'aria-label': 'Remove', onclick: () => net.send({ t: 'queue.remove', taskId: t.id }) }, '✕'));
+      buttons.push(h('button.btn', { type: 'button', title: 'Kuyruğa geri koy', onclick: () => net.send({ t: 'queue.retry', taskId: t.id }) }, '↻ Yeniden kuyruğa al'));
+      buttons.push(h('button.btn', { type: 'button', title: 'Unut gitsin', 'aria-label': 'Kaldır', onclick: () => net.send({ t: 'queue.remove', taskId: t.id }) }, '✕'));
     }
     return h(
       'li',
@@ -149,7 +149,7 @@ export function openQueue(net: Net, actions: QueueActions) {
 
   const render = () => {
     const q = store.queue;
-    limitValue.textContent = q.maxWorkers === 0 ? 'Paused' : String(q.maxWorkers);
+    limitValue.textContent = q.maxWorkers === 0 ? 'Duraklatıldı' : String(q.maxWorkers);
     minus.toggleAttribute('disabled', q.maxWorkers <= 0);
     const running = q.tasks.filter((t) => t.status === 'running');
     const queued = q.tasks.filter((t) => t.status === 'queued');
@@ -159,19 +159,19 @@ export function openQueue(net: Net, actions: QueueActions) {
       h(
         'p.note',
         {},
-        'Or open the 📌 Issues board and click ',
-        h('b', {}, 'Add to queue'),
-        ' on an issue. Whenever a desk is free and fewer than ',
+        'Ya da 📌 Issue panosunu aç ve bir issue’da ',
+        h('b', {}, 'Kuyruğa ekle'),
+        ' düğmesine tıkla. Bir masa boşsa ve kuyruğun çalışan görevi ',
         h('b', {}, q.maxWorkers === 0 ? '0' : String(q.maxWorkers)),
-        " of its tasks are running, the next task gets a fresh worker in its own git worktree (workers you hire yourself don't count). Issues are assigned on GitHub when they start, and the pull request is linked when it shows up.",
+        " taneden azsa, sıradaki görev kendi git worktree’sinde yeni bir çalışan alır (kendi işe aldığın çalışanlar sayılmaz). Issue’lar başlarken GitHub’da atanır, PR çıkınca bağlanır.",
       ),
       queued.length && officeFull(m)
-        ? h('p.note', {}, `⏸ The office is at its limit of ${m.limit} worker${m.limit === 1 ? '' : 's'}, so the next task waits until one goes home. A queue worker that's finished goes home by itself to make room.`)
+        ? h('p.note', {}, `⏸ Ofis ${m.limit} çalışan sınırında, bu yüzden sıradaki görev biri eve gidene kadar bekler. Görevi biten bir kuyruk çalışanı yer açmak için kendiliğinden eve gider.`)
         : null,
-      section('🤖 Working on it', running),
-      section('⏳ Up next', queued),
-      section('✅ Finished', done, h('button.btn', { type: 'button', onclick: () => net.send({ t: 'queue.clear' }) }, 'Clear')),
-      running.length + queued.length + done.length ? null : h('div.queue-empty', {}, 'Nothing on the queue yet.'),
+      section('🤖 Üstünde çalışılıyor', running),
+      section('⏳ Sırada', queued),
+      section('✅ Bitti', done, h('button.btn', { type: 'button', onclick: () => net.send({ t: 'queue.clear' }) }, 'Temizle')),
+      running.length + queued.length + done.length ? null : h('div.queue-empty', {}, 'Kuyrukta henüz bir şey yok.'),
     ];
     list.replaceChildren(...parts.filter((n): n is HTMLElement => n !== null));
   };
@@ -187,7 +187,7 @@ export function openQueue(net: Net, actions: QueueActions) {
   const unsubs = [store.on('queue', render), store.on('workers', render), store.on('issues', render), store.on('machine', machineChanged)];
   const tick = setInterval(render, 30_000);
   const modal = openModal(el, {
-    doing: '📥 at the queue',
+    doing: '📥 kuyrukta',
     onClose: () => {
       unsubs.forEach((u) => u());
       clearInterval(tick);

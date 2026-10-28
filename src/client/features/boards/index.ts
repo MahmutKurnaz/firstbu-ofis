@@ -104,8 +104,8 @@ export function installBoards(ctx: Ctx, deps: BoardsDeps) {
     reach: 9,
     hint: () => {
       const aimedNote = deps.aimedNote();
-      if (aimedNote) return { k: String(aimedNote.number), parts: [hintTitle(clip(`📌 #${aimedNote.number} ${aimedNote.title}`, 60)), key('E', 'Take it'), key('O', 'Read it')] };
-      return issuesTex.hasNotes ? { k: 'notes', parts: [hintTitle('📌 Issues board'), key('E', 'Open'), aside('or point at a note to take it')] } : boardHint('📌 Issues board');
+      if (aimedNote) return { k: String(aimedNote.number), parts: [hintTitle(clip(`📌 #${aimedNote.number} ${aimedNote.title}`, 60)), key('E', 'Al'), key('O', 'Oku')] };
+      return issuesTex.hasNotes ? { k: 'notes', parts: [hintTitle('📌 Issue panosu'), key('E', 'Aç'), aside('ya da almak için bir nota nişan al')] } : boardHint('📌 Issue panosu');
     },
     use: (_it, key, note) => {
       // A note on the issues board: E takes it straight off the cork, O opens it to read first.
@@ -116,19 +116,19 @@ export function installBoards(ctx: Ctx, deps: BoardsDeps) {
   });
   ctx.interactions.define('pulls', {
     reach: 9,
-    hint: () => boardHint('🔀 Pull request board'),
+    hint: () => boardHint('🔀 Pull request panosu'),
     use: onE(() => openBoard('pulls', ctx.net, deps.boardActions())),
   });
   ctx.interactions.define('services', {
     reach: 9,
-    hint: () => boardHint('🌐 Services board'),
+    hint: () => boardHint('🌐 Servisler panosu'),
     use: onE(() => openServices()),
   });
   ctx.interactions.define('queue', {
     reach: 9,
     hint: () => {
       const n = store.queue.tasks.filter((t) => t.status !== 'done').length;
-      return { k: String(n), parts: [hintTitle(`📋 Task queue${n ? ` · ${n}` : ''}`), key('E', 'Open')] };
+      return { k: String(n), parts: [hintTitle(`📋 Görev kuyruğu${n ? ` · ${n}` : ''}`), key('E', 'Aç')] };
     },
     use: onE(() => deps.showQueue()),
   });

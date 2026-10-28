@@ -168,8 +168,8 @@ export function installWorkerViews(ctx: Ctx, core: CoreState, parts: WorkerViews
       const deskDef = plan().byId.get(w.deskId);
       // Keys clack while it types, not while it reads, watches its tests or browses.
       if (deskDef) sound.setTyping(w.id, deskDef.x, deskDef.z, w.status === 'working' && (!w.action || w.action === 'edit'));
-      const again = w.kind === 'shell' ? 'restart' : 'resume';
-      v.laptop.setPlaceholder(w.lost ? `🌿 ${w.name}'s worktree was deleted — press E to fix it` : w.status === 'offline' ? `💤 ${w.name} is asleep — press R to ${again}` : w.status === 'exited' ? `${w.name} exited` : 'booting…');
+      const again = w.kind === 'shell' ? 'yeniden başlatmak' : 'devam ettirmek';
+      v.laptop.setPlaceholder(w.lost ? `🌿 ${w.name} için worktree silindi — düzeltmek için E’ye bas` : w.status === 'offline' ? `💤 ${w.name} uyuyor — ${again} için R’ye bas` : w.status === 'exited' ? `${w.name} çıktı` : 'açılıyor…');
     }
     for (const [id, v] of workerViews) {
       if (store.workers.has(id)) continue;
@@ -267,10 +267,10 @@ export function installWorkerViews(ctx: Ctx, core: CoreState, parts: WorkerViews
     if (i < 0) return undefined;
     const role = m.seats[i].role;
     const p = MEETING_PATTERNS[m.pattern];
-    if (m.status !== 'running') return { name: `${role} · ${p.icon} ${p.label}`, summary: m.status === 'done' ? `✅ The meeting wrote ${m.output}` : `⛔ Stopped: ${m.reason ?? 'stopped'}` };
+    if (m.status !== 'running') return { name: `${role} · ${p.icon} ${p.label}`, summary: m.status === 'done' ? `✅ Toplantı ${m.output} dosyasını yazdı` : `⛔ Durdu: ${m.reason ?? 'durdu'}` };
     const t = m.turns.find((x) => x.seat === i);
-    if (!t || t.state === 'done') return { name: `👂 ${role} · round ${m.round} of ${m.rounds}`, summary: t ? 'Part written: listening' : 'Listening' };
-    return { name: `💬 ${role} · round ${m.round} of ${m.rounds}`, summary: t.state === 'working' ? t.doing : `${t.doing} (up next)` };
+    if (!t || t.state === 'done') return { name: `👂 ${role} · tur ${m.round}/${m.rounds}`, summary: t ? 'Kısım yazıldı: dinliyor' : 'Dinliyor' };
+    return { name: `💬 ${role} · tur ${m.round}/${m.rounds}`, summary: t.state === 'working' ? t.doing : `${t.doing} (sırada)` };
   }
 
   /**
@@ -360,8 +360,8 @@ export function installWorkerViews(ctx: Ctx, core: CoreState, parts: WorkerViews
     reach: 8,
     hint: () => {
       const level = store.floorPlan.wing;
-      if (level >= WING.rows) return { k: 'full', parts: [hintTitle('🏢 Back office'), aside('built all the way out'), key('E', 'Wall a row up')] };
-      return { k: String(level), parts: [hintTitle(level ? '🚧 Room to grow' : '🚧 Room to grow through the wall'), aside(level ? `${level} of ${WING.rows} rows built` : 'the office can get bigger here'), key('E', level ? 'Another row: 2 more desks' : 'Knock through: 2 more desks')] };
+      if (level >= WING.rows) return { k: 'full', parts: [hintTitle('🏢 Arka ofis'), aside('sonuna kadar yapıldı'), key('E', 'Bir sıra ekle')] };
+      return { k: String(level), parts: [hintTitle(level ? '🚧 Genişleyecek yer' : '🚧 Duvarın ardında genişleyecek yer'), aside(level ? `${level}/${WING.rows} sıra yapıldı` : 'ofis burada büyüyebilir'), key('E', level ? 'Bir sıra daha: 2 masa daha' : 'Duvarı yık: 2 masa daha')] };
     },
     use: onE(() => openExpand(net)),
   });

@@ -20,7 +20,7 @@ const GONE = 0.6;
 /** Seconds for a shut laptop to shrink away. */
 const LAPTOP_GONE = 0.3;
 
-const FAREWELLS = ['😢 bye, everyone', '🥲 it was fun', '📦 welp', '😞 cleaning out my desk', '🥺 but my PR…', '😶 security is walking me out'];
+const FAREWELLS = ['😢 hoşça kalın', '🥲 eğlenceliydi', '📦 eh işte', '😞 masamı boşaltıyorum', '🥺 ama PR’ım…', '😶 güvenlik beni geçiriyor'];
 
 // Leaving a floor with no exit door, by parachute off the balcony.
 /** Seconds climbing up onto the railing, then teetering on it. */
@@ -37,7 +37,7 @@ const TURN = 1.2;
 /** Seconds for the chute to pop open, and to crumple on the ground once it's down. */
 const POP = 0.45;
 const CRUMPLE = 1.3;
-const JUMPS = ['🪂 geronimo!', '🪂 see ya!', '🪂 wheee!', '🪂 bye bye!', '🪂 I quit!'];
+const JUMPS = ['🪂 geronimo!', '🪂 görüşürüz!', '🪂 vııı!', '🪂 bay bay!', '🪂 ben istifa!'];
 const CANOPIES = ['#ef476f', '#ffd166', '#06d6a0', '#118ab2', '#8338ec', '#ff8a5b'];
 
 /** Seen from below too, so both sides of the fabric. */

@@ -73,12 +73,12 @@ export function installPalette(ctx: Ctx, parts: PaletteParts) {
       const open = () => waiting.openWorkerTerminal(w.id);
       out.push({
         icon: desk?.station ? STATION_INFO[desk.station].icon : w.kind === 'shell' ? '🐚' : '🧑‍💻',
-        kind: 'Worker',
+        kind: 'Çalışan',
         title: w.name,
         detail: [w.task?.name, desk?.label, STATUS_LABEL[w.status]].filter(Boolean).join(' · '),
         keywords: [w.title, w.worktree?.branch],
         open,
-        walk: desk && spot ? () => walkThen(spot, `${w.name} at ${desk.label}`, open, desk) : undefined,
+        walk: desk && spot ? () => walkThen(spot, `${w.name} · ${desk.label}`, open, desk) : undefined,
       });
     }
 
@@ -86,40 +86,40 @@ export function installPalette(ctx: Ctx, parts: PaletteParts) {
     const hireAt = (d: DeskDef) => () => actions.hireAtDesk(d.id);
     out.push({
       icon: '✨',
-      kind: 'Action',
-      title: 'Hire a worker',
-      detail: free ? `At ${free.label}, the free desk nearest you` : 'Every desk is taken',
-      keywords: ['new worker', 'spawn an agent'],
-      open: free ? hireAt(free) : () => toast('Every desk on this floor is taken', 'warn'),
+      kind: 'Eylem',
+      title: 'Çalışan işe al',
+      detail: free ? `${free.label}, sana en yakın boş masa` : 'Bütün masalar dolu',
+      keywords: ['new worker', 'spawn an agent', 'yeni çalışan', 'hire'],
+      open: free ? hireAt(free) : () => toast('Bu kattaki bütün masalar dolu', 'warn'),
       walk: free ? () => walkThen(deskSpot(free)!, free.label, hireAt(free), free) : undefined,
     });
-    out.push(at('queue', 'the task queue', { icon: '📋', kind: 'Action', title: 'Open the task queue', detail: 'Issues and tasks waiting for a worker', keywords: ['backlog', 'tasks'], open: showQueue }));
-    out.push({ icon: '⚙️', kind: 'Action', title: 'Settings', keywords: ['preferences', 'options'], open: () => parts.hud.showSettings() });
-    if (store.invites) out.push({ icon: '👥', kind: 'Action', title: 'Invite teammates', keywords: ['team', 'add people'], open: () => openTeam(net) });
-    else if (store.me.admin) out.push({ icon: '👥', kind: 'Action', title: 'Invite people', detail: 'Accounts', keywords: ['invite teammates', 'accounts', 'team'], open: () => openAccounts(net) });
-    out.push({ icon: '🖼️', kind: 'Action', title: 'Hang a picture', detail: 'On a wall of this floor', keywords: ['decorate', 'frame', 'art'], open: hanging.startHanging });
-    out.push({ icon: '🔎', kind: 'Action', title: 'Search the chat and every terminal', keywords: ['find'], open: showSearch });
+    out.push(at('queue', 'Görev kuyruğu', { icon: '📋', kind: 'Eylem', title: 'Görev kuyruğunu aç', detail: 'Çalışan bekleyen issue’lar ve görevler', keywords: ['backlog', 'tasks', 'görevler'], open: showQueue }));
+    out.push({ icon: '⚙️', kind: 'Eylem', title: 'Ayarlar', keywords: ['preferences', 'options', 'settings'], open: () => parts.hud.showSettings() });
+    if (store.invites) out.push({ icon: '👥', kind: 'Eylem', title: 'Takım arkadaşı davet et', keywords: ['team', 'add people', 'invite', 'davet'], open: () => openTeam(net) });
+    else if (store.me.admin) out.push({ icon: '👥', kind: 'Eylem', title: 'İnsanları davet et', detail: 'Hesaplar', keywords: ['invite teammates', 'accounts', 'team', 'hesaplar', 'davet'], open: () => openAccounts(net) });
+    out.push({ icon: '🖼️', kind: 'Eylem', title: 'Resim as', detail: 'Bu katın bir duvarına', keywords: ['decorate', 'frame', 'art', 'resim', 'tablo'], open: hanging.startHanging });
+    out.push({ icon: '🔎', kind: 'Eylem', title: 'Sohbette ve tüm terminallerde ara', keywords: ['find', 'search', 'ara'], open: showSearch });
 
-    out.push(at('issues', 'the Issues board', { icon: '📌', kind: 'Board', title: 'Issues board', open: () => openBoard('issues', net, actions.boardActions()) }));
-    out.push(at('pulls', 'the PR board', { icon: '🔀', kind: 'Board', title: 'PR board', keywords: ['pull requests'], open: () => openBoard('pulls', net, actions.boardActions()) }));
-    out.push(at('services', 'the Services board', { icon: '🌐', kind: 'Board', title: 'Services board', detail: 'Web servers the workers are running', open: () => openServices() }));
-    out.push(at('whiteboard', 'the whiteboard', { icon: '📝', kind: 'Board', title: 'Whiteboard', open: () => openWhiteboard(net) }));
-    out.push(at('meeting', 'the meeting room', { icon: '🤝', kind: 'Board', title: 'Meeting room', keywords: ['call a meeting'], open: () => meeting.showMeeting() }));
+    out.push(at('issues', 'Issue panosu', { icon: '📌', kind: 'Pano', title: 'Issue panosu', open: () => openBoard('issues', net, actions.boardActions()) }));
+    out.push(at('pulls', 'PR panosu', { icon: '🔀', kind: 'Pano', title: 'PR panosu', keywords: ['pull requests'], open: () => openBoard('pulls', net, actions.boardActions()) }));
+    out.push(at('services', 'Servisler panosu', { icon: '🌐', kind: 'Pano', title: 'Servisler panosu', detail: 'Çalışanların çalıştırdığı web sunucuları', open: () => openServices() }));
+    out.push(at('whiteboard', 'Beyaz tahta', { icon: '📝', kind: 'Pano', title: 'Beyaz tahta', open: () => openWhiteboard(net) }));
+    out.push(at('meeting', 'Toplantı odası', { icon: '🤝', kind: 'Pano', title: 'Toplantı odası', keywords: ['call a meeting', 'toplantı'], open: () => meeting.showMeeting() }));
 
     for (const pr of store.pulls.items) {
       out.push(
-        at('pulls', 'the PR board', {
+        at('pulls', 'PR panosu', {
           icon: '🔀',
           kind: 'PR',
           title: `#${pr.number} ${pr.title}`,
-          detail: [pr.isDraft ? 'Draft' : pr.state.toLowerCase(), pr.headRefName, pr.author].join(' · '),
+          detail: [pr.isDraft ? 'Taslak' : pr.state.toLowerCase(), pr.headRefName, pr.author].join(' · '),
           open: () => openPull(pr, net, actions.boardActions()),
         }),
       );
     }
     for (const issue of store.issues.items) {
       out.push(
-        at('issues', 'the Issues board', {
+        at('issues', 'Issue panosu', {
           icon: '📌',
           kind: 'Issue',
           title: `#${issue.number} ${issue.title}`,
@@ -132,20 +132,20 @@ export function installPalette(ctx: Ctx, parts: PaletteParts) {
       const board = spotOf('services');
       out.push({
         icon: '🌐',
-        kind: 'Service',
+        kind: 'Servis',
         title: svc.title || svc.command,
         detail: [`:${svc.port}`, svc.title && svc.command, store.workers.get(svc.workerId)?.name].filter(Boolean).join(' · '),
         keywords: [String(svc.port)],
         // As its Open ↗ button does. A new tab needs the key press itself, so walking there shows the board instead.
         open: () => window.open(serviceUrl(svc.port), '_blank', 'noopener'),
-        walk: board ? () => walkThen(board, 'the Services board', () => openServices()) : undefined,
+        walk: board ? () => walkThen(board, 'Servisler panosu', () => openServices()) : undefined,
       });
     }
     for (const p of store.peers.values()) {
       if (p.id === store.you) continue;
-      const floor = store.onMyFloor(p) ? 'On this floor' : `On the ${store.floors.find((f) => f.id === p.floor)?.name ?? 'other'} floor`;
+      const floor = store.onMyFloor(p) ? 'Bu katta' : `${store.floors.find((f) => f.id === p.floor)?.name ?? 'Başka'} katında`;
       // As clicking them under "In the office" does: over to them, by elevator if need be.
-      out.push({ icon: '🙂', kind: 'Teammate', title: p.name, detail: floor, open: () => parts.walking.walkTo(p.id) });
+      out.push({ icon: '🙂', kind: 'Takım arkadaşı', title: p.name, detail: floor, open: () => parts.walking.walkTo(p.id) });
     }
     return out;
   }

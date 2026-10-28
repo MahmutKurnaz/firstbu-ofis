@@ -32,13 +32,13 @@ export interface HudAction {
 }
 
 const PANELS: { id: HudPanel; icon: string; label: string; what: string }[] = [
-  { id: 'workers', icon: '🤖', label: 'Workers', what: 'Every desk and what it’s up to' },
+  { id: 'workers', icon: '🤖', label: 'Çalışanlar', what: 'Her masa ve ne yaptığı' },
   { id: 'ordu', icon: '🏢', label: 'Ekipler', what: 'Ofisler, ekipler, roller ve raporlar' },
-  { id: 'people', icon: '👥', label: 'People', what: 'Who’s here, on which floor' },
-  { id: 'spend', icon: '💸', label: 'Spend', what: 'Today, the budget, all time' },
-  { id: 'limits', icon: '⏳', label: 'Claude limits', what: 'The plan’s 5-hour and week' },
-  { id: 'chat', icon: '💬', label: 'Chat', what: 'T opens it either way' },
-  { id: 'floor', icon: '🏢', label: 'Floor details', what: 'Branch, folder, default agent' },
+  { id: 'people', icon: '👥', label: 'Kişiler', what: 'Kim burada, hangi katta' },
+  { id: 'spend', icon: '💸', label: 'Harcama', what: 'Bugün, bütçe, tüm zamanlar' },
+  { id: 'limits', icon: '⏳', label: 'Claude limitleri', what: 'Planın 5 saatlik ve haftalık limiti' },
+  { id: 'chat', icon: '💬', label: 'Sohbet', what: 'T her durumda açar' },
+  { id: 'floor', icon: '🏢', label: 'Kat ayrıntıları', what: 'Dal, klasör, varsayılan ajan' },
 ];
 
 /** The element each panel is. */
@@ -48,7 +48,7 @@ const PIN_SVG = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="tr
 
 /** The ✕ in a panel's heading, which hides it until you turn it back on from the ☰ menu. */
 export function panelHide(id: HudPanel): HTMLElement {
-  return h('button.panel-x', { type: 'button', 'data-hud': id, 'aria-label': 'Hide', title: 'Hide (☰ brings it back)' }, '✕');
+  return h('button.panel-x', { type: 'button', 'data-hud': id, 'aria-label': 'Gizle', title: 'Gizle (☰ geri getirir)' }, '✕');
 }
 
 export interface Hud {
@@ -73,7 +73,7 @@ export function mountHud(actions: HudAction[], settings: Settings, save: () => v
   const pinned = (a: HudAction) => settings.pins.includes(a.id);
   let menu: Modal | null = null;
 
-  const menuBtn = h('button.btn.dock-btn.dock-menu', { type: 'button', 'aria-label': 'Menu', 'aria-haspopup': 'menu', 'aria-expanded': 'false', title: 'Menu: everything else, and what shows on screen (Tab)' }, h('span.burger', { 'aria-hidden': 'true' }, h('i'), h('i'), h('i')));
+  const menuBtn = h('button.btn.dock-btn.dock-menu', { type: 'button', 'aria-label': 'Menü', 'aria-haspopup': 'menu', 'aria-expanded': 'false', title: 'Menü: geri kalan her şey ve ekranda neyin görüneceği (Tab)' }, h('span.burger', { 'aria-hidden': 'true' }, h('i'), h('i'), h('i')));
   menuBtn.addEventListener('click', () => toggleMenu());
 
   function applyPanels() {
@@ -120,7 +120,7 @@ export function mountHud(actions: HudAction[], settings: Settings, save: () => v
     const on = settings.hud[id];
     return h(
       'button.btn.dock-btn.dock-panel',
-      { type: 'button', 'aria-pressed': String(on), title: `${title}${on ? ' · click to hide' : ' · click to show'}`, onclick: () => setPanel(id, !settings.hud[id]) },
+      { type: 'button', 'aria-pressed': String(on), title: `${title}${on ? ' · gizlemek için tıkla' : ' · göstermek için tıkla'}`, onclick: () => setPanel(id, !settings.hud[id]) },
       icon,
       h('span.lbl', {}, label),
       n ? h('span.n', {}, String(n)) : null,
@@ -130,14 +130,14 @@ export function mountHud(actions: HudAction[], settings: Settings, save: () => v
   function render() {
     const items: HTMLElement[] = actions.filter((a) => offered(a) && (pinned(a) || a.status?.())).map(dockButton);
     const people = store.peers.size;
-    if (people > 1 || settings.hud.people) items.push(panelChip('people', '👥', 'People', people, `${people} in the office`));
+    if (people > 1 || settings.hud.people) items.push(panelChip('people', '👥', 'Kişiler', people, `ofiste ${people} kişi`));
     const workers = [...store.workers.values()];
     // Hired onto desks, bean bags and the meeting room's table; the board agents at their kiosks don't count.
     const hired = workers.filter((w) => !DESK_BY_ID.get(w.deskId)?.station).length;
     const waiting = workers.filter(waitingOnSomeone).length;
-    const workersTitle = hired || waiting ? `${hired} worker${hired === 1 ? '' : 's'} on this floor${waiting ? `, ${waiting} waiting on someone` : ''}` : 'No workers on this floor yet';
+    const workersTitle = hired || waiting ? `bu katta ${hired} çalışan${waiting ? `, ${waiting} tanesi birini bekliyor` : ''}` : 'Bu katta henüz çalışan yok';
     // Who's waiting has its own button on the bar (the 'waiting' action), so this just counts them.
-    items.push(panelChip('workers', '🤖', 'Workers', hired, workersTitle));
+    items.push(panelChip('workers', '🤖', 'Çalışanlar', hired, workersTitle));
     // Redrawn only when it looks different, so a busy worker's updates don't swap a button out from under a click.
     const next = h('div', {}, ...items);
     if (next.innerHTML !== [...dock.children].filter((c) => c !== menuBtn).map((c) => c.outerHTML).join('')) dock.replaceChildren(...items, menuBtn);
@@ -173,8 +173,8 @@ export function mountHud(actions: HudAction[], settings: Settings, save: () => v
       pin.innerHTML = PIN_SVG;
       const paintPin = () => {
         pin.setAttribute('aria-pressed', String(pinned(a)));
-        pin.setAttribute('aria-label', `Pin ${labelOf(a)} to the top bar`);
-        pin.title = pinned(a) ? 'Unpin from the top bar' : 'Pin to the top bar';
+        pin.setAttribute('aria-label', `${labelOf(a)} üst çubuğa sabitle`);
+        pin.title = pinned(a) ? 'Üst çubuktan kaldır' : 'Üst çubuğa sabitle';
       };
       paintPin();
       pin.addEventListener('click', () => {
@@ -203,10 +203,10 @@ export function mountHud(actions: HudAction[], settings: Settings, save: () => v
     const rows = (s: HudAction['section']) => actions.filter((a) => a.section === s && offered(a)).map(row);
     const el = h(
       'div.hud-menu',
-      { role: 'menu', 'aria-label': 'Menu' },
-      h('div.menu-col', {}, ...section('Open', rows('Open')), ...section('Together', rows('Together'))),
-      h('div.menu-col', {}, ...section('Show on screen', PANELS.map(toggle)), ...section('Office', rows('Office'))),
-      h('p.menu-foot', {}, 'Pin what you use most to keep it on the top bar. ', h('kbd', {}, 'Tab'), ' opens and closes this menu.'),
+      { role: 'menu', 'aria-label': 'Menü' },
+      h('div.menu-col', {}, ...section('Aç', rows('Open')), ...section('Birlikte', rows('Together'))),
+      h('div.menu-col', {}, ...section('Ekranda göster', PANELS.map(toggle)), ...section('Ofis', rows('Office'))),
+      h('p.menu-foot', {}, 'En çok kullandıklarını üst çubukta tutmak için sabitle. ', h('kbd', {}, 'Tab'), ' bu menüyü açar ve kapatır.'),
     );
     // On the window, so the keys work wherever focus is while the menu is up.
     const onKey = (e: KeyboardEvent) => menuKey(el, e);

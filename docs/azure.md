@@ -85,7 +85,7 @@ deploy/azure.sh reset-password           # new password, shown once; signs every
 deploy/azure.sh ssh | logs               # get on the VM / follow the office logs
 ```
 
-**⬆️ Upgrade the office** in the **☰** menu works too.
+**⬆️ Ofisi yükselt** in the **☰** menu works too.
 
 Useful options for `up`:
 

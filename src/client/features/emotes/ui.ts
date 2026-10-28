@@ -42,7 +42,7 @@ export class EmoteWheel {
       );
     });
     this.caption = h('div.middle');
-    this.el = h('div.emote-wheel.hidden', { role: 'menu', 'aria-label': 'Emotes' }, h('div.ring', {}, ...this.items, this.caption));
+    this.el = h('div.emote-wheel.hidden', { role: 'menu', 'aria-label': 'Emojiler' }, h('div.ring', {}, ...this.items, this.caption));
     this.el.addEventListener('pointerdown', (e) => {
       e.preventDefault();
       const i = this.items.findIndex((b) => b.contains(e.target as Node));
@@ -125,7 +125,7 @@ export class EmoteWheel {
   private render() {
     this.items.forEach((b, i) => b.classList.toggle('on', i === this.at));
     const e = EMOTES[this.at];
-    const how = !e ? 'Point at one, or 1–6' : this.heldAt ? 'Let go of G' : 'Click';
-    this.caption.replaceChildren(h('b', {}, e?.label ?? 'Emote'), h('small', {}, how));
+    const how = !e ? 'Birini göster ya da 1–6' : this.heldAt ? 'G’yi bırak' : 'Tıkla';
+    this.caption.replaceChildren(h('b', {}, e?.label ?? 'Emoji'), h('small', {}, how));
   }
 }

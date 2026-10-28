@@ -229,8 +229,8 @@ void whoami().then(() => {
       });
     });
     loading.until([
-      { say: 'Knocking on the door', done: welcomed },
-      { say: 'Fetching the dog', done: parts.dog.firstReady },
+      { say: 'Kapı çalınıyor', done: welcomed },
+      { say: 'Köpek getiriliyor', done: parts.dog.firstReady },
     ]);
   } else {
     // Pick a character first (people from before there was a choice keep their name and color).

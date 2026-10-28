@@ -238,7 +238,7 @@ export const elevator: Fixture<'elevator' | 'setProjectName'> = (site) => {
  */
 export const garageLift: Fixture<'garageLift'> = () => {
   const built = buildElevator(-SLAB - STREET_Y);
-  built.setSign('🛗 Garage');
+  built.setSign('🛗 Garaj');
   return {
     group: built.group,
     colliders: built.colliders,

@@ -30,7 +30,7 @@ export function issueMeeting(n: number, title: string): MeetingPreset {
   return { issue: n, title: `#${n} ${title}`, prompt: officePrompt('issue.meeting', issueVars({ number: n, title })) };
 }
 
-const PART_LABEL: Record<MeetingTurn['state'], string> = { waiting: '⏳ up next', sent: '📨 handed over', working: '💬 on it', done: '✅ written' };
+const PART_LABEL: Record<MeetingTurn['state'], string> = { waiting: '⏳ sırada', sent: '📨 devredildi', working: '💬 üstünde', done: '✅ yazıldı' };
 
 /**
  * The meeting room's window. With a meeting at the table it shows how it's going (and stops it, or
@@ -38,17 +38,17 @@ const PART_LABEL: Record<MeetingTurn['state'], string> = { waiting: '⏳ up next
  * that calls one.
  */
 export function openMeeting(net: Net, actions: MeetingActions, preset?: MeetingPreset) {
-  const close = h('button.btn.close', { 'aria-label': 'Close' }, '✕');
-  const title = h('h2', {}, '🤝 Meeting room');
+  const close = h('button.btn.close', { 'aria-label': 'Kapat' }, '✕');
+  const title = h('h2', {}, '🤝 Toplantı odası');
   const body = h('div.body.meeting');
   const foot = h('footer');
-  const el = h('div.modal.meeting-window', { role: 'dialog', 'aria-label': 'Meeting room' }, h('header', {}, title, close), body, foot);
+  const el = h('div.modal.meeting-window', { role: 'dialog', 'aria-label': 'Toplantı odası' }, h('header', {}, title, close), body, foot);
   let view: 'status' | 'form' = preset || !store.meeting.current ? 'form' : 'status';
   let form: ReturnType<typeof meetingForm> | null = null;
   const render = () => {
     if (view === 'status' && store.meeting.current) {
       form = null;
-      title.textContent = '🤝 Meeting room';
+      title.textContent = '🤝 Toplantı odası';
       renderStatus(store.meeting.current, body, foot, net, actions, () => {
         view = 'form';
         render();
@@ -60,14 +60,14 @@ export function openMeeting(net: Net, actions: MeetingActions, preset?: MeetingP
         view = 'status';
         render();
       });
-      title.textContent = '🤝 Call a meeting';
+      title.textContent = '🤝 Toplantı çağır';
       body.replaceChildren(form.body);
       foot.replaceChildren(...form.foot);
     }
     form.refresh();
   };
   const offs = [store.on('meeting', render), store.on('workers', () => view === 'status' && render()), store.on('pulls', () => form?.refresh())];
-  const modal: Modal = openModal(el, { doing: '🤝 at the meeting room', onClose: () => offs.forEach((off) => off()) });
+  const modal: Modal = openModal(el, { doing: '🤝 toplantı odasında', onClose: () => offs.forEach((off) => off()) });
   close.addEventListener('click', () => modal.close());
   render();
 }
@@ -75,49 +75,49 @@ export function openMeeting(net: Net, actions: MeetingActions, preset?: MeetingP
 function renderStatus(m: Meeting, body: HTMLElement, foot: HTMLElement, net: Net, actions: MeetingActions, callAnother: () => void) {
   const p = MEETING_PATTERNS[m.pattern];
   const running = m.status === 'running';
-  const pill = h('span.pill', { class: running ? 'working' : m.status === 'done' ? 'done' : 'needs_input' }, running ? 'in a meeting' : m.status);
+  const pill = h('span.pill', { class: running ? 'working' : m.status === 'done' ? 'done' : 'needs_input' }, running ? 'toplantıda' : ({ done: 'bitti', stopped: 'durduruldu' } as Record<string, string>)[m.status] ?? m.status);
   const seats = h(
     'ul.meeting-seats',
     {},
     ...m.seats.map((s, i) => {
       const w = s.workerId ? store.workers.get(s.workerId) : undefined;
       const t = m.turns.find((x) => x.seat === i);
-      const part = running ? (t ? `${PART_LABEL[t.state]}: ${t.doing}` : '👂 listening') : '';
+      const part = running ? (t ? `${PART_LABEL[t.state]}: ${t.doing}` : '👂 dinliyor') : '';
       return h(
         'li',
         {},
         h('span.dot', { style: `background:${w?.color ?? '#adb5bd'}` }),
         h('b', {}, s.role),
-        h('span.muted', {}, `${i === 0 ? 'head of the table · ' : ''}${s.workerName ?? '…'}`),
-        w ? h('span.pill', { class: w.status }, STATUS_LABEL[w.status]) : h('span.pill.exited', {}, 'gone home'),
+        h('span.muted', {}, `${i === 0 ? 'masanın başı · ' : ''}${s.workerName ?? '…'}`),
+        w ? h('span.pill', { class: w.status }, STATUS_LABEL[w.status]) : h('span.pill.exited', {}, 'eve gitti'),
         part ? h('span.meeting-part', { title: t?.file ?? '' }, part) : null,
-        s.tokens ? h('span.muted', {}, `${fmtTokens(s.tokens)} tokens`) : null,
+        s.tokens ? h('span.muted', {}, `${fmtTokens(s.tokens)} token`) : null,
         w ? h('button.btn.small', { type: 'button', onclick: () => actions.openTerminal(w.id) }, '🖥️ Terminal') : null,
       );
     }),
   );
-  const where = m.worktree ? h('span', {}, '🌿 ', h('code', {}, m.worktree.branch), m.commit ? ` · committed ${m.commit}` : '') : null;
-  const review = m.review?.url ? h('a', { href: m.review.url, target: '_blank', rel: 'noopener noreferrer' }, `🔍 The review on PR #${m.pr} ↗`) : m.review?.error ? h('span.bad', {}, `Couldn't post the review: ${m.review.error}`) : null;
+  const where = m.worktree ? h('span', {}, '🌿 ', h('code', {}, m.worktree.branch), m.commit ? ` · commit edildi ${m.commit}` : '') : null;
+  const review = m.review?.url ? h('a', { href: m.review.url, target: '_blank', rel: 'noopener noreferrer' }, `🔍 PR #${m.pr} üzerindeki inceleme ↗`) : m.review?.error ? h('span.bad', {}, `İnceleme gönderilemedi: ${m.review.error}`) : null;
   body.replaceChildren(
     ...present(
     h('div.meeting-head', {}, pill, h('b', {}, `${p.icon} ${p.label}`), h('span.meeting-title', { title: m.prompt }, m.title)),
-    h('p.meeting-line', {}, running ? `${meetingStage(m)} · called by ${m.calledBy} ${timeAgo(new Date(m.startedAt).toISOString())}` : m.status === 'done' ? `✅ Wrote ${m.output} in ${m.round} round${m.round === 1 ? '' : 's'}` : `⛔ Stopped in round ${m.round}: ${m.reason ?? 'stopped'}`),
-    m.tokens ? h('p.meeting-spend', { title: `${m.tokens.toLocaleString()} tokens, cache reads included` }, `💸 ${meetingSpend(m)}${running ? ' so far' : ''}`) : null,
+    h('p.meeting-line', {}, running ? `${meetingStage(m)} · çağıran: ${m.calledBy} ${timeAgo(new Date(m.startedAt).toISOString())}` : m.status === 'done' ? `✅ ${m.output} ${m.round} turda yazıldı` : `⛔ ${m.round}. turda durdu: ${m.reason ?? 'durduruldu'}`),
+    m.tokens ? h('p.meeting-spend', { title: `${m.tokens.toLocaleString()} token, önbellek okumaları dahil` }, `💸 ${meetingSpend(m)}${running ? ' şimdiye kadar' : ''}`) : null,
     seats,
-    h('div.meeting-out', {}, h('div.meeting-out-head', {}, h('b', {}, '📄 '), h('code', {}, m.output), where, review), h('pre.meeting-preview', {}, m.preview?.trim() ? m.preview : running ? 'Nothing written yet.' : 'Nothing was written.')),
+    h('div.meeting-out', {}, h('div.meeting-out-head', {}, h('b', {}, '📄 '), h('code', {}, m.output), where, review), h('pre.meeting-preview', {}, m.preview?.trim() ? m.preview : running ? 'Henüz bir şey yazılmadı.' : 'Hiçbir şey yazılmadı.')),
     store.meeting.past.length
-      ? h('details.meeting-past', {}, h('summary', {}, `Earlier meetings (${store.meeting.past.length})`), h('ul', {}, ...store.meeting.past.map((r) => h('li', { title: `Called by ${r.calledBy}` }, h('b', {}, r.title), h('div.muted', {}, r.summary)))))
+      ? h('details.meeting-past', {}, h('summary', {}, `Önceki toplantılar (${store.meeting.past.length})`), h('ul', {}, ...store.meeting.past.map((r) => h('li', { title: `Çağıran: ${r.calledBy}` }, h('b', {}, r.title), h('div.muted', {}, r.summary)))))
       : null,
     ),
   );
   const head = m.seats[0]?.workerId ? store.workers.get(m.seats[0].workerId) : undefined;
   foot.replaceChildren(
     ...present(
-    h('span.grow', {}, running ? 'The workers stay at the table after it ends, so you can read their terminals.' : 'Clearing the room sends the workers home. A committed output stays on its branch.'),
-    running ? h('button.btn', { type: 'button', onclick: () => confirmDialog('Stop the meeting?', `The workers stop where they are and stay at the table. ${m.output} is only there if it was written.`, 'Stop it', () => net.send({ t: 'meeting.stop' })) }, '⛔ Stop meeting') : null,
-    !running && m.commit && head?.worktree ? h('button.btn', { type: 'button', title: `Push ${m.worktree?.branch} and open a pull request`, onclick: () => actions.openPr(head.id) }, head.pr ? `🔀 PR #${head.pr.number}` : '🔀 Open PR') : null,
-    !running ? h('button.btn', { type: 'button', onclick: () => net.send({ t: 'meeting.clear' }) }, '🧹 Clear the room') : null,
-    !running ? h('button.btn.primary', { type: 'button', onclick: callAnother }, '🤝 Call a meeting…') : null,
+    h('span.grow', {}, running ? 'Toplantı bittikten sonra çalışanlar masada kalır, böylece terminallerini okuyabilirsin.' : 'Odayı boşaltmak çalışanları eve gönderir. Commit edilmiş çıktı dalında kalır.'),
+    running ? h('button.btn', { type: 'button', onclick: () => confirmDialog('Toplantı durdurulsun mu?', `Çalışanlar bulundukları yerde durur ve masada kalır. ${m.output} ancak yazılmışsa vardır.`, 'Durdur', () => net.send({ t: 'meeting.stop' })) }, '⛔ Toplantıyı durdur') : null,
+    !running && m.commit && head?.worktree ? h('button.btn', { type: 'button', title: `${m.worktree?.branch} dalını gönder ve PR aç`, onclick: () => actions.openPr(head.id) }, head.pr ? `🔀 PR #${head.pr.number}` : '🔀 PR aç') : null,
+    !running ? h('button.btn', { type: 'button', onclick: () => net.send({ t: 'meeting.clear' }) }, '🧹 Odayı boşalt') : null,
+    !running ? h('button.btn.primary', { type: 'button', onclick: callAnother }, '🤝 Toplantı çağır…') : null,
     ),
   );
 }
@@ -129,29 +129,29 @@ function meetingForm(net: Net, preset: MeetingPreset | undefined, done: () => vo
   let pattern: MeetingPattern = preset?.pattern ?? 'debate';
   let roles: string[] = [];
   let outputTouched = false;
-  const patterns = h('div.meeting-patterns', { role: 'radiogroup', 'aria-label': 'Pattern' });
-  const about = h('textarea', { rows: 4, placeholder: 'The question to settle, or the task to do: e.g. “Should the dog use A* or a navmesh?”', 'aria-label': 'What the meeting is about' }) as HTMLTextAreaElement;
+  const patterns = h('div.meeting-patterns', { role: 'radiogroup', 'aria-label': 'Düzen' });
+  const about = h('textarea', { rows: 4, placeholder: 'Çözülecek soru ya da yapılacak görev: örn. “Köpek A* mı yoksa navmesh mi kullanmalı?”', 'aria-label': 'Toplantının konusu' }) as HTMLTextAreaElement;
   about.value = preset?.prompt ?? '';
-  const titleIn = h('input', { type: 'text', placeholder: 'Title (optional): the first line otherwise', maxlength: 100, 'aria-label': 'Title' }) as HTMLInputElement;
+  const titleIn = h('input', { type: 'text', placeholder: 'Başlık (isteğe bağlı): yoksa ilk satır', maxlength: 100, 'aria-label': 'Başlık' }) as HTMLInputElement;
   titleIn.value = preset?.title ?? '';
-  const outputIn = h('input', { type: 'text', 'aria-label': 'Output file', spellcheck: 'false' }) as HTMLInputElement;
+  const outputIn = h('input', { type: 'text', 'aria-label': 'Çıktı dosyası', spellcheck: 'false' }) as HTMLInputElement;
   const outputNote = h('small.muted');
   const prSel = h('select.provider-select', { 'aria-label': 'Pull request' }) as HTMLSelectElement;
   const prRow = h('div.meeting-field', {}, h('label', {}, 'Pull request'), prSel);
-  const partsIn = h('textarea', { rows: 3, placeholder: 'src/server/\nsrc/client/\nsrc/shared/', 'aria-label': 'Parts', spellcheck: 'false' }) as HTMLTextAreaElement;
-  const partsRow = h('div.meeting-field', {}, h('label', {}, 'Parts, one per line'), partsIn, h('small.muted', {}, 'Handed out to the mappers in turn: files, folders, modules or issues.'));
+  const partsIn = h('textarea', { rows: 3, placeholder: 'src/server/\nsrc/client/\nsrc/shared/', 'aria-label': 'Parçalar', spellcheck: 'false' }) as HTMLTextAreaElement;
+  const partsRow = h('div.meeting-field', {}, h('label', {}, 'Parçalar, her satıra bir tane'), partsIn, h('small.muted', {}, 'Haritacılara sırayla dağıtılır: dosyalar, klasörler, modüller ya da issue’lar.'));
   const count = h('b');
-  const minus = h('button.btn.small', { type: 'button', 'aria-label': 'Fewer workers' }, '−');
-  const plus = h('button.btn.small', { type: 'button', 'aria-label': 'More workers' }, '+');
+  const minus = h('button.btn.small', { type: 'button', 'aria-label': 'Daha az çalışan' }, '−');
+  const plus = h('button.btn.small', { type: 'button', 'aria-label': 'Daha çok çalışan' }, '+');
   const roleList = h('div.meeting-roles');
-  const roundsSel = h('select.provider-select.meeting-rounds', { 'aria-label': 'Round limit' }) as HTMLSelectElement;
+  const roundsSel = h('select.provider-select.meeting-rounds', { 'aria-label': 'Tur sınırı' }) as HTMLSelectElement;
   // A pattern that always runs the same rounds says so, where a locked control would look broken.
   const roundsFixed = h('span.meeting-fixed');
   const roundsNote = h('small.muted');
-  const provider = providerPicker(store.project, 'meeting-provider', 'Workers');
+  const provider = providerPicker(store.project, 'meeting-provider', 'Çalışanlar');
   const busy = h('p.meeting-busy');
-  const submit = h('button.btn.primary', { type: 'submit' }, '🤝 Start the meeting');
-  const cancel = h('button.btn', { type: 'button', onclick: store.meeting.current ? back : done }, store.meeting.current ? '← Back' : 'Cancel');
+  const submit = h('button.btn.primary', { type: 'submit' }, '🤝 Toplantıyı başlat');
+  const cancel = h('button.btn', { type: 'button', onclick: store.meeting.current ? back : done }, store.meeting.current ? '← Geri' : 'Vazgeç');
 
   const def = () => MEETING_PATTERNS[pattern];
   const slug = () => slugify(titleIn.value.trim() || about.value.trim().split('\n')[0] || 'meeting', 32);
@@ -159,7 +159,7 @@ function meetingForm(net: Net, preset: MeetingPreset | undefined, done: () => vo
   const syncOutput = () => {
     if (!outputTouched) outputIn.value = def().output(slug(), pr());
     const problem = outputProblem(outputIn.value.trim());
-    outputNote.textContent = problem ? `⚠️ ${problem}` : pattern === 'review' ? 'It ends when this file is written; the office then posts it on the PR as one review.' : store.project?.branch ? 'It ends when this file is written; the office commits it on the meeting’s own branch.' : 'It ends when this file is written.';
+    outputNote.textContent = problem ? `⚠️ ${problem}` : pattern === 'review' ? 'Bu dosya yazılınca biter; ofis onu PR’a tek bir inceleme olarak gönderir.' : store.project?.branch ? 'Bu dosya yazılınca biter; ofis onu toplantının kendi dalına commit eder.' : 'Bu dosya yazılınca biter.';
     outputNote.classList.toggle('bad', !!problem);
   };
   const renderRoles = () => {
@@ -169,7 +169,7 @@ function meetingForm(net: Net, preset: MeetingPreset | undefined, done: () => vo
     plus.toggleAttribute('disabled', roles.length >= d.seats.max);
     roleList.replaceChildren(
       ...roles.map((r, i) => {
-        const input = h('input', { type: 'text', value: r, maxlength: 40, 'aria-label': `Role ${i + 1}` }) as HTMLInputElement;
+        const input = h('input', { type: 'text', value: r, maxlength: 40, 'aria-label': `Rol ${i + 1}` }) as HTMLInputElement;
         input.addEventListener('input', () => (roles[i] = input.value));
         return h('div.meeting-role', {}, h('span.muted', {}, i === 0 ? '👑' : `${i + 1}`), input);
       }),
@@ -183,13 +183,13 @@ function meetingForm(net: Net, preset: MeetingPreset | undefined, done: () => vo
     for (const b of patterns.children) b.setAttribute('aria-checked', String((b as HTMLElement).dataset.pattern === p));
     const fixed = fixedRounds(d);
     const limits = Array.from({ length: d.rounds.max - d.rounds.min + 1 }, (_, i) => d.rounds.min + i);
-    roundsSel.replaceChildren(...limits.map((n) => h('option', { value: String(n) }, `${n} round${n === 1 ? '' : 's'}`)));
+    roundsSel.replaceChildren(...limits.map((n) => h('option', { value: String(n) }, `${n} tur`)));
     roundsSel.value = String(d.rounds.default);
     roundsSel.classList.toggle('hidden', !!fixed);
     roundsFixed.classList.toggle('hidden', !fixed);
     roundsFixed.textContent = fixed ? `🔒 ${fixed.line}` : '';
     roundsFixed.title = fixed?.why ?? '';
-    roundsNote.textContent = fixed ? fixed.stages : `${d.rounds.min} to ${d.rounds.max}. ${d.roundsNote ?? ''}`.trim();
+    roundsNote.textContent = fixed ? fixed.stages : `${d.rounds.min} – ${d.rounds.max}.${d.roundsNote ?? ''}`.trim();
     prRow.classList.toggle('hidden', d.needs !== 'pr');
     partsRow.classList.toggle('hidden', d.needs !== 'parts');
     renderRoles();
@@ -219,13 +219,13 @@ function meetingForm(net: Net, preset: MeetingPreset | undefined, done: () => vo
     'form.meeting-form',
     {},
     patterns,
-    h('div.meeting-field', {}, h('label', {}, 'What’s it about?'), dictateField(about)),
+    h('div.meeting-field', {}, h('label', {}, 'Ne hakkında?'), dictateField(about)),
     h('div.meeting-field', {}, titleIn),
     prRow,
     partsRow,
-    h('div.meeting-field', {}, h('label', {}, 'Output file'), outputIn, outputNote),
-    h('div.meeting-field', {}, h('label.meeting-count', {}, 'Workers at the table', minus, count, plus), roleList),
-    h('div.meeting-field', {}, h('label', {}, 'Round limit'), roundsSel, roundsFixed, roundsNote),
+    h('div.meeting-field', {}, h('label', {}, 'Çıktı dosyası'), outputIn, outputNote),
+    h('div.meeting-field', {}, h('label.meeting-count', {}, 'Masadaki çalışanlar', minus, count, plus), roleList),
+    h('div.meeting-field', {}, h('label', {}, 'Tur sınırı'), roundsSel, roundsFixed, roundsNote),
     provider.element,
     busy,
   ) as HTMLFormElement;
@@ -238,7 +238,7 @@ function meetingForm(net: Net, preset: MeetingPreset | undefined, done: () => vo
     if (def().needs === 'pr' && !pr()) return prSel.focus();
     const parts = partsIn.value.split('\n').map((l) => l.trim()).filter(Boolean);
     if (def().needs === 'parts' && parts.length < roles.length - 1) {
-      toast(`List at least ${roles.length - 1} parts, one per line, or seat fewer workers`, 'warn');
+      toast(`En az ${roles.length - 1} parça yaz, her satıra bir tane, ya da daha az çalışan oturt`, 'warn');
       return partsIn.focus();
     }
     const output = outputIn.value.trim();
@@ -259,7 +259,7 @@ function meetingForm(net: Net, preset: MeetingPreset | undefined, done: () => vo
       model: provider.model(),
       effort: provider.effort(),
     });
-    toast(`🤝 Calling the ${def().label} meeting: the workers are heading for the meeting room`);
+    toast(`🤝 ${def().label} toplantısı çağrılıyor: çalışanlar toplantı odasına gidiyor`);
     done();
   };
   bodyEl.addEventListener('submit', (e) => {
@@ -280,18 +280,18 @@ function meetingForm(net: Net, preset: MeetingPreset | undefined, done: () => vo
     const key = JSON.stringify(opts);
     if (prSel.dataset.key !== key) {
       prSel.dataset.key = key;
-      prSel.replaceChildren(h('option', { value: '' }, open.length || preset?.pr ? 'Pick a pull request…' : 'No open pull requests'), ...opts.map(([v, label]) => h('option', { value: v }, label.length > 70 ? `${label.slice(0, 69)}…` : label)));
+      prSel.replaceChildren(h('option', { value: '' }, open.length || preset?.pr ? 'Bir pull request seç…' : 'Açık pull request yok'), ...opts.map(([v, label]) => h('option', { value: v }, label.length > 70 ? `${label.slice(0, 69)}…` : label)));
       prSel.value = want;
       syncOutput();
     }
     const m = store.meeting.current;
     const taken = m?.status === 'running';
-    busy.textContent = taken ? `The room is busy with “${m.title}” until it ends or someone stops it.` : m ? `Starting this sends the last meeting’s workers home.` : '';
+    busy.textContent = taken ? `Oda, bitene ya da biri durdurana kadar “${m.title}” toplantısıyla meşgul.` : m ? `Bunu başlatmak son toplantının çalışanlarını eve gönderir.` : '';
     submit.toggleAttribute('disabled', taken);
   };
   pickPattern(pattern);
   if (preset?.pr) prSel.value = String(preset.pr);
   refresh();
   setTimeout(() => (preset?.prompt ? titleIn : about).focus(), 0);
-  return { body: bodyEl, foot: [h('span.grow', {}, 'Few rounds and a file at the end: that’s what keeps meetings cheap.'), cancel, submit], refresh };
+  return { body: bodyEl, foot: [h('span.grow', {}, 'Az tur ve sonda bir dosya: toplantıları ucuz tutan bu.'), cancel, submit], refresh };
 }
