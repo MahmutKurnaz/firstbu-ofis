@@ -332,3 +332,23 @@ verir. Bir masaya tıklayıp o terminalde doğrudan yazar. Tüm bunlar için tek
 - Rapor kuralı plandan farklı: işçisi olmayan rollere en yeni rapor atanmıyor (yoksa hepsinde aynı rapor görünürdü).
   Yalnızca verify rolleri en yeni `verify.md`'yi gösterir.
 - FirstBU `git status` değişmedi (24 satır).
+
+## F2 sonuçları (2026-10-28)
+
+- Yeni harita stili `cadde` ve yerleşik "🏙️ Cadde" haritası: ağaçlıklı cadde, 7 cam ofis, ortada kafe (koltuğun,
+  barista, şemsiyeli masalar, tezgâh), çevrede gece ışıkları yanan kuleler, güneyde proje adlı giriş kapısı.
+- Masalar, laptoplar, kiosklar, panolar ve toplantı masası istasyon stilinden yeniden kullanıldı. Taslak
+  varlıklar kodla kuruldu (izin gerektiren dış CC0 indirmesi yapılmadı). `glb` prop türü F4 modelleri için hazır.
+- **Bölge = ofis:** `ordu.json`'daki n. ofis haritadaki n. binaya yerleşir. Tabelada adı, çatıda ve arka duvarda
+  ekip rengi görünür. Deneme: `bug-hunter` işe alındı, `desk-4` (sıradaki boş masa) yerine kendi ofisindeki
+  `desk-10`'a ("Hata laboratuvarı") oturdu.
+- Ofis kapısında **E** → Ekipler panelinde o ofis öne gelir ve yanıp söner. Panel gizliyse açılır.
+- İşini bitiren ajanlar kafedeki koltuğunun önünde sıraya giriyor (kalenin "sıra" davranışı). F3'ün temeli hazır.
+- Testleri yine ayrı bir Sonnet 5.5 ajanı yazdı: 17 yeni test ve `docs/maps/cadde.json` anlık görüntüsü.
+- **CC0 taslaklar (sonradan):** Kenney otomatik indirmeyi engellediği için KayKit'in resmi GitHub depolarından
+  City Builder, Furniture ve Restaurant Bits (CC0) alındı. Blender betiği (`build_kaykit.py`) seçilen parçaları
+  üç GLB'de topluyor (toplam ~1,2 MB, yalnızca caddede yükleniyor): çevre binaları, ofis içi oturma köşeleri,
+  tablolar, raflar, kapı çalıları, kafe buzdolabı ve menü.
+- **Lider akışı uçtan uca doğrulandı:** Aslan Lider'e görev verildi. Lider `hire_worker role=scout-fe` ile Mirket FE'yi
+  işe aldı ve Mirket FE kendi ofisine (Keşif, desk-4) oturdu. Mirket FE `.claude/agents` altındaki dosyaları sayıp
+  `tell_worker` ile lidere bildirdi, lider de sonucu yazdı: 14, doğru. FirstBU dosyalarına dokunulmadı.

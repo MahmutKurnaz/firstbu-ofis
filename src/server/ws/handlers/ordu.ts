@@ -1,5 +1,6 @@
 // The army panel: a floor's ordu.json and its roles' reports, and hiring a worker for a role.
 import path from 'node:path';
+import { mapZones } from '../../../shared/maps/index.js';
 import type { OrduClientMsg, OrduView } from '../../../shared/protocol.js';
 import type { Floor } from '../../floor.js';
 import type { Ctx } from '../../office/context.js';
@@ -30,7 +31,7 @@ export const orduHandlers = {
     if (!floor.project.agentProviders.includes('claude')) return ctx.warn(c, 'Bu katta Claude Code yok: roller Claude Code ile çalışır');
     // A role runs Claude Code as whoever hires it, so they need a Claude sign-in of their own, as at a desk.
     ctx.withSignIn(c, ctx.claudeFor('claude'), () => {
-      const r = hireRole(floor, str(msg.role, 40), who, str(msg.prompt, 20000) || undefined, c.accountId);
+      const r = hireRole(floor, str(msg.role, 40), who, str(msg.prompt, 20000) || undefined, c.accountId, mapZones(ctx.maps.plan()).map((z) => z.desks));
       if (typeof r === 'string') return ctx.warn(c, r);
       ctx.toastFloor(floor, `${who}, ${r.info.name} (${r.info.role}) işe aldı${msg.prompt ? ': bir işle' : ''}`);
       if (r.note) ctx.toastFloor(floor, r.note, 'warn');

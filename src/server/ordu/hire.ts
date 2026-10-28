@@ -4,7 +4,7 @@ import { existsSync, readFileSync, statSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { findRole, rolePrompt } from '../../shared/ordu.js';
-import { nextFreeSeat } from '../../shared/layout.js';
+import { SEATS, deskBuilt, nextFreeSeat } from '../../shared/layout.js';
 import type { WorkerInfo } from '../../shared/protocol.js';
 import type { Floor } from '../floor.js';
 import { loadOrdu } from './config.js';
@@ -50,9 +50,11 @@ export function newTaskId(now = Date.now()): string {
 
 /**
  * Hires a worker for `roleName`. A string is why it can't (in Turkish, for the page); `note` is
- * something to warn about although it went ahead (its agent file is missing, say).
+ * something to warn about although it went ahead (its agent file is missing, say). `zones` are the
+ * seats in each of the map's offices (shared/maps/zones.ts): a role without a desk of its own sits in
+ * its office's, the nth office of ordu.json in the nth zone, while one there's free.
  */
-export function hireRole(floor: HireFloor, roleName: string, by: string, prompt?: string, owner?: string): { info: WorkerInfo; note?: string } | string {
+export function hireRole(floor: HireFloor, roleName: string, by: string, prompt?: string, owner?: string, zones?: string[][]): { info: WorkerInfo; note?: string } | string {
   const loaded = loadOrdu(floor.dir, path.join(floor.dir, '.agent-office'));
   const found = findRole(loaded.config, roleName);
   if (!found) return `"${roleName}" diye bir rol yok`;
@@ -63,7 +65,9 @@ export function hireRole(floor: HireFloor, roleName: string, by: string, prompt?
   if (desk) {
     if (floor.workers.deskOccupied(desk)) return `${role.name}'in masası (${desk}) dolu`;
   } else {
-    desk = nextFreeSeat((id) => floor.workers.deskOccupied(id), floor.plan.wing)?.id;
+    const mine = new Set(zones?.[loaded.config.offices.indexOf(found.office)] ?? []);
+    const free = (id: string) => !floor.workers.deskOccupied(id);
+    desk = SEATS.find((d) => mine.has(d.id) && free(d.id) && deskBuilt(d, floor.plan.wing))?.id ?? nextFreeSeat((id) => !free(id), floor.plan.wing)?.id;
     if (!desk) return 'Boş masa yok: önce birini eve gönder';
   }
   let note: string | undefined;

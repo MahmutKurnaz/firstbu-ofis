@@ -67,3 +67,20 @@ test('a role with a report carries it', () => {
 test('an empty config has no rows', () => {
   assert.deepEqual(roleRows({ ...view(), config: { version: 1, offices: [] }, source: 'none' }, [worker('w1', { role: 'lead' })]), []);
 });
+
+test('roleRows: officeIndex is the office\'s place in the config, empty and same-named offices included', () => {
+  const team = (id: string, names: string[]) => ({ id, name: id, color: '#112233', roles: names.map((name) => ({ name })) });
+  const v = {
+    ...view(),
+    config: {
+      version: 1,
+      offices: [
+        { id: 'a', name: 'A', teams: [] },
+        { id: 'b', name: 'Aynı', teams: [team('tb', ['b1', 'b2'])] },
+        { id: 'c', name: 'Aynı', teams: [team('tc', ['c1'])] },
+      ],
+    },
+  } as unknown as OrduView;
+  const rows = roleRows(v, []);
+  assert.deepEqual(rows.map((r) => [r.role.name, r.officeIndex]), [['b1', 1], ['b2', 1], ['c1', 2]]);
+});

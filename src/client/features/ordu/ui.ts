@@ -3,8 +3,9 @@
 import type { OrduRole, OrduView, RoleReport, WorkerInfo } from '../../../shared/protocol';
 
 export interface RoleRow {
-  /** The office's and the team's names. */
+  /** The office's and the team's names, and which of ordu.json's offices it is (from 0). */
   office: string;
+  officeIndex: number;
   team: string;
   /** The team's color. */
   color: string;
@@ -17,10 +18,11 @@ export function roleRows(view: OrduView, workers: Iterable<WorkerInfo>): RoleRow
   const byRole = new Map<string, WorkerInfo>();
   for (const w of workers) if (w.role && !byRole.has(w.role)) byRole.set(w.role, w);
   const reports = new Map(view.reports.map((r) => [r.role, r]));
-  return view.config.offices.flatMap((o) =>
+  return view.config.offices.flatMap((o, officeIndex) =>
     o.teams.flatMap((t) =>
       t.roles.map((role): RoleRow => ({
         office: o.name,
+        officeIndex,
         team: t.name,
         color: t.color,
         role,

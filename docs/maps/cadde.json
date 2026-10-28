@@ -1,0 +1,167 @@
+{
+  "id": "my-cadde",
+  "name": "My street",
+  "icon": "🏙️",
+  "description": "A copy of the cadde, to make your own.",
+  "style": "cadde",
+  "hall": {
+    "width": 64,
+    "length": 76,
+    "height": 12
+  },
+  "spawn": {
+    "x": -2.4,
+    "z": -2.6,
+    "rotY": 3.1416
+  },
+  "door": {
+    "x": 0,
+    "z": 36.4
+  },
+  "throne": {
+    "x": 0,
+    "z": -6.6,
+    "rotY": 0,
+    "dais": null,
+    "label": "☕ Senin koltuğun"
+  },
+  "herald": {
+    "x": 2.4,
+    "z": -6.1,
+    "rotY": -0.35,
+    "name": "Karşılayıcı",
+    "says": "Yeni bir ajan için benimle konuş",
+    "ask": "Yeni ajan ne yapsın?",
+    "button": "İşe başlasın ☕"
+  },
+  "lineup": {
+    "x": 0,
+    "z": -4.6,
+    "rotY": 3.1416,
+    "step": [
+      0,
+      1.2
+    ],
+    "count": 6
+  },
+  "stations": {
+    "issues": {
+      "x": -7,
+      "z": -4,
+      "rotY": -1.5708
+    },
+    "queue": {
+      "x": -7,
+      "z": 4,
+      "rotY": -1.5708
+    },
+    "pulls": {
+      "x": 7,
+      "z": -4,
+      "rotY": 1.5708
+    }
+  },
+  "council": {
+    "x": 0,
+    "z": 14.5,
+    "rotY": 3.1416
+  },
+  "boards": {
+    "issues": {
+      "x": -8.4,
+      "y": 2.3,
+      "z": -4,
+      "rotY": 1.5708,
+      "width": 3.2,
+      "height": 2,
+      "label": "🐞 Konular"
+    },
+    "queue": {
+      "x": -8.4,
+      "y": 2.3,
+      "z": 4,
+      "rotY": 1.5708,
+      "width": 3.2,
+      "height": 2,
+      "label": "📋 İş sırası"
+    },
+    "pulls": {
+      "x": 8.4,
+      "y": 2.3,
+      "z": -4,
+      "rotY": -1.5708,
+      "width": 3.2,
+      "height": 2,
+      "label": "🔀 PR’lar"
+    },
+    "services": {
+      "x": 8.4,
+      "y": 2.3,
+      "z": 4,
+      "rotY": -1.5708,
+      "width": 3.2,
+      "height": 2,
+      "label": "🌐 Servisler"
+    }
+  },
+  "agents": {
+    "outfit": "none",
+    "ageMinutes": 0
+  },
+  "palette": {
+    "hull": "#f3efe8",
+    "panel": "#d9d2c5",
+    "metal": "#4a4f57",
+    "glow": "#ffb547",
+    "paving": "#cfc8bc",
+    "frame": "#2f343b"
+  },
+  "tables": [
+    {"name":"Lider ofisi","x":0,"z":-31.8,"length":6,"seats":2,"rotY":1.5708},
+    {"name":"Keşif ofisi","x":-22.5,"z":-19,"length":6,"seats":2,"rotY":0},
+    {"name":"Tasarım stüdyosu","x":22.5,"z":-19,"length":7.5,"seats":3,"rotY":0},
+    {"name":"Mühendislik ofisi","x":-22.5,"z":0,"length":6,"seats":2,"rotY":0},
+    {"name":"Hata laboratuvarı","x":22.5,"z":0,"length":6,"seats":2,"rotY":0},
+    {"name":"Test laboratuvarı","x":-22.5,"z":19,"length":6,"seats":2,"rotY":0},
+    {"name":"Güvenlik merkezi","x":22.5,"z":19,"length":6,"seats":2,"rotY":0},
+    {"name":"Kafe masası","x":0,"z":5.6,"length":6,"seats":2,"rotY":1.5708}
+  ],
+  "props": [
+    {"kind":"office","x":0,"z":-31,"width":16,"length":10,"rotY":0},
+    {"kind":"office","x":-21,"z":-19,"width":14,"length":18,"rotY":1.5708},
+    {"kind":"office","x":21,"z":-19,"width":14,"length":18,"rotY":-1.5708},
+    {"kind":"office","x":-21,"z":0,"width":14,"length":18,"rotY":1.5708},
+    {"kind":"office","x":21,"z":0,"width":14,"length":18,"rotY":-1.5708},
+    {"kind":"office","x":-21,"z":19,"width":14,"length":18,"rotY":1.5708},
+    {"kind":"office","x":21,"z":19,"width":14,"length":18,"rotY":-1.5708},
+    {"kind":"tree","x":-7.6,"z":-23},
+    {"kind":"tree","x":7.6,"z":-23},
+    {"kind":"tree","x":-7.6,"z":-12},
+    {"kind":"tree","x":7.6,"z":-12},
+    {"kind":"tree","x":-7.6,"z":11},
+    {"kind":"tree","x":7.6,"z":11},
+    {"kind":"tree","x":-7.6,"z":26},
+    {"kind":"tree","x":7.6,"z":26},
+    {"kind":"tree","x":-7.6,"z":32},
+    {"kind":"tree","x":7.6,"z":32},
+    {"kind":"lamp","x":-8.7,"z":-28,"rotY":1.5708,"light":true},
+    {"kind":"lamp","x":8.7,"z":-28,"rotY":-1.5708,"light":true},
+    {"kind":"lamp","x":-8.7,"z":-9.5,"rotY":1.5708,"light":false},
+    {"kind":"lamp","x":8.7,"z":-9.5,"rotY":-1.5708,"light":false},
+    {"kind":"lamp","x":-8.7,"z":9.5,"rotY":1.5708,"light":true},
+    {"kind":"lamp","x":8.7,"z":9.5,"rotY":-1.5708,"light":true},
+    {"kind":"lamp","x":-8.7,"z":29,"rotY":1.5708,"light":false},
+    {"kind":"lamp","x":8.7,"z":29,"rotY":-1.5708,"light":false},
+    {"kind":"parasol","x":-4.6,"z":-1.2},
+    {"kind":"parasol","x":4.6,"z":-1.2},
+    {"kind":"parasol","x":-4.6,"z":9.6},
+    {"kind":"parasol","x":4.6,"z":9.6},
+    {"kind":"counter","x":-4.2,"z":-9.4,"width":4.4,"rotY":0},
+    {"kind":"dispenser","x":4.2,"z":-9.6,"rotY":0},
+    {"kind":"gong","x":6.6,"z":-6.4,"rotY":-1.5708},
+    {"kind":"bench","x":-7.8,"z":18.5,"rotY":1.5708},
+    {"kind":"bench","x":7.8,"z":18.5,"rotY":1.5708},
+    {"kind":"planter","x":-4.6,"z":30,"width":3.2},
+    {"kind":"planter","x":4.6,"z":30,"width":3.2}
+  ]
+}

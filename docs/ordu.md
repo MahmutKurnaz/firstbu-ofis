@@ -56,6 +56,14 @@ masası, ajan dosyası, modeli ve eforu o rolden gelir.
 `ordu.json` yoksa roller `.claude/agents/*.md` dosyalarından türetilir: tek ofis, tek ekip. Dosya bozuksa
 panel nedenini Türkçe gösterir ve yine türetilmiş yapıyı kullanır.
 
+## Cadde haritasında
+
+⚙️ Ayarlar → 🏢 Bina → Harita → **🏙️ Cadde** seçilince her ofis caddede kendi cam binasına yerleşir. `offices`
+listesindeki sıra, binaların sırasıdır: birincisi caddenin başındaki lider ofisine, sonrakiler batı ve doğu
+sırayla aşağı doğru yerleşir. Binanın tabelasında ofisin adı yazar, çatısında ve arka duvarında ilk ekibin rengi
+görünür. `desk` verilmemiş bir rol işe alınınca kendi ofisindeki boş bir masaya oturur. Ofis doluysa ilk boş
+masaya geçer. Bir ofisin kapısında **E**'ye basınca Ekipler panelinde o ofis öne gelir.
+
 ## Şablonlar
 
 `ordu/sablonlar/yazilim.json`, bir lider altında 15 rollük bir yazılım ekibidir: keşif, frontend,

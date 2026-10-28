@@ -1,6 +1,8 @@
 import { BEANBAGS, BOARDS, DESKS, ELEVATOR, ELEVATOR_CAR, EXIT_DOOR, FLOOR, MEETING_SEATS, SEATING, STATIONS, STATION_AGENT, WALL_HEIGHT, WING_DESKS, seatHere, seatPlace, type DeskDef, type SeatDef, type SeatPlace, type StationKind } from '../layout.js';
 import type { Circle, Rect } from '../nav.js';
 import { planAirlock, wallOpenings } from './airlock.js';
+import { CADDE } from './cadde.js';
+import { CADDE_PROP_KINDS, caddeFootprint, caddeTop, quarterTurn } from './cadde-props.js';
 import { CASTLE } from './castle.js';
 import { MapError, isObj, num, str } from './check.js';
 import { overlaps, planDungeon, planSendHome } from './dungeon.js';
@@ -12,16 +14,18 @@ import { BOARD_KEYS, MAP_STYLES, type BoardDef, type BoardKey, type MapChoice, t
 export * from './types.js';
 export { ADRIFT, AIRLOCK, HATCH, HULL, VIEWPORT, adrift, adriftFrom, wallOut, wallPoint, type Drift } from './airlock.js';
 export { DUNGEON_SLAB, SEND_HOME_STEPS, dungeonClear, levelRoute, prisonSeat, wasting } from './dungeon.js';
+export { mapZones, zoneOf, type MapZone } from './zones.js';
 
 /** The office: built in code (world/office/), and what the building is until someone picks another map. */
 export const OFFICE_MAP = 'office';
 /** The maps that come with the office, besides the office itself. */
-export const BUILTIN_MAPS: readonly MapConfig[] = [CASTLE, STATION];
+export const BUILTIN_MAPS: readonly MapConfig[] = [CASTLE, STATION, CADDE];
 
-/** The props each style of map can put up (see ./props.ts and ./station-props.ts): their kinds, the floor each takes and how high it reaches. */
-const STYLE_PROPS: Record<MapStyle, { kinds: Readonly<Record<string, string>>; footprint: typeof propFootprint; top(p: PropConfig): number }> = {
+/** The props each style of map can put up (see ./props.ts, ./station-props.ts and ./cadde-props.ts): their kinds, the floor each takes and how high it reaches. */
+const STYLE_PROPS: Record<MapStyle, { kinds: Readonly<Record<string, string>>; footprint(p: PropConfig): { rect?: Rect; rects?: Rect[]; circle?: Circle } | null; top(p: PropConfig): number }> = {
   castle: { kinds: PROP_KINDS, footprint: propFootprint, top: propTop },
   station: { kinds: STATION_PROP_KINDS, footprint: stationFootprint, top: stationTop },
+  cadde: { kinds: CADDE_PROP_KINDS, footprint: caddeFootprint, top: caddeTop },
 };
 
 const STATION_KINDS: readonly StationKind[] = ['issues', 'pulls', 'queue'];
@@ -327,11 +331,15 @@ export function planMap(input: unknown): MapPlan {
     opt(p.height, `${what}.height`, 0.3, 20);
     opt(p.length, `${what}.length`, 0.3, 120);
     if (p.light !== undefined && typeof p.light !== 'boolean') throw new MapError(`${what}.light should be true or false`);
+    // Its walls are what's in the way, box by box, so they have to be square to the hall.
+    if (style === 'cadde' && p.kind === 'office' && !quarterTurn(p.rotY)) throw new MapError(`${what} (an office) has to face along x or z: its rotY should be 0, 1.5708, 3.1416 or -1.5708`);
+    if (p.model !== undefined && (typeof p.model !== 'string' || !/^[a-z0-9][a-z0-9_-]{0,39}$/.test(p.model))) throw new MapError(`${what}.model should be a model's name: lowercase letters, digits, - and _`);
     // What hangs on a wall, or from the roof, has to fit under the walls' top.
     const top = kinds.top(p);
     if (top > height) throw new MapError(`props[${i}] (a ${p.kind}) reaches ${top.toFixed(1)} m up, over the hall's ${height} m walls: lower its y, or raise hall.height`);
     const f = kinds.footprint(p);
     if (f?.rect) rects.push(f.rect);
+    if (f?.rects) rects.push(...f.rects);
     if (f?.circle) circles.push(f.circle);
   });
   if (props.filter((p) => p.kind === 'gong').length > 1) throw new MapError('it has more than one gong');
