@@ -12,13 +12,19 @@ import { builtFloors } from './floors';
 import type { Parts } from './parts';
 import { streetOf } from './worlds';
 
-export type MapsParts = Pick<Parts, 'stage' | 'worlds' | 'place' | 'travel' | 'arrival' | 'views' | 'walking' | 'peers' | 'telescope' | 'smoking' | 'hoops' | 'arcade' | 'cabinet' | 'dog' | 'jukebox' | 'boards'>;
+export type MapsParts = Pick<
+  Parts,
+  'stage' | 'worlds' | 'place' | 'travel' | 'arrival' | 'views' | 'walking' | 'peers' | 'telescope' | 'smoking' | 'hoops' | 'arcade' | 'cabinet' | 'dog' | 'jukebox' | 'boards'
+>;
 
 /** Registers the floor's paint (store 'floors'), the map (store 'map') and the floors' waiting count (the 'floors' message). */
 export function installMaps(ctx: Ctx, core: CoreState, parts: MapsParts) {
   const { player, sound, sky, me, hands } = ctx;
   const { holiday } = parts.stage;
   const { inOffice, plan } = parts.worlds;
+  /** The street and the street as the editor (features/mapedit) has put it: a rebuild between them leaves you standing where you are. */
+  const EDITED = new Set(['cadde', 'duzen']);
+  let lastMap = plan().id;
 
   /** Which of the floor palettes the walls are painted in now. */
   let painted = -1;
@@ -39,6 +45,8 @@ export function installMaps(ctx: Ctx, core: CoreState, parts: MapsParts) {
     const { worlds, views, boards, travel } = parts;
     const next = worlds.worldFor(store.plan());
     if (next.world === worlds.world()) return;
+    const stay = lastMap === plan().id || (EDITED.has(lastMap) && EDITED.has(plan().id));
+    lastMap = plan().id;
     // Everyone gets up from the old map's seats; they sit down in the new one's below.
     for (const [id, v] of views.workerViews) {
       worlds.court()?.release(id);
@@ -90,7 +98,9 @@ export function installMaps(ctx: Ctx, core: CoreState, parts: MapsParts) {
     boards.renderPullsBoard();
     boards.renderServicesBoard();
     boards.renderQueueBoard();
-    if (store.floor && !core.upTop && !core.trip) {
+    if (stay && !inOffice()) {
+      // The same street, edited: nobody is moved, sat down or stood up.
+    } else if (store.floor && !core.upTop && !core.trip) {
       parts.place.placeInCar();
       // Back in the office, in its elevator: the doors open onto it.
       travel.lift()?.setOpen(true);

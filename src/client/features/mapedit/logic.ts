@@ -1,7 +1,11 @@
 // The map editor's arithmetic (features/mapedit): which prop a point on the ground means, and what moving,
 // turning, deleting and copying one makes of the list. Pure, so it can be tested; the list is never changed in place.
 
-export type Prop = Record<string, unknown> & { kind: string; x: number; z: number };
+export type Prop = Record<string, unknown> & {
+  kind: string;
+  x: number;
+  z: number;
+};
 
 /** What the editor doesn't move: the offices (their walls are the plan's, and their teams are in them). */
 export const FIXED = new Set(['office']);
@@ -52,7 +56,14 @@ export function turned(props: readonly Prop[], i: number, by: number): Prop[] {
 /** The list with prop `i` scaled by `factor`, within 0.3…3 times. */
 export function scaled(props: readonly Prop[], i: number, factor: number): Prop[] {
   if (!props[i] || FIXED.has(props[i].kind)) return props.slice();
-  return props.map((p, k) => (k === i ? { ...p, scale: Math.round(Math.min(3, Math.max(0.3, Number(p.scale ?? 1) * factor)) * 100) / 100 } : p));
+  return props.map((p, k) =>
+    k === i
+      ? {
+          ...p,
+          scale: Math.round(Math.min(3, Math.max(0.3, Number(p.scale ?? 1) * factor)) * 100) / 100,
+        }
+      : p,
+  );
 }
 
 /** The list without prop `i`. */
@@ -64,7 +75,14 @@ export function removed(props: readonly Prop[], i: number): Prop[] {
 /** The list with a copy of prop `i` beside it (the copy is last), or the list as it was when it's full or fixed. */
 export function duplicated(props: readonly Prop[], i: number): Prop[] {
   if (!props[i] || FIXED.has(props[i].kind) || props.length >= MAX_PROPS) return props.slice();
-  return [...props, { ...props[i], x: snap(props[i].x + COPY_OFFSET), z: snap(props[i].z + COPY_OFFSET) }];
+  return [
+    ...props,
+    {
+      ...props[i],
+      x: snap(props[i].x + COPY_OFFSET),
+      z: snap(props[i].z + COPY_OFFSET),
+    },
+  ];
 }
 
 /** What the editor can put down: the street's own kinds, and the street's Meshy pieces (a `glb` prop whose `model` is `meshy-<key>`, see world/cadde/props.ts). */
@@ -83,7 +101,12 @@ export const CATALOG: readonly CatalogItem[] = [
   { id: 'meshy-cop-kutusu', label: 'Çöp kutusu', width: 0.6, length: 0.6 },
   { id: 'meshy-hidrant', label: 'Yangın musluğu', width: 0.6, length: 0.6 },
   { id: 'meshy-kafe-koltuk', label: 'Kafe koltuğu', width: 0.8, length: 0.8 },
-  { id: 'meshy-kafe-masasi-yuvarlak', label: 'Bistro masası', width: 0.75, length: 0.75 },
+  {
+    id: 'meshy-kafe-masasi-yuvarlak',
+    label: 'Bistro masası',
+    width: 0.75,
+    length: 0.75,
+  },
   { id: 'meshy-kafe-tabure', label: 'Tabure', width: 0.6, length: 0.6 },
   { id: 'meshy-semsiye', label: 'Şemsiye', width: 2.7, length: 2.7 },
   { id: 'meshy-sezlong', label: 'Şezlong', width: 0.75, length: 2.0 },
@@ -92,31 +115,134 @@ export const CATALOG: readonly CatalogItem[] = [
   { id: 'meshy-sehpa', label: 'Sehpa', width: 1.0, length: 0.6 },
   { id: 'meshy-ayakli-lamba', label: 'Ayaklı lamba', width: 0.6, length: 0.6 },
   { id: 'meshy-puf', label: 'Puf', width: 0.6, length: 0.6 },
-  { id: 'meshy-yonetici-masa', label: 'Yönetici masası', width: 1.8, length: 0.9 },
+  {
+    id: 'meshy-yonetici-masa',
+    label: 'Yönetici masası',
+    width: 1.8,
+    length: 0.9,
+  },
   { id: 'meshy-ofis-masa', label: 'Ofis masası', width: 1.4, length: 0.7 },
-  { id: 'meshy-ofis-sandalye', label: 'Ofis sandalyesi', width: 0.62, length: 0.62 },
+  {
+    id: 'meshy-ofis-sandalye',
+    label: 'Ofis sandalyesi',
+    width: 0.62,
+    length: 0.62,
+  },
   { id: 'meshy-kitaplik', label: 'Kitaplık', width: 0.9, length: 0.6 },
   { id: 'meshy-fikus', label: 'Fikus', width: 0.9, length: 0.9 },
   { id: 'meshy-cicek-saksi', label: 'Çiçek saksısı', width: 0.7, length: 0.7 },
   { id: 'meshy-saksi', label: 'Uzun saksı', width: 3.0, length: 0.8 },
   { id: 'meshy-kiosk', label: 'Kiosk', width: 0.9, length: 0.7 },
-  { id: 'meshy-kahve-makinesi', label: 'Kahve makinesi', width: 0.9, length: 0.7 },
+  {
+    id: 'meshy-kahve-makinesi',
+    label: 'Kahve makinesi',
+    width: 0.9,
+    length: 0.7,
+  },
   { id: 'meshy-heykel', label: 'Heykel', width: 0.9, length: 0.9 },
   { id: 'meshy-kargo-sandik', label: 'Sandık', width: 1.2, length: 0.8 },
   { id: 'meshy-menu-sehpasi', label: 'Menü tabelası', width: 0.6, length: 0.7 },
   { id: 'meshy-kursu', label: 'Kürsü', width: 0.6, length: 0.6 },
 ];
 
+/** The catalog as the panel shows it: groups of ids from CATALOG, every item in exactly one. */
+export const GROUPS: readonly { title: string; ids: readonly string[] }[] = [
+  {
+    title: '🌳 Bitkiler',
+    ids: ['meshy-agac-genis', 'meshy-agac-ince', 'meshy-cali', 'meshy-fikus', 'meshy-cicek-saksi', 'meshy-saksi'],
+  },
+  {
+    title: '🏙️ Cadde',
+    ids: ['meshy-cop-kutusu', 'meshy-hidrant', 'meshy-bank', 'meshy-semsiye', 'meshy-sezlong', 'meshy-kiosk', 'meshy-menu-sehpasi', 'meshy-heykel', 'meshy-kargo-sandik'],
+  },
+  {
+    title: '☕ Kafe',
+    ids: ['meshy-kafe-koltuk', 'meshy-kafe-masasi-yuvarlak', 'meshy-kafe-tabure', 'meshy-kahve-makinesi'],
+  },
+  {
+    title: '🛋️ Oturma ve salon',
+    ids: ['meshy-kanepe', 'meshy-sehpa', 'meshy-puf', 'meshy-ayakli-lamba'],
+  },
+  {
+    title: '💼 Ofis',
+    ids: ['meshy-yonetici-masa', 'meshy-ofis-masa', 'meshy-ofis-sandalye', 'meshy-kitaplik', 'meshy-kursu'],
+  },
+];
+
+/** What the street's own kinds are called on screen. */
+export const KIND_NAMES: Record<string, string> = {
+  tree: 'Ağaç',
+  bench: 'Bank',
+  lamp: 'Sokak lambası',
+  planter: 'Saksı',
+  parasol: 'Şemsiye',
+  gong: 'Gong',
+  dispenser: 'Otomat',
+  counter: 'Tezgâh',
+  office: 'Ofis',
+};
+
+/** What a prop is called on screen: a catalog item's label, a street kind's name, else its kind. */
+export function nameOf(p: Prop): string {
+  if (p.kind === 'glb') {
+    const m = String(p.model ?? '');
+    return CATALOG.find((c) => c.id === m)?.label ?? (m.replace(/^meshy-/, '') || 'Model');
+  }
+  return KIND_NAMES[p.kind] ?? p.kind;
+}
+
+/** The ground a prop takes (m, width × length) as it is scaled: 1.2 × 1.2 when the map doesn't say. */
+export function footprint(p: Prop): [number, number] {
+  const s = Number(p.scale ?? 1) || 1;
+  const w = Number(p.width);
+  const l = Number(p.length);
+  return [(w > 0 ? w : 1.2) * s, (l > 0 ? l : 1.2) * s];
+}
+
+/** The prop a click at (x, z) means: the smallest one whose footprint holds the point, else the nearest within a metre; -1 for none. */
+export function pickProp(props: readonly Prop[], x: number, z: number): number {
+  let best = -1;
+  let bestArea = Infinity;
+  props.forEach((p, i) => {
+    if (FIXED.has(p.kind)) return;
+    const [w, l] = footprint(p);
+    const r = Number(p.rotY ?? 0);
+    const dx = x - p.x;
+    const dz = z - p.z;
+    const lx = dx * Math.cos(r) - dz * Math.sin(r);
+    const lz = dx * Math.sin(r) + dz * Math.cos(r);
+    if (Math.abs(lx) <= w / 2 + 0.15 && Math.abs(lz) <= l / 2 + 0.15 && w * l < bestArea) {
+      best = i;
+      bestArea = w * l;
+    }
+  });
+  return best >= 0 ? best : nearestProp(props, x, z, 1);
+}
+
 /** A new prop of catalog item `item` at (x, z). */
 export function made(item: CatalogItem, x: number, z: number): Prop {
-  return { kind: 'glb', model: item.id, x: snap(x), z: snap(z), width: item.width, length: item.length };
+  return {
+    kind: 'glb',
+    model: item.id,
+    x: snap(x),
+    z: snap(z),
+    width: item.width,
+    length: item.length,
+  };
 }
 
 /** The list with prop `i` made another catalog item, where it stands and turned as it was. */
 export function swapped(props: readonly Prop[], i: number, item: CatalogItem): Prop[] {
   const p = props[i];
   if (!p || FIXED.has(p.kind)) return props.slice();
-  return props.map((q, k) => (k === i ? { ...made(item, p.x, p.z), ...(p.rotY !== undefined ? { rotY: p.rotY } : {}) } : q));
+  return props.map((q, k) =>
+    k === i
+      ? {
+          ...made(item, p.x, p.z),
+          ...(p.rotY !== undefined ? { rotY: p.rotY } : {}),
+        }
+      : q,
+  );
 }
 
 /** The list with `prop` added (nothing when it's full). */
