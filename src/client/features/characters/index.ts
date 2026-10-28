@@ -9,7 +9,7 @@ import { loadModel, type ModelName } from '../../world/models';
 import type { WorkerView } from '../workers/views';
 
 /** The characters there's a model for, by ordu.json's `character` key. */
-export const CHARACTER_MODELS: Readonly<Record<string, ModelName>> = { aslan: 'aslan' };
+export const CHARACTER_MODELS: Readonly<Record<string, ModelName>> = { aslan: 'aslan', 'aslan-sevimli': 'aslan-sevimli' };
 
 /** The model a worker with `role` wears on a floor whose army is `config`, or undefined. */
 export function characterOf(config: Parameters<typeof findRole>[0] | undefined, role: string | undefined): ModelName | undefined {

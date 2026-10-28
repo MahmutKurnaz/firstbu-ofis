@@ -5,6 +5,10 @@
 // macOS's `sips` (--tex <px>), as a JPEG, to keep the file small.
 //
 //   node blender/scripts/merge_clips.mjs <out.glb> idle=<a.glb> walk=<b.glb> sit=<c.glb> [--tex 1024]
+//   node blender/scripts/merge_clips.mjs <out.glb> --from <all.glb> Idle=idle Casual_Walk=walk … [--tex 1024]
+//
+// The second form is for one file that already holds every clip (Meshy's Animation API with several
+// `action_ids`): each animation, by the name it came with, is kept under the name after the `=`, the rest dropped.
 //
 // The clips are named as given (`idle`, `walk`, `sit`: what world/character/animal.ts plays), and
 // the first file's own animation is replaced by its named one. The generations it's made from are listed
@@ -17,9 +21,13 @@ import path from 'node:path';
 const args = process.argv.slice(2);
 const out = args[0];
 const tex = args.includes('--tex') ? Number(args[args.indexOf('--tex') + 1]) : 0;
-const clips = args.filter((a) => /^[a-z]+=/.test(a)).map((a) => ({ name: a.split('=')[0], file: a.slice(a.indexOf('=') + 1) }));
+const from = args.includes('--from') ? args[args.indexOf('--from') + 1] : null;
+const pairs = args.filter((a) => /^[A-Za-z_]+=/.test(a));
+const clips = pairs.map((a) =>
+  from ? { name: a.slice(a.indexOf('=') + 1), file: from, anim: a.split('=')[0] } : { name: a.split('=')[0], file: a.slice(a.indexOf('=') + 1) },
+);
 if (!out || !clips.length) {
-  console.error('usage: node blender/scripts/merge_clips.mjs <out.glb> idle=<a.glb> walk=<b.glb> … [--tex 1024]');
+  console.error('usage: node blender/scripts/merge_clips.mjs <out.glb> idle=<a.glb> walk=<b.glb> … [--tex 1024]\n   or: … <out.glb> --from <all.glb> Idle=idle Casual_Walk=walk … [--tex 1024]');
   process.exit(2);
 }
 
@@ -57,8 +65,8 @@ const own = g.animations ?? [];
 g.animations = [];
 for (const clip of clips) {
   const src = clip.file === clips[0].file ? base : readGlb(clip.file);
-  const anim = src === base ? own[0] : src.json.animations?.[0];
-  if (!anim) throw new Error(`no animation in ${clip.file}`);
+  const anim = src === base ? (clip.anim ? own.find((x) => x.name === clip.anim) : own[0]) : src.json.animations?.[0];
+  if (!anim) throw new Error(`no animation${clip.anim ? ` "${clip.anim}"` : ''} in ${clip.file}`);
   const accMap = new Map();
   const copyAccessor = (i) => {
     // The base's own clip is in the file already.

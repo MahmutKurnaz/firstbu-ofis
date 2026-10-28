@@ -29,4 +29,22 @@ Toplam: 69 kredi (aslan için onaylanan ~61, sonra kahve klibi için ayrıca ona
 
 | Karakter | Rol | Dosya | Klipler | Nasıl yapıldı |
 | --- | --- | --- | --- | --- |
-| Aslan (lacivert üç parça takım, altın kravat iğnesi) | lead | `src/client/models/aslan.glb` (2 MB, yalnızca bir ajan giyince yüklenir) | idle, walk, sit, drink (+ kodla klavyede yazma ve etrafa bakma) | Higgsfield konsepti → 4 ayrı açı → Meshy multi_image_to_3d (dokulu, iskeletli) → Meshy rigging klipleri → `blender/scripts/merge_clips.mjs` |
+| Aslan, premium ve kaslı sürüm (lacivert takım, altın kravat iğnesi) | lead (`character: "aslan"`) | `src/client/models/aslan.glb` (1,6 MB, yalnızca bir ajan giyince yüklenir) | idle, walk, sit, drink (+ kodla klavyede yazma ve etrafa bakma) | Meshy konsept görseli (nano-banana-2) → Meshy image-to-3D (meshy-7.1) → Meshy rigging → Meshy animations (`action_ids`) → `blender/scripts/merge_clips.mjs --from` |
+| Aslan, ilk sevimli sürüm | `character: "aslan-sevimli"` ile seçilir | `src/client/models/aslan-sevimli.glb` (2,2 MB) | idle, walk, sit, drink | Higgsfield konsepti → Meshy multi_image_to_3d (Higgsfield üzerinden) → klipler |
+
+## Meshy doğrudan (Mahmut'un kendi hesabı, 5.500 aylık kredi) — aslan 2. sürüm (premium, kaslı)
+
+Onay: Mahmut, 2026-10-28, ~72 Meshy kredisi (iki yol). Anahtar macOS Anahtar Zinciri'nde (`meshy-api`), repoda yok.
+
+| Tarih | Ne | Model | Kredi | İş id |
+| --- | --- | --- | --- | --- |
+| 2026-10-28 | 2 konsept görsel, A-poz (kaslı, premium aslan) | nano-banana-2 | 12 | 01a18133-0218…, 01a18133-0702… |
+| 2026-10-28 | Seçilen görselden 3D, dokulu (2K), A-poz | meshy-7.1 image-to-3d | 30 | 01a18133-bee6… |
+| 2026-10-28 | Yazıdan 3D şekil (preview) | meshy-7.1 text-to-3d | 20 | 01a18133-c487… |
+| 2026-10-28 | Yazıdan 3D doku (refine, 2K) | meshy-7.1 text-to-3d | 10 | 01a18135-36a4… |
+
+| 2026-10-28 | İskelet (rigging), seçilen görselden 3D'ye | Meshy rigging | 5 | 01a1813b-a12c… |
+| 2026-10-28 | 4 animasyon tek dosyada: Idle (0), Casual_Walk (30), Chair_Sit_Idle_M (33), Sit_and_Drink (343) | Meshy animations (`action_ids`) | 12 | 01a1813d-f00d… |
+
+Toplam: 89 Meshy kredisi (72 + ayrıca onaylanan 17). Bakiye 5.500 → 5.411.
+Sonuç: görselden 3D (01a18133-bee6…) yazıdan 3D'den belirgin biçimde daha iyi: aslan başı, yele ve kuyruk korunuyor; yazı yolu insan eli ve saçına kaçıyor, kuyruk yok.
