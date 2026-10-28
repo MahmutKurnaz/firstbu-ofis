@@ -73,6 +73,12 @@ def call(method, path, k, body=None, tries=6):
                 time.sleep(5 * (i + 1))
                 continue
             sys.exit(f"{e.code} {e.read().decode()[:300]}")
+        except (urllib.error.URLError, TimeoutError):
+            # A read (GET) is safe to ask again. A create (POST) may have gone through: stop and look at the balance first.
+            if method == "GET" and i < tries - 1:
+                time.sleep(3 * (i + 1))
+                continue
+            sys.exit(f"ağ hatası ({method} {path}): bakiyeye ve <klasör>/*.json'a bak, gönderilmiş olabilir")
 
 
 def data_uri(path):
