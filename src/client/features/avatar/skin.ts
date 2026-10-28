@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { polishCharacter, toPhysical } from '../../world/character/polish';
 import type { Model } from '../../world/models';
-import { AVATAR_HEIGHT, clipOf, gaitFor, type Clip } from './logic';
+import { AVATAR_HEIGHT, FIDGET_EVERY, clipOf, gaitFor, type Clip } from './logic';
 
 /** How long one clip takes to blend into the next (s). */
 const BLEND = 0.2;
@@ -33,6 +33,10 @@ export class PlayerAvatar {
   private actions = new Map<Clip, THREE.AnimationAction>();
   private playing: Clip | null = null;
   private hips: THREE.Object3D | undefined;
+  /** Seconds stood still, when the next wave is due, and until when the one being waved lasts. */
+  private still = 0;
+  private nextFidget = FIDGET_EVERY[0] + Math.random() * (FIDGET_EVERY[1] - FIDGET_EVERY[0]);
+  private waving = 0;
 
   constructor(model: Model) {
     const body = model.scene;
@@ -55,6 +59,11 @@ export class PlayerAvatar {
       faceForward(clip);
       this.actions.set(key, this.mixer.clipAction(clip));
     }
+    const wave = this.actions.get('wave');
+    if (wave) {
+      wave.setLoop(THREE.LoopOnce, 1);
+      wave.clampWhenFinished = true;
+    }
     const jump = this.actions.get('jump');
     if (jump) {
       jump.setLoop(THREE.LoopOnce, 1);
@@ -66,7 +75,19 @@ export class PlayerAvatar {
   /** `seated`: sitting on a seat, which `seatOn` then puts its hips on. */
   update(dt: number, speed: number, grounded: boolean, seated = false) {
     const gait = gaitFor(speed, grounded);
-    const { clip: want, rate } = seated ? { clip: 'sit' as Clip, rate: 1 } : gait;
+    let { clip: want, rate } = seated ? { clip: 'sit' as Clip, rate: 1 } : gait;
+    // Stood still a while: a wave, now and then.
+    this.still = want === 'idle' ? this.still + dt : 0;
+    if (this.waving > 0) {
+      this.waving -= dt;
+      if (want === 'idle') want = 'wave';
+      else this.waving = 0;
+    } else if (want === 'idle' && this.actions.has('wave') && this.still >= this.nextFidget) {
+      this.waving = this.actions.get('wave')!.getClip().duration;
+      this.nextFidget = this.still + FIDGET_EVERY[0] + Math.random() * (FIDGET_EVERY[1] - FIDGET_EVERY[0]);
+      this.actions.get('wave')!.reset();
+      want = 'wave';
+    }
     const next = this.actions.has(want) ? want : this.actions.has('idle') ? 'idle' : null;
     if (next && next !== this.playing) {
       const to = this.actions.get(next)!;

@@ -2,8 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { CAM_PRESETS, DEFAULT_PRESET, nextPreset, presetIndex, gaitFor, clipOf, STILL, WALK_UP_TO, WALK_PACE, RUN_PACE } from '../src/client/features/avatar/logic.js';
 
-test('there are 5 camera presets with unique ids', () => {
-  assert.equal(CAM_PRESETS.length, 5);
+test('there are 6 camera presets with unique ids', () => {
+  assert.equal(CAM_PRESETS.length, 6);
   const ids = CAM_PRESETS.map((p) => p.id);
   assert.equal(new Set(ids).size, ids.length);
 });
@@ -20,11 +20,12 @@ test('third-person presets have positive distance and pitch', () => {
   }
 });
 
-test('only the "on" preset looks back from the front (yaw π)', () => {
+test('only the "on" and "portre" presets look back from the front (yaw π)', () => {
   const on = CAM_PRESETS.find((p) => p.id === 'on');
   assert.ok(on);
   assert.equal(on.yaw, Math.PI);
-  for (const p of CAM_PRESETS.filter((c) => c.id !== 'on')) assert.equal(p.yaw, 0, p.id);
+  for (const p of CAM_PRESETS.filter((c) => c.id !== 'on' && c.id !== 'portre')) assert.equal(p.yaw, 0, p.id);
+  assert.equal(CAM_PRESETS.find((c) => c.id === 'portre')!.yaw, Math.PI);
 });
 
 test('DEFAULT_PRESET is a valid index', () => {
@@ -134,7 +135,7 @@ test('clipOf maps model clip names, ignoring case', () => {
 });
 
 test('clipOf returns undefined for clips it does not drive', () => {
-  assert.equal(clipOf('wave'), undefined);
+  assert.equal(clipOf('wave'), 'wave');
   assert.equal(clipOf('sit'), 'sit');
   assert.equal(clipOf(''), undefined);
 });

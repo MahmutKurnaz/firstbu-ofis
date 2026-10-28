@@ -26,7 +26,7 @@ const TAG_GAP = 0.2;
 /** How long one clip takes to blend into the next (s). */
 const BLEND = 0.25;
 
-export type AnimalClip = 'idle' | 'walk' | 'sit' | 'drink';
+export type AnimalClip = 'idle' | 'walk' | 'sit' | 'drink' | 'skill';
 /** How often it stops for a sip of coffee, sat at its desk (s): somewhere between these. */
 const SIP_EVERY: [number, number] = [25, 45];
 
@@ -53,6 +53,9 @@ export class AnimalSkin {
   /** When its next sip of coffee is due (its own clock, see t), and when the one it's having is over. */
   private nextSip = SIP_EVERY[0] * Math.random();
   private sipping = 0;
+  /** When its next gesture is due, and until when the one it's making lasts. */
+  private nextSkill = 6 + Math.random() * 12;
+  private skilling = 0;
   /** The cup in its right hand while it drinks. */
   private cup: THREE.Group | null = null;
   private readonly key = new THREE.Vector3();
@@ -89,8 +92,13 @@ export class AnimalSkin {
     this.mixer = new THREE.AnimationMixer(body);
     for (const clip of model.clips) {
       const name = clip.name.toLowerCase();
-      const key: AnimalClip | undefined = name.includes('drink') ? 'drink' : name.includes('walk') ? 'walk' : name.includes('sit') ? 'sit' : name.includes('idle') ? 'idle' : undefined;
+      const key: AnimalClip | undefined = name.includes('drink') ? 'drink' : name.includes('skill') ? 'skill' : name.includes('walk') ? 'walk' : name.includes('sit') ? 'sit' : name.includes('idle') ? 'idle' : undefined;
       if (key && !this.actions.has(key)) this.actions.set(key, this.mixer.clipAction(clip));
+    }
+    const gesture = this.actions.get('skill');
+    if (gesture) {
+      gesture.setLoop(THREE.LoopOnce, 1);
+      gesture.clampWhenFinished = true;
     }
     // A sip is played once through, then it's back to work, a cup in its hand meanwhile.
     const sip = this.actions.get('drink');
@@ -130,6 +138,17 @@ export class AnimalSkin {
         want = 'drink';
       }
     } else this.sipping = 0;
+    // On its feet and waiting: now and then its own gesture (the role's skill clip), once through.
+    const skill = this.actions.get('skill');
+    if (skill && want === 'idle') {
+      if (this.skilling > this.t) want = 'skill';
+      else if (this.t >= this.nextSkill) {
+        this.skilling = this.t + skill.getClip().duration;
+        this.nextSkill = this.skilling + 10 + Math.random() * 14;
+        skill.reset();
+        want = 'skill';
+      }
+    }
     const next = this.actions.has(want) ? want : this.actions.has('idle') ? 'idle' : null;
     if (next && next !== this.playing) {
       const to = this.actions.get(next)!;

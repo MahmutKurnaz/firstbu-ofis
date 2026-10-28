@@ -23,6 +23,7 @@ export const CAM_PRESETS: readonly CamPreset[] = [
   { id: 'ucceDort', name: 'Arkadan yukarıdan (3/4)', third: true, yaw: 0, pitch: 0.42, dist: 5.2 },
   { id: 'oyun', name: 'Oyun görünümü', third: true, yaw: 0, pitch: 0.85, dist: 9.5 },
   { id: 'on', name: 'Önden (yüzün)', third: true, yaw: Math.PI, pitch: 0.18, dist: 3.4 },
+  { id: 'portre', name: 'Portre (yakın, önden)', third: true, yaw: Math.PI, pitch: 0.04, dist: 1.7 },
 ];
 
 /** The one you start with: from behind and above, a three-quarter view. */
@@ -44,7 +45,10 @@ export const RUN_PACE = 6;
 export const STILL = 0.3;
 export const WALK_UP_TO = 2.4;
 
-export type Clip = 'idle' | 'walk' | 'run' | 'jump' | 'sit';
+export type Clip = 'idle' | 'walk' | 'run' | 'jump' | 'sit' | 'wave';
+
+/** How long you stand still before you wave or look about (s, from-to). */
+export const FIDGET_EVERY: [number, number] = [14, 28];
 
 /**
  * Which clip to play at `speed` (m/s over the ground), and how fast to play it so the feet keep up with the floor
@@ -61,5 +65,5 @@ export function gaitFor(speed: number, grounded: boolean): { clip: Clip; rate: n
 /** Which clip a name in the model is, by what it contains (the model's own: idle, walk, run, jump, wave, sit). */
 export function clipOf(name: string): Clip | undefined {
   const n = name.toLowerCase();
-  return n.includes('jump') ? 'jump' : n.includes('run') ? 'run' : n.includes('walk') ? 'walk' : n.includes('sit') ? 'sit' : n.includes('idle') ? 'idle' : undefined;
+  return n.includes('jump') ? 'jump' : n.includes('run') ? 'run' : n.includes('walk') ? 'walk' : n.includes('sit') ? 'sit' : n.includes('wave') ? 'wave' : n.includes('idle') ? 'idle' : undefined;
 }
