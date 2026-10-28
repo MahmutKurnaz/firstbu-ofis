@@ -16,6 +16,7 @@ import { caddeKit } from './kit';
 import { paintOffice, type OfficeView } from './offices';
 import { streetLife } from './passersby';
 import { buildDesks, furnishSuite } from './suite';
+import { TEAM_COLORS, themeOffice } from './interiors';
 import { PROPS } from './props';
 import { buildShell } from './shell';
 
@@ -44,7 +45,11 @@ export function buildCadde(plan: MapPlan): World {
   for (const p of c.props ?? []) PROPS[p.kind as CaddePropKind](kit, p, p.kind === 'office' ? offices++ : 0);
   // The CC0 drafts, which come in once they've loaded.
   const officeProps = (c.props ?? []).filter((p) => p.kind === 'office');
-  officeProps.forEach((p, i) => (p.style === 'yonetim' ? furnishSuite(kit, p) : furnish(kit, p, i)));
+  officeProps.forEach((p, i) => {
+    if (p.style === 'yonetim') return furnishSuite(kit, p);
+    furnish(kit, p, i);
+    themeOffice(kit, p, i, TEAM_COLORS[i] ?? '#8a94a6');
+  });
   dress(kit, c.props ?? []);
   skyline(kit, shell.near);
   buildArmchair(kit);

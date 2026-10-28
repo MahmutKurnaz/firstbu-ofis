@@ -79,7 +79,7 @@ function solid(kit: CaddeKit, x: number, z: number, w: number, d: number, top: n
 
 /**
  * Furnishes an office: a sofa, a low table and a lamp on a rug in a front corner (out of the way of
- * its door and its table), a shelf and pictures on its back wall, a cactus by the shelf.
+ * its door and its table); the back wall is the team's (./interiors.ts).
  */
 export function furnish(kit: CaddeKit, p: PropConfig, index: number) {
   const o = officeBox(p);
@@ -103,17 +103,6 @@ export function furnish(kit: CaddeKit, p: PropConfig, index: number) {
     [ls - s * 0.4, lo, 0.8, 1.0],
   ])
     solid(kit, ...at(side, out), w, d, 0.6, o.rotY);
-  // The back wall: a shelf, pictures over the table, a cactus.
-  put('kaykit-furniture', 'shelf_B_large_decorated', -s * (hw - 1.8), -hl + 0.5);
-  put('kaykit-furniture', 'cactus_medium_A', -s * (hw - 0.6), -hl + 0.6);
-  for (const [side, part] of [
-    [-1.4, 'pictureframe_large_A'],
-    [1.4, 'pictureframe_large_B'],
-  ] as const) {
-    const [x, z] = at(side, -hl + 0.32);
-    kay(kit, 'kaykit-furniture', part, x, z, o.rotY, 0.9, 1.4);
-  }
-  solid(kit, ...at(-s * (hw - 1.8), -hl + 0.5), 1, 1, 0.5, o.rotY);
 }
 
 /** The street's furniture: bushes by the office doors, hydrants and bins by the benches, the café's fridge, menu and crate by its counter. */
