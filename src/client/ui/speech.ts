@@ -45,9 +45,18 @@ export function speechSupport(): 'ok' | 'insecure' | 'none' {
   return globalThis.isSecureContext === false ? 'insecure' : 'ok';
 }
 
-/** The language to listen for: the browser's. */
+/**
+ * The language to listen for: Turkish, as the office's own is, unless the browser's is another Turkish
+ * or one the person picked by hand (localStorage `ao-speech-lang`, e.g. 'en-US').
+ */
 export function speechLang(): string {
-  return (typeof navigator !== 'undefined' && navigator.language) || 'en-US';
+  try {
+    const picked = typeof localStorage !== 'undefined' ? localStorage.getItem('ao-speech-lang') : null;
+    if (picked) return picked;
+  } catch {
+    // storage blocked: the default
+  }
+  return 'tr-TR';
 }
 
 /** Whether the on-device model for a language is installed, once the browser has said (it's asked once). */
