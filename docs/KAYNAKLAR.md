@@ -48,3 +48,14 @@ Onay: Mahmut, 2026-10-28, ~72 Meshy kredisi (iki yol). Anahtar macOS Anahtar Zin
 
 Toplam: 89 Meshy kredisi (72 + ayrıca onaylanan 17). Bakiye 5.500 → 5.411.
 Sonuç: görselden 3D (01a18133-bee6…) yazıdan 3D'den belirgin biçimde daha iyi: aslan başı, yele ve kuyruk korunuyor; yazı yolu insan eli ve saçına kaçıyor, kuyruk yok.
+
+## Kadro konseptleri (Meshy, doğrudan) — 29 karakter × 2 öneri
+
+Onay: Mahmut, 2026-10-28 ("hepsi olur … tasarlamaya başla"), 348 Meshy kredisi. Model: nano-banana-2, A-poz, tanesi 6 kredi, toplam 58 görsel.
+Karakterler ve istemler: `docs/karakterler.md` ve `blender/scripts/meshy_concepts.py`. Görseller (küçültülmüş) ve iş numaraları: `docs/konseptler/` (`tasks.json` karakter → iki iş id'si).
+
+| Tarih | Ne | Kredi |
+| --- | --- | --- |
+| 2026-10-28 | 13 rol + 10 yedek hayvan + 6 NPC için 58 konsept görsel | 348 |
+
+Bakiye: 5.411 → 5.063.
