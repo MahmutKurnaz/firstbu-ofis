@@ -14,6 +14,7 @@ import kaykitCafeUrl from '../models/kaykit-cafe.glb?url';
 import kaykitCityUrl from '../models/kaykit-city.glb?url';
 import kaykitFurnitureUrl from '../models/kaykit-furniture.glb?url';
 import kitchenUrl from '../models/kitchen.glb?url';
+import mahmutUrl from '../models/mahmut.glb?url';
 import loungeUrl from '../models/lounge.glb?url';
 import plantsUrl from '../models/plants.glb?url';
 import { toon } from './toon';
@@ -34,6 +35,8 @@ const MODELS = {
   // Our own characters (blender/scripts/build_aslan.py): only a worker wearing one loads it.
   aslan: { url: aslanUrl, preload: false },
   'aslan-sevimli': { url: aslanSevimliUrl, preload: false },
+  // Your own character, from Mahmut's photos (features/avatar/).
+  mahmut: { url: mahmutUrl, preload: false },
   // The street's CC0 drafts (KayKit, see blender/scripts/build_kaykit.py): only the street loads them.
   'kaykit-city': { url: kaykitCityUrl, preload: false },
   'kaykit-furniture': { url: kaykitFurnitureUrl, preload: false },

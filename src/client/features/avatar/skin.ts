@@ -1,0 +1,87 @@
+import * as THREE from 'three';
+import type { Model } from '../../world/models';
+import { AVATAR_HEIGHT, clipFor, clipOf, type Clip, type MoveState } from './logic';
+
+/** How long one clip takes to blend into the next (s). */
+const BLEND = 0.2;
+
+const UP = new THREE.Vector3(0, 1, 0);
+
+/** The library's clips start with the hips turned a little (the idle by 40°): turn each back so its first frame faces forward. */
+function faceForward(clip: THREE.AnimationClip) {
+  for (const track of clip.tracks) {
+    if (!track.name.endsWith('Hips.quaternion')) continue;
+    const v = track.values;
+    const first = new THREE.Euler().setFromQuaternion(new THREE.Quaternion(v[0], v[1], v[2], v[3]), 'YXZ');
+    const fix = new THREE.Quaternion().setFromAxisAngle(UP, -first.y);
+    const q = new THREE.Quaternion();
+    for (let i = 0; i < v.length; i += 4) {
+      q.set(v[i], v[i + 1], v[i + 2], v[i + 3]).premultiply(fix);
+      v[i] = q.x;
+      v[i + 1] = q.y;
+      v[i + 2] = q.z;
+      v[i + 3] = q.w;
+    }
+  }
+}
+
+/** Your character: a rigged model standing where you stand, walking, running and jumping as you do. */
+export class PlayerAvatar {
+  readonly root = new THREE.Group();
+  private mixer: THREE.AnimationMixer;
+  private actions = new Map<Clip, THREE.AnimationAction>();
+  private playing: Clip | null = null;
+
+  constructor(model: Model) {
+    const body = model.scene;
+    // Stood on the floor at its origin, AVATAR_HEIGHT tall, measured as it's drawn on its bones.
+    body.updateMatrixWorld(true);
+    const box = new THREE.Box3().setFromObject(body, true);
+    const k = AVATAR_HEIGHT / (box.max.y - box.min.y || 1);
+    body.scale.setScalar(k);
+    body.position.y = -box.min.y * k;
+    body.traverse((o) => {
+      const m = o as THREE.Mesh;
+      if (!m.isMesh) return;
+      m.castShadow = m.receiveShadow = true;
+      // Skinned and big: never culled by a stale bounding box, and no toon outline round a photo-like face.
+      m.frustumCulled = false;
+      for (const mat of Array.isArray(m.material) ? m.material : [m.material]) mat.userData.outlineParameters = { visible: false };
+    });
+    this.root.add(body);
+    this.mixer = new THREE.AnimationMixer(body);
+    for (const clip of model.clips) {
+      const key = clipOf(clip.name);
+      if (!key || this.actions.has(key)) continue;
+      faceForward(clip);
+      this.actions.set(key, this.mixer.clipAction(clip));
+    }
+    const jump = this.actions.get('jump');
+    if (jump) {
+      jump.setLoop(THREE.LoopOnce, 1);
+      jump.clampWhenFinished = true;
+    }
+  }
+
+  update(dt: number, s: MoveState) {
+    const want = clipFor(s);
+    const next = this.actions.has(want) ? want : this.actions.has('idle') ? 'idle' : null;
+    if (next && next !== this.playing) {
+      const to = this.actions.get(next)!;
+      const from = this.playing ? this.actions.get(this.playing) : undefined;
+      to.reset().play();
+      if (from) to.crossFadeFrom(from, BLEND, false);
+      this.playing = next;
+    }
+    this.mixer.update(dt);
+  }
+
+  dispose() {
+    this.mixer.stopAllAction();
+    this.root.removeFromParent();
+    this.root.traverse((o) => {
+      const m = o as THREE.Mesh;
+      if (m.isMesh) m.geometry.dispose();
+    });
+  }
+}
