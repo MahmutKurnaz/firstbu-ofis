@@ -7,7 +7,7 @@ import type { Ctx } from '../../core/context';
 import { isTyping } from '../../player';
 import { store } from '../../state';
 import { modalOpen, toast } from '../../ui/dom';
-import { History, duplicated, moved, nearestProp, removed, scaled, turned, TURN, type Prop } from './logic';
+import { CATALOG, History, added, duplicated, made, moved, nearestProp, removed, scaled, swapped, turned, TURN, type Prop } from './logic';
 
 const KEY = 'KeyJ';
 
@@ -17,6 +17,9 @@ export function installMapEdit(ctx: Ctx) {
   let selected = -1;
   let dragging = false;
   let ghost: [number, number] | null = null;
+  /** What N has picked to put down (Enter), or to swap the selected one for (Y), and where the pointer last was on the ground. */
+  let cat = 0;
+  let pointer: [number, number] | null = null;
   const history = new History();
   const ray = new THREE.Raycaster();
   const plane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
@@ -45,6 +48,7 @@ export function installMapEdit(ctx: Ctx) {
     const p = props[selected];
     panel.innerHTML =
       '<b>✏️ Düzenleme modu</b><br>Bir eşyaya tıkla, sürükle. <b>R</b> döndür · <b>[</b> <b>]</b> boyut · <b>Delete</b> sil · <b>Ctrl+D</b> kopyala · <b>Ctrl+Z</b> geri al · <b>J</b>/<b>Esc</b> çık' +
+      `<br><b>N</b>: katalog → <span style="color:#9fd2ee">${CATALOG[cat].label}</span> · <b>Enter</b> imlecin olduğu yere koy · <b>Y</b> seçiliyle değiştir` +
       (p ? `<br><span style="color:#ffb547">Seçili: ${p.kind} (${p.x.toFixed(2)}, ${p.z.toFixed(2)})${p.rotY ? ` · ${(Number(p.rotY) * 57.3).toFixed(0)}°` : ''}${p.scale ? ` · ×${p.scale}` : ''}</span>` : '<br><span style="opacity:.7">Hiçbir şey seçili değil.</span>');
     const q = ghost ?? (p ? [p.x, p.z] : null);
     ring.visible = on && !!q;
@@ -112,8 +116,10 @@ export function installMapEdit(ctx: Ctx) {
     true,
   );
   window.addEventListener('pointermove', (e) => {
-    if (!on || !dragging) return;
+    if (!on) return;
     const at = point(e);
+    if (at) pointer = at;
+    if (!dragging) return;
     if (at) ghost = at;
     show();
   });
@@ -165,6 +171,22 @@ export function installMapEdit(ctx: Ctx) {
       } else if (e.code === 'KeyR' && selected >= 0 && !mod) {
         swallow();
         commit(turned(props, selected, e.shiftKey ? -TURN : TURN));
+      } else if (e.code === 'KeyN' && !mod) {
+        swallow();
+        cat = (cat + (e.shiftKey ? CATALOG.length - 1 : 1)) % CATALOG.length;
+        show();
+      } else if (e.code === 'Enter' && !mod) {
+        swallow();
+        const at = pointer ?? [ctx.player.pos.x, ctx.player.pos.z];
+        const next = added(props, made(CATALOG[cat], at[0], at[1]));
+        if (next.length > props.length) {
+          commit(next);
+          selected = next.length - 1;
+          show();
+        }
+      } else if (e.code === 'KeyY' && selected >= 0 && !mod) {
+        swallow();
+        commit(swapped(props, selected, CATALOG[cat]));
       } else if ((e.code === 'BracketRight' || e.code === 'BracketLeft') && selected >= 0) {
         swallow();
         commit(scaled(props, selected, e.code === 'BracketRight' ? 1.1 : 1 / 1.1));

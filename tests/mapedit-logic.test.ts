@@ -188,3 +188,76 @@ test('History keeps at most 100 states', () => {
   assert.equal(n, 100);
   assert.equal(last![0].x, 50, 'the oldest 50 were dropped');
 });
+
+// ---- the catalog, and putting its pieces down ----
+import { CATALOG, added, made, swapped } from '../src/client/features/mapedit/logic.js';
+
+test('CATALOG: unique meshy- ids, labels, sane sizes, at least 20 items', () => {
+  assert.ok(CATALOG.length >= 20);
+  assert.equal(new Set(CATALOG.map((c) => c.id)).size, CATALOG.length, 'ids are unique');
+  for (const c of CATALOG) {
+    assert.ok(c.id.startsWith('meshy-'), c.id);
+    assert.ok(c.label.trim().length > 0, `${c.id} has a label`);
+    for (const d of [c.width, c.length]) assert.ok(d >= 0.6 && d < 8, `${c.id} size ${d}`);
+  }
+});
+
+test('made: a glb prop of the item, snapped to the grid', () => {
+  const item = CATALOG[0];
+  const p = made(item, 3.1, -7.9);
+  assert.equal(p.kind, 'glb');
+  assert.equal(p.model, item.id);
+  assert.equal(p.width, item.width);
+  assert.equal(p.length, item.length);
+  assert.equal(p.x, snap(3.1));
+  assert.equal(p.z, snap(-7.9));
+  assert.equal(Math.abs(p.x % GRID), 0);
+  assert.equal(Math.abs(p.z % GRID), 0);
+  assert.equal(made(item, 0.13, 0.12).x, 0.25);
+  assert.equal(made(item, 0.12, 0.12).x, 0);
+});
+
+test('swapped: keeps place and turn, takes the item', () => {
+  const item = CATALOG[3];
+  const l = freeze([P('office', 0, 0), P('tree', 5, 5, { rotY: 1.25, scale: 2 }), P('bench', 6, 5)]);
+  const r = swapped(l, 1, item);
+  assert.equal(r.length, 3);
+  assert.equal(r[1].kind, 'glb');
+  assert.equal(r[1].model, item.id);
+  assert.equal(r[1].x, 5);
+  assert.equal(r[1].z, 5);
+  assert.equal(r[1].rotY, 1.25);
+  assert.equal(r[1].width, item.width);
+  assert.equal(r[0], l[0]);
+  assert.equal(r[2], l[2]);
+  assert.equal(l[1].kind, 'tree', 'input not mutated');
+  assert.equal(l[1].model, undefined);
+});
+
+test('swapped: rotY absent stays absent', () => {
+  const r = swapped(list(), 1, CATALOG[0]);
+  assert.equal('rotY' in r[1], false);
+});
+
+test('swapped: an office or a bad index changes nothing (a copy)', () => {
+  const l = freeze(list());
+  for (const i of [0, -1, 99]) {
+    const r = swapped(l, i, CATALOG[0]);
+    assert.deepEqual(r, l);
+    assert.notEqual(r, l);
+  }
+});
+
+test('added: appends, and at MAX_PROPS returns an equal copy', () => {
+  const l = freeze(list());
+  const np = made(CATALOG[1], 1, 1);
+  const r = added(l, np);
+  assert.equal(r.length, l.length + 1);
+  assert.equal(r[r.length - 1], np);
+  assert.equal(l.length, 4, 'input not mutated');
+  const full = Array.from({ length: MAX_PROPS }, (_, i) => P('tree', i, 0));
+  const r2 = added(full, np);
+  assert.equal(r2.length, MAX_PROPS);
+  assert.deepEqual(r2, full);
+  assert.notEqual(r2, full);
+});

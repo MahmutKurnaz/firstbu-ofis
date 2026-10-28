@@ -1,3 +1,4 @@
+import { meshy } from '../cadde/meshy';
 import * as THREE from 'three';
 import { mesh, roundedBox, toon } from '../toon';
 import { palette, piece } from '../models';
@@ -99,7 +100,11 @@ function upholstered(part: 'pillow' | 'pouf', color: string): THREE.Object3D {
  */
 export function loungeCouch(): THREE.Group {
   const g = new THREE.Group();
-  g.add(piece('lounge', 'sofa', paintLounge));
+  const stand = piece('lounge', 'sofa', paintLounge);
+  g.add(stand);
+  // Its own cognac leather sofas (2 m each, real size), two side by side where the 4.2 m stand-in is.
+  meshy(g, 'kanepe', { scale: 1.05, replaces: [stand] }).position.x = -1.05;
+  meshy(g, 'kanepe', { scale: 1.05 }).position.x = 1.05;
   for (const [x, color] of [
     [0.6, '#ffd166'],
     [-0.6, '#ef476f'],
@@ -115,12 +120,22 @@ export function loungeCouch(): THREE.Group {
 
 /** A floor pouf in `color`, about 1.05 round and 0.4 tall, its origin on the floor under its middle. */
 export function pouf(color: string): THREE.Object3D {
-  return upholstered('pouf', color);
+  const g = new THREE.Group();
+  const stand = upholstered('pouf', color);
+  g.add(stand);
+  // Its own tufted leather pouf, a real 0.55 m, in place of the flat disc (the colour was the disc's).
+  meshy(g, 'puf', { scale: 1.1, replaces: [stand] });
+  return g;
 }
 
 /** The lounge's round coffee table, 0.9 round, its top 0.46 up (where the holiday pumpkin stands). */
 export function coffeeTable(): THREE.Object3D {
-  return piece('lounge', 'coffee_table', paintLounge);
+  const g = new THREE.Group();
+  const stand = piece('lounge', 'coffee_table', paintLounge);
+  g.add(stand);
+  // Its own walnut coffee table, 1.1 x 0.55 m and 46 cm high, in place of the disc.
+  meshy(g, 'sehpa', { scale: 1.1, turn: Math.PI / 2, replaces: [stand] });
+  return g;
 }
 
 /** A pendant lamp, its shade at 0, on a cord `cord` meters long. */

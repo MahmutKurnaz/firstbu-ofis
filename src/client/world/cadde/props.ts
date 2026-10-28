@@ -8,7 +8,7 @@ import { box, collide, placed } from '../station/kit';
 import type { Interactable } from '../types';
 import { mesh, roundedBox, textPlane, toon } from '../toon';
 import { MAX_LAMPS, glow, lightOnly, type CaddeKit } from './kit';
-import { meshy } from './meshy';
+import { MESHY_KEYS, meshy, type MeshyKey } from './meshy';
 import { buildOffice } from './offices';
 
 // The props a street-style map places (see shared/maps/cadde-props.ts): its offices (./offices.ts),
@@ -150,6 +150,12 @@ function glb(kit: CaddeKit, p: PropConfig) {
   g.scale.setScalar(p.scale ?? 1);
   kit.group.add(g);
   collide(kit, p.x, p.z, (p.width ?? CADDE_SIZE.glb) * (p.scale ?? 1), (p.length ?? CADDE_SIZE.glb) * (p.scale ?? 1), p.rotY ?? 0, 99);
+  // One of the street's own pieces (the editor puts them down): `meshy-<key>`, at its real size times `scale`.
+  if (typeof p.model === 'string' && p.model.startsWith('meshy-')) {
+    const key = p.model.slice(6) as MeshyKey;
+    if ((MESHY_KEYS as readonly string[]).includes(key)) meshy(g, key, { scale: 1 });
+    return;
+  }
   const name = p.model as ModelName;
   void loadModel(name)
     .then((m) => {

@@ -67,6 +67,63 @@ export function duplicated(props: readonly Prop[], i: number): Prop[] {
   return [...props, { ...props[i], x: snap(props[i].x + COPY_OFFSET), z: snap(props[i].z + COPY_OFFSET) }];
 }
 
+/** What the editor can put down: the street's own kinds, and the street's Meshy pieces (a `glb` prop whose `model` is `meshy-<key>`, see world/cadde/props.ts). */
+export interface CatalogItem {
+  id: string;
+  label: string;
+  /** The ground it takes (m), for its collision box. */
+  width: number;
+  length: number;
+}
+
+export const CATALOG: readonly CatalogItem[] = [
+  { id: 'meshy-agac-genis', label: 'Ağaç (geniş)', width: 3.0, length: 3.0 },
+  { id: 'meshy-agac-ince', label: 'Ağaç (ince)', width: 1.6, length: 1.6 },
+  { id: 'meshy-cali', label: 'Çalı', width: 0.9, length: 0.9 },
+  { id: 'meshy-cop-kutusu', label: 'Çöp kutusu', width: 0.6, length: 0.6 },
+  { id: 'meshy-hidrant', label: 'Yangın musluğu', width: 0.6, length: 0.6 },
+  { id: 'meshy-kafe-koltuk', label: 'Kafe koltuğu', width: 0.8, length: 0.8 },
+  { id: 'meshy-kafe-masasi-yuvarlak', label: 'Bistro masası', width: 0.75, length: 0.75 },
+  { id: 'meshy-kafe-tabure', label: 'Tabure', width: 0.6, length: 0.6 },
+  { id: 'meshy-semsiye', label: 'Şemsiye', width: 2.7, length: 2.7 },
+  { id: 'meshy-sezlong', label: 'Şezlong', width: 0.75, length: 2.0 },
+  { id: 'meshy-bank', label: 'Bank', width: 1.8, length: 0.6 },
+  { id: 'meshy-kanepe', label: 'Kanepe', width: 2.0, length: 0.9 },
+  { id: 'meshy-sehpa', label: 'Sehpa', width: 1.0, length: 0.6 },
+  { id: 'meshy-ayakli-lamba', label: 'Ayaklı lamba', width: 0.6, length: 0.6 },
+  { id: 'meshy-puf', label: 'Puf', width: 0.6, length: 0.6 },
+  { id: 'meshy-yonetici-masa', label: 'Yönetici masası', width: 1.8, length: 0.9 },
+  { id: 'meshy-ofis-masa', label: 'Ofis masası', width: 1.4, length: 0.7 },
+  { id: 'meshy-ofis-sandalye', label: 'Ofis sandalyesi', width: 0.62, length: 0.62 },
+  { id: 'meshy-kitaplik', label: 'Kitaplık', width: 0.9, length: 0.6 },
+  { id: 'meshy-fikus', label: 'Fikus', width: 0.9, length: 0.9 },
+  { id: 'meshy-cicek-saksi', label: 'Çiçek saksısı', width: 0.7, length: 0.7 },
+  { id: 'meshy-saksi', label: 'Uzun saksı', width: 3.0, length: 0.8 },
+  { id: 'meshy-kiosk', label: 'Kiosk', width: 0.9, length: 0.7 },
+  { id: 'meshy-kahve-makinesi', label: 'Kahve makinesi', width: 0.9, length: 0.7 },
+  { id: 'meshy-heykel', label: 'Heykel', width: 0.9, length: 0.9 },
+  { id: 'meshy-kargo-sandik', label: 'Sandık', width: 1.2, length: 0.8 },
+  { id: 'meshy-menu-sehpasi', label: 'Menü tabelası', width: 0.6, length: 0.7 },
+  { id: 'meshy-kursu', label: 'Kürsü', width: 0.6, length: 0.6 },
+];
+
+/** A new prop of catalog item `item` at (x, z). */
+export function made(item: CatalogItem, x: number, z: number): Prop {
+  return { kind: 'glb', model: item.id, x: snap(x), z: snap(z), width: item.width, length: item.length };
+}
+
+/** The list with prop `i` made another catalog item, where it stands and turned as it was. */
+export function swapped(props: readonly Prop[], i: number, item: CatalogItem): Prop[] {
+  const p = props[i];
+  if (!p || FIXED.has(p.kind)) return props.slice();
+  return props.map((q, k) => (k === i ? { ...made(item, p.x, p.z), ...(p.rotY !== undefined ? { rotY: p.rotY } : {}) } : q));
+}
+
+/** The list with `prop` added (nothing when it's full). */
+export function added(props: readonly Prop[], prop: Prop): Prop[] {
+  return props.length >= MAX_PROPS ? props.slice() : [...props, prop];
+}
+
 /** The states the editor has been in, for undo and redo. */
 export class History {
   private past: Prop[][] = [];
