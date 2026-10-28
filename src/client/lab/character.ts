@@ -2,7 +2,7 @@
 // http://localhost:5173/lab/character.html). A plain Claude worker for scale, then the character
 // (`?model=aslan`, the default) worn by a worker standing, walking and sat typing at a bench and table, as
 // the office draws them (world/character/animal.ts). `t=<seconds>` steps to t and draws one frame,
-// for screenshots. Once it has drawn, window.__ready says how tall each one stands.
+// for screenshots; `cam=side` looks from the side, `sip=1` has the one sat down drink first. Once it has drawn, window.__ready says how tall each one stands.
 
 import * as THREE from 'three';
 import { AnimalSkin } from '../world/character/animal';
@@ -54,6 +54,8 @@ void loadModel(name).then(async () => {
       if (a.seated) w.status = 'working';
       scene.add(w.root);
       const skin = new AnimalSkin(w, await loadModel(name), () => a.seated);
+      // `sip=1`: the one sat down has its coffee straight away.
+      if (a.seated && q.get('sip') === '1') (skin as unknown as { nextSip: number }).nextSip = 0;
       return { a, w, skin };
     }),
   );

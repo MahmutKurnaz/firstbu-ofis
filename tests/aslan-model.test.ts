@@ -32,8 +32,8 @@ test('one skinned mesh, on a skin with a Hips joint', () => {
   assert.ok(names.includes('Hips'), `joints: ${names.slice(0, 5)}…`);
 });
 
-test('the clips are idle, walk and sit, each moving the skin\'s bones for more than the rest pose', () => {
-  assert.deepEqual(g.animations.map((a) => a.name).sort(), ['idle', 'sit', 'walk']);
+test('the clips are idle, walk, sit and drink, each moving the skin\'s bones for more than the rest pose', () => {
+  assert.deepEqual(g.animations.map((a) => a.name).sort(), ['drink', 'idle', 'sit', 'walk']);
   const joints = new Set(g.skins[0].joints);
   for (const a of g.animations) {
     assert.ok(a.channels.length > 0, `${a.name} has channels`);

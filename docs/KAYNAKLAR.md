@@ -21,11 +21,12 @@ Onay: Mahmut, 2026-10-28, aslan için yaklaşık 61 kredi. Başlangıç bakiyesi
 | 2026-10-28 | Aslan ayrı açılar (ön, sol, arka, sağ) | gpt_image_2_5 (low) | 4 | 1,00 | 7c06a32c…, e715eeb5…, 4741bbd1…, 15134c3c… |
 | 2026-10-28 | Aslan 3D, dokulu, iskeletli (A-poz, 12k üçgen) | multi_image_to_3d (Meshy) | 1 | 35 | b6f9c461… |
 | 2026-10-28 | Aslan animasyonları: bekleme (Idle, 0), yürüme (Casual_Walk, 30), oturma (Chair_Sit_Idle_M, 33) | 3d_rigging (Meshy) | 3 | 24 | 00f73030…, 3ef100fc…, 377c4138… |
+| 2026-10-28 | Aslan kahve içme klibi (Sit_and_Drink, 343) | 3d_rigging (Meshy) | 1 | 8 | e0b94b0e… |
 
-Toplam: 61 kredi (onaylanan ~61). Kalan bakiye yaklaşık 529,5.
+Toplam: 69 kredi (aslan için onaylanan ~61, sonra kahve klibi için ayrıca onaylanan 8). Kalan bakiye yaklaşık 521,5.
 
 ## Kendi karakterlerimiz
 
 | Karakter | Rol | Dosya | Klipler | Nasıl yapıldı |
 | --- | --- | --- | --- | --- |
-| Aslan (lacivert üç parça takım, altın kravat iğnesi) | lead | `src/client/models/aslan.glb` (2 MB, yalnızca bir ajan giyince yüklenir) | idle, walk, sit | Higgsfield konsepti → 4 ayrı açı → Meshy multi_image_to_3d (dokulu, iskeletli) → Meshy rigging klipleri → `blender/scripts/merge_clips.mjs` |
+| Aslan (lacivert üç parça takım, altın kravat iğnesi) | lead | `src/client/models/aslan.glb` (2 MB, yalnızca bir ajan giyince yüklenir) | idle, walk, sit, drink (+ kodla klavyede yazma ve etrafa bakma) | Higgsfield konsepti → 4 ayrı açı → Meshy multi_image_to_3d (dokulu, iskeletli) → Meshy rigging klipleri → `blender/scripts/merge_clips.mjs` |
