@@ -77,7 +77,7 @@ export function placeSetting(kit: Kit, def: DeskDef, overflow: boolean): { view:
 const CONSOLE_SIGN: Record<StationKind, string> = { issues: '📡 Bana sor', pulls: '🔀 Bana sor', queue: '📋 Bana sor' };
 
 /** A board agent's console: a slanted panel on a pedestal, lit in the agent's color; it stands behind it, as at the office's kiosk. */
-export function agentConsole(kit: Kit, def: DeskDef): DeskView {
+export function agentConsole(kit: Kit, def: DeskDef, dress?: (g: THREE.Group, parts: THREE.Object3D[]) => void): DeskView {
   const kind = def.station!;
   const g = new THREE.Group();
   g.position.set(def.x, 0, def.z);
@@ -94,6 +94,8 @@ export function agentConsole(kit: Kit, def: DeskDef): DeskView {
   top.add(mesh(box(KIOSK.width - 0.3, 0.014, 0.05), lit(color), 0, 0.045, -0.1, false));
   top.add(mesh(box(KIOSK.width - 0.4, 0.014, 0.05), lit(color), -0.05, 0.045, 0.02, false));
   g.add(top);
+  // A map's own lectern can take the place of this one (the street's).
+  dress?.(g, [...g.children]);
   // The agent's color round the pedestal, and a sign facing whoever walks up (-z, the room).
   g.add(mesh(new THREE.TorusGeometry(0.13, 0.03, 6, 20).rotateX(Math.PI / 2), lit(color), 0, 0.72, 0, false));
   const sign = textPlane(CONSOLE_SIGN[kind], { bg: '#0f1a26', color: '#e6f6ff', border: color, size: 56 });

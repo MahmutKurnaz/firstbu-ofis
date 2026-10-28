@@ -64,10 +64,14 @@ export function buildCadde(plan: MapPlan): World {
     kit.desks.set(def.id, view);
     overflow.set(def.id, it);
   }
-  for (const def of plan.stations) kit.desks.set(def.id, agentConsole(kit, def));
+  for (const def of plan.stations) kit.desks.set(def.id, agentConsole(kit, def, (g, parts) => meshy(g, 'kursu', { turn: Math.PI, replaces: parts })));
   // Its own table: a round walnut one, 2.2 m across and 76 cm high.
   const briefing = buildBriefing(kit, '🤝 Toplantı', (t) => meshy(t, 'konsey-masasi', { replaces: [...t.children] }));
-  const boardMeshes = buildBoards(kit);
+  // Its own frames: a thin black bezel with brass corners, in place of the black box and its orange lines.
+  const boardMeshes = buildBoards(kit, (g, bd, frame) => {
+    const k = (bd.width + 0.1) / 3.3;
+    meshy(g, 'pano-cercevesi', { scale: k, y: -(2.1 * k) / 2, replaces: frame });
+  });
   const herald = buildBarista(kit);
   const life = streetLife(kit);
   const npcs = buildNpcs(kit, herald?.person);

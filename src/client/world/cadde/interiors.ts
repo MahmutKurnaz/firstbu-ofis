@@ -4,6 +4,7 @@ import { officeBox, officePoint } from '../../../shared/maps/cadde-props';
 import { box, collide, lit, placed } from '../station/kit';
 import { mesh, textPlane, toon } from '../toon';
 import { glow, type CaddeKit } from './kit';
+import { addTeamBoard } from './teamboard';
 import { meshy, type MeshyKey } from './meshy';
 
 // What each team's office looks like inside, so you know whose it is from the door: a map wall and crates
@@ -14,6 +15,8 @@ import { meshy, type MeshyKey } from './meshy';
 
 /** The team colors of the template's offices (ordu/sablonlar/yazilim.json), which the themes are keyed to. */
 export const TEAM_COLORS = ['#e8b931', '#3fae6a', '#ff7a6b', '#4a8fe7', '#9b6bdf', '#2bb5b0', '#8a93a6'];
+
+const THEME_NAMES = ['', 'Keşif', 'Tasarım', 'Mühendislik', 'Hata avı', 'Test', 'Güvenlik'];
 
 type Put = (key: MeshyKey, u: number, v: number, turn?: number, scale?: number) => void;
 
@@ -165,6 +168,16 @@ export function themeOffice(kit: CaddeKit, p: PropConfig, index: number, color: 
     collide(kit, x, z, w, d, o.rotY, top);
   };
   theme({ kit, g, o, bx, sign, put, solid }, color);
+  // A TV on a stand by the glass, opposite the lounge, showing its team live: who's on what, and for how long (features/teamboards).
+  const tvSide = index % 2 ? -1 : 1;
+  const tv = placed(0, 0, 0, 0);
+  tv.position.set(tvSide * (o.width / 2 - 0.55), 0, o.length / 2 - 3.6);
+  tv.rotation.y = tvSide * (-Math.PI / 2);
+  g.add(tv);
+  // (an 85 inch TV, 1.9 x 1.07 m, its middle 1.5 m up, on two black posts)
+  for (const sx of [-0.7, 0.7]) tv.add(mesh(box(0.08, 1.0, 0.08), toon('#1d232b'), sx, 0.5, -0.12));
+  addTeamBoard(tv, 'team', index, THEME_NAMES[index] ?? `Ofis ${index}`, 0, 1.5, 0, 1.9, 1.07);
+  solid(tvSide * (o.width / 2 - 0.55), o.length / 2 - 3.6, 0.3, 2.0, 2.1);
   // Brighter: the team's color washing the back wall from a strip under the ceiling, and a row of ceiling panels over the table.
   const wash = glow(kit, color, 0.35, 1);
   g.add(mesh(box(o.width - 1, 0.08, 0.3), wash, 0, o.height - 0.3, -o.length / 2 + 0.3, false));
