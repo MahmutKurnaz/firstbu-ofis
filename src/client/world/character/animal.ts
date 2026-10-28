@@ -9,6 +9,8 @@ import type { Worker } from './worker';
 
 /** How tall the characters stand (m): the worker's height, so they sit at the desks the same way. */
 export const ANIMAL_HEIGHT = 1.15;
+/** How far the little worker's feet are above its root, which the office stands its root that far under the floor for (court.ts's FEET): the character's feet go there too. */
+const FEET = 0.07;
 /** How long one clip takes to blend into the next (s). */
 const BLEND = 0.25;
 
@@ -66,8 +68,9 @@ export class AnimalSkin {
       if (from) to.crossFadeFrom(from, BLEND, false);
       this.playing = next;
     }
-    // Sat down, the seat is under its hips: down to the floor so its feet are on it.
-    this.root.position.y = this.playing === 'sit' ? -this.worker.root.getWorldPosition(this.tmp).y / Math.max(0.01, this.worker.root.getWorldScale(this.tmp).y) : 0;
+    // Sat down, the seat is under its hips: down to the floor so its feet are on it. On its feet, up
+    // to where the little worker's feet would be.
+    this.root.position.y = this.playing === 'sit' ? -this.worker.root.getWorldPosition(this.tmp).y / Math.max(0.01, this.worker.root.getWorldScale(this.tmp).y) : FEET;
     this.mixer.update(dt);
   }
 

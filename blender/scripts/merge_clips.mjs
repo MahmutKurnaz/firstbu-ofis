@@ -36,6 +36,12 @@ const pad4 = (buf, fill = 0) => (buf.length % 4 ? Buffer.concat([buf, Buffer.all
 
 const base = readGlb(clips[0].file);
 const g = base.json;
+// What this doesn't know how to carry over: refuse rather than write a broken file.
+for (const { file } of clips) {
+  const { json } = file === clips[0].file ? base : readGlb(file);
+  if ((json.accessors ?? []).some((a) => a.sparse)) throw new Error(`${file}: sparse accessors aren't handled`);
+  if ((json.extensionsUsed ?? []).some((x) => /draco|meshopt/i.test(x))) throw new Error(`${file}: compressed meshes aren't handled`);
+}
 let bin = base.bin;
 /** Appends `data` to the binary chunk as a new buffer view; returns its index. */
 const addView = (data, extra = {}) => {
@@ -44,7 +50,8 @@ const addView = (data, extra = {}) => {
   bin = Buffer.concat([bin, data]);
   return g.bufferViews.length - 1;
 };
-const nodeByName = new Map(g.nodes.map((n, i) => [n.name, i]));
+// The clips go onto the base's bones, by name (only its skin's joints: another node may share a name).
+const nodeByName = new Map((g.skins?.[0]?.joints ?? []).map((i) => [g.nodes[i].name, i]));
 
 const own = g.animations ?? [];
 g.animations = [];
@@ -54,6 +61,8 @@ for (const clip of clips) {
   if (!anim) throw new Error(`no animation in ${clip.file}`);
   const accMap = new Map();
   const copyAccessor = (i) => {
+    // The base's own clip is in the file already.
+    if (src === base) return i;
     if (accMap.has(i)) return accMap.get(i);
     const acc = src.json.accessors[i];
     const view = src.json.bufferViews[acc.bufferView];
@@ -76,19 +85,45 @@ for (const clip of clips) {
 // The texture, smaller, as a JPEG.
 if (tex && g.images?.length) {
   const dir = mkdtempSync(path.join(tmpdir(), 'merge-clips-'));
-  for (const img of g.images) {
+  // A texture with transparency in it stays as it is: a JPEG has none.
+  const alpha = new Set((g.materials ?? []).filter((m) => m.alphaMode === 'MASK' || m.alphaMode === 'BLEND').flatMap((m) => [m.pbrMetallicRoughness?.baseColorTexture?.index]).filter((t) => t !== undefined).map((t) => g.textures[t].source));
+  for (const [k, img] of g.images.entries()) {
+    if (alpha.has(k)) continue;
     const view = g.bufferViews[img.bufferView];
     const src = path.join(dir, 'in');
     writeFileSync(src, bin.subarray(view.byteOffset ?? 0, (view.byteOffset ?? 0) + view.byteLength));
     const dst = path.join(dir, 'out.jpg');
-    execFileSync('sips', ['-s', 'format', 'jpeg', '-s', 'formatOptions', '85', '-Z', String(tex), src, '--out', dst], { stdio: 'ignore' });
+    // Only ever smaller.
+    const size = Math.max(...execFileSync('sips', ['-g', 'pixelWidth', '-g', 'pixelHeight', src], { encoding: 'utf8' }).match(/\d+$/gm).map(Number));
+    execFileSync('sips', ['-s', 'format', 'jpeg', '-s', 'formatOptions', '85', ...(size > tex ? ['-Z', String(tex)] : []), src, '--out', dst], { stdio: 'ignore' });
     img.bufferView = addView(readFileSync(dst));
     img.mimeType = 'image/jpeg';
   }
   rmSync(dir, { recursive: true, force: true });
 }
 
-// Only what's still used: rebuild the binary from the views still pointed at.
+// Only what's still used: the accessors something still points at (the base's old clip's are left over),
+// then the binary rebuilt from the views those and the images point at.
+const live = new Set();
+for (const m of g.meshes ?? [])
+  for (const p of m.primitives) {
+    for (const a of Object.values(p.attributes)) live.add(a);
+    if (p.indices !== undefined) live.add(p.indices);
+    for (const t of p.targets ?? []) for (const a of Object.values(t)) live.add(a);
+  }
+for (const s of g.skins ?? []) if (s.inverseBindMatrices !== undefined) live.add(s.inverseBindMatrices);
+for (const an of g.animations) for (const s of an.samplers) (live.add(s.input), live.add(s.output));
+const accRemap = new Map();
+g.accessors = g.accessors.filter((a, i) => live.has(i) && (accRemap.set(i, accRemap.size), true));
+const reAcc = (i) => accRemap.get(i);
+for (const m of g.meshes ?? [])
+  for (const p of m.primitives) {
+    for (const k of Object.keys(p.attributes)) p.attributes[k] = reAcc(p.attributes[k]);
+    if (p.indices !== undefined) p.indices = reAcc(p.indices);
+    for (const t of p.targets ?? []) for (const k of Object.keys(t)) t[k] = reAcc(t[k]);
+  }
+for (const s of g.skins ?? []) if (s.inverseBindMatrices !== undefined) s.inverseBindMatrices = reAcc(s.inverseBindMatrices);
+for (const an of g.animations) for (const s of an.samplers) (s.input = reAcc(s.input), s.output = reAcc(s.output));
 const used = new Set([...g.accessors.map((a) => a.bufferView), ...(g.images ?? []).map((i) => i.bufferView)].filter((v) => v !== undefined));
 const views = [];
 let packed = Buffer.alloc(0);

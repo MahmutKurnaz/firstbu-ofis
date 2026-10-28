@@ -19,35 +19,43 @@ export function characterOf(config: Parameters<typeof findRole>[0] | undefined, 
 }
 
 export function installCharacters(ctx: Ctx, deps: { workerViews: Map<string, WorkerView> }) {
-  const skins = new Map<string, { skin: AnimalSkin | null; model: ModelName; view: WorkerView }>();
+  /** Each worker wearing a character, by the worker model itself: it keeps it on while it's walked out (sent home), after it's left workerViews. */
+  const skins = new Map<WorkerView['model'], { skin: AnimalSkin | null; model: ModelName; id: string }>();
   ctx.ticks.add('others', ({ dt }) => {
     for (const [id, view] of deps.workerViews) {
       const want = characterOf(store.ordu?.config, store.workers.get(id)?.role);
-      const have = skins.get(id);
-      // Gone, or a different worker in the same slot, or no longer a character: back to itself.
-      if (have && (have.view !== view || have.model !== want)) {
+      const have = skins.get(view.model);
+      // No longer a character (its role or the floor's army changed): back to itself.
+      if (have && have.model !== want) {
         have.skin?.dispose();
-        skins.delete(id);
+        skins.delete(view.model);
       }
-      if (!want || skins.has(id)) continue;
-      const entry: { skin: AnimalSkin | null; model: ModelName; view: WorkerView } = { skin: null, model: want, view };
-      skins.set(id, entry);
-      void loadModel(want)
+      if (!want) continue;
+      if (skins.has(view.model)) continue;
+      const entry: { skin: AnimalSkin | null; model: ModelName; id: string } = { skin: null, model: want, id };
+      skins.set(view.model, entry);
+      loadModel(want)
         .then((m) => {
-          if (skins.get(id) !== entry) return;
-          // Sat at its desk: its root is in the desk's seat (not out walking about the hall).
+          if (skins.get(view.model) !== entry) return;
+          // Sat at its desk: its root is in the desk's seat, where the seat has it (not up dancing on the
+          // desk), and the desk is one to sit at (not a kiosk or a lectern, which are stood at).
           const seated = () => {
             const desk = ctx.world().desks.get(view.deskId);
-            return !!desk && view.model.root.parent === desk.seatAnchor;
+            return !!desk && !desk.def.station && view.model.root.parent === desk.seatAnchor && view.model.root.position.lengthSq() < 1e-4;
           };
           entry.skin = new AnimalSkin(view.model, m, seated);
         })
-        .catch(() => console.warn(`characters: ${want} didn't load`));
+        .catch((e: unknown) => {
+          // Tried again next frame (a model that won't load keeps warning, rather than going quiet).
+          if (skins.get(view.model) === entry) skins.delete(view.model);
+          console.warn(`characters: ${want} didn't load`, e);
+        });
     }
-    for (const [id, have] of skins) {
-      if (!deps.workerViews.has(id)) {
+    for (const [model, have] of skins) {
+      // Gone from the scene (it's left, or its floor or map was put away): it's done with.
+      if (!model.root.parent) {
         have.skin?.dispose();
-        skins.delete(id);
+        skins.delete(model);
       } else have.skin?.update(dt);
     }
   });
