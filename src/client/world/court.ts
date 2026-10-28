@@ -11,6 +11,9 @@ import type { DeskView, Interactable } from './types';
  * to its seat once it has been. A new one runs in from wherever it was sent out from (the herald by
  * the throne, or the doors) to its seat. While it's up, its seat is empty but still its own, and the
  * spot it stands in is somewhere to walk up to it (`interactables`), as good as its seat.
+ *
+ * On a street (cadde), one stuck on a question doesn't wait in line while you're up and about: it
+ * comes to you, wherever you are (see follow), and stands in front of you until it's been seen to.
  */
 
 /** Walking pace (m/s), and running, for a new worker sent out to its seat. */
@@ -21,8 +24,34 @@ const HOP = 0.5;
 /** A worker's feet are this far above its origin (see features/workers/leaving.ts). */
 const FEET = 0.07;
 
-/** Where it's going: its seat, or a spot in line (its index). */
-type Goal = { seat: true } | { spot: number };
+/** Where it's going: its seat, a spot in line (its index), or one of the spots in front of you (see seekSpots). */
+type Goal = { seat: true } | { spot: number } | { seek: number };
+
+/** The most who come to you at once; the rest wait in line. */
+const SEEKERS = 4;
+/** How far you can move before those come to you set off again to catch up. */
+const RESEEK = 2.5;
+
+/** Somewhere to stand, facing `rotY`. */
+export interface Stand {
+  x: number;
+  z: number;
+  rotY: number;
+}
+
+/**
+ * Where `count` workers who've come to you stand: side by side 1.7 m in front of you (the way `anchor`
+ * faces), 1.1 m apart, each turned to face you.
+ */
+export function seekSpots(anchor: Stand, count: number): Stand[] {
+  const [fx, fz] = [Math.sin(anchor.rotY), Math.cos(anchor.rotY)];
+  return Array.from({ length: count }, (_, i) => {
+    const side = (i - (count - 1) / 2) * 1.1;
+    const x = anchor.x + fx * 1.7 + fz * side;
+    const z = anchor.z + fz * 1.7 - fx * side;
+    return { x, z, rotY: Math.atan2(anchor.x - x, anchor.z - z) };
+  });
+}
 
 interface Courtier {
   id: string;
@@ -43,12 +72,20 @@ interface Courtier {
 }
 
 const wrap = (a: number) => Math.atan2(Math.sin(a), Math.cos(a));
-const sameGoal = (a: Goal, b: Goal) => ('seat' in a ? 'seat' in b : 'spot' in b && a.spot === b.spot);
+const sameGoal = (a: Goal, b: Goal) => ('seat' in a ? 'seat' in b : 'spot' in a ? 'spot' in b && a.spot === b.spot : 'seek' in b && a.seek === b.seek);
 
 export class Court {
   /** One for each spot in line: walk up to whoever stands there, as at its seat. */
   readonly interactables: Interactable[];
+  /** One for each of those come to you (after the line's own). */
+  private readonly seekIts: Interactable[];
   private people = new Map<string, Courtier>();
+  /** Where you are while they come to you (null: they don't), and where it was when they last set off. */
+  private anchor: Stand | null = null;
+  private routedAt: Stand | null = null;
+  private stands: Stand[] = [];
+  private lastWaiting: readonly string[] = [];
+  private lastAsking: ReadonlySet<string> = new Set();
   private readonly tmp = new THREE.Vector3();
 
   constructor(
@@ -59,7 +96,9 @@ export class Court {
     private ground: (x: number, z: number, y: number) => number,
     private footstep: (x: number, y: number, z: number) => void,
   ) {
-    this.interactables = plan.lineup.map((s) => ({ kind: 'desk', x: s.x, z: s.z, radius: 1.3, off: true }));
+    this.interactables = plan.lineup.map((s): Interactable => ({ kind: 'desk', x: s.x, z: s.z, radius: 1.3, off: true }));
+    this.seekIts = Array.from({ length: SEEKERS }, (): Interactable => ({ kind: 'desk', x: 0, z: 0, radius: 1.3, off: true }));
+    this.interactables.push(...this.seekIts);
   }
 
   /**
@@ -106,13 +145,38 @@ export class Court {
     return c && c.state !== 'seated' && 'spot' in c.goal ? c.goal.spot : -1;
   }
 
-  /** Who's waiting on someone, the one who's waited longest first: they line up in that order, as many as there are spots. */
-  line(waiting: readonly string[]) {
-    const spots = this.plan.lineup.length;
-    const order = waiting.filter((id) => this.people.has(id)).slice(0, spots);
+  /** Whether `id` has come to you (or is on its way). */
+  seeking(id: string): boolean {
+    const c = this.people.get(id);
+    return !!c && c.state !== 'seated' && 'seek' in c.goal;
+  }
+
+  /**
+   * Who's waiting on someone, the one who's waited longest first: they line up in that order, as many
+   * as there are spots. While you're up and about (see follow), the ones in `asking` come to you instead.
+   */
+  line(waiting: readonly string[], asking: ReadonlySet<string> = new Set()) {
+    this.relink(waiting, asking, false);
+  }
+
+  /** As line; `moved`: you've moved on, so those already coming to you set off again after you. */
+  private relink(waiting: readonly string[], asking: ReadonlySet<string>, moved: boolean) {
+    this.lastWaiting = waiting;
+    this.lastAsking = asking;
+    const here = waiting.filter((id) => this.people.has(id));
+    const seekers = this.anchor ? here.filter((id) => asking.has(id)).slice(0, SEEKERS) : [];
+    const order = here.filter((id) => !seekers.includes(id)).slice(0, this.plan.lineup.length);
+    this.routedAt = this.anchor;
+    this.stands = this.anchor ? seekSpots(this.anchor, seekers.length) : [];
     for (const c of this.people.values()) {
+      const k = seekers.indexOf(c.id);
       const i = order.indexOf(c.id);
-      const goal: Goal = i >= 0 ? { spot: i } : { seat: true };
+      const goal: Goal = k >= 0 ? { seek: k } : i >= 0 ? { spot: i } : { seat: true };
+      // Come to you already, or on its way, and you've moved on: it sets off again after you.
+      if (k >= 0 && moved && sameGoal(goal, c.goal) && c.state !== 'seated') {
+        this.walkTo(c, goal);
+        continue;
+      }
       if (sameGoal(goal, c.goal)) continue;
       c.pace = WALK;
       this.walkTo(c, goal);
@@ -126,6 +190,17 @@ export class Court {
     return this.walking;
   }
   private readonly walking: THREE.Vector3[] = [];
+
+  /**
+   * Where you are, while you're up and about on a map where they come to you (null: you're sat down, or
+   * it's not that kind of map). Those come to you follow you once you've moved off a little way.
+   */
+  follow(anchor: Stand | null) {
+    const was = this.anchor;
+    this.anchor = anchor;
+    if (!was !== !anchor) this.relink(this.lastWaiting, this.lastAsking, false);
+    else if (anchor && this.routedAt && Math.hypot(anchor.x - this.routedAt.x, anchor.z - this.routedAt.z) > RESEEK) this.relink(this.lastWaiting, this.lastAsking, true);
+  }
 
   update(dt: number) {
     for (const c of this.people.values()) this.step(c, dt);
@@ -142,7 +217,11 @@ export class Court {
       it.deskId = undefined;
     }
     for (const c of this.people.values()) {
-      const it = c.state === 'stand' && 'spot' in c.goal ? this.interactables[c.goal.spot] : undefined;
+      const it = c.state !== 'stand' ? undefined : 'spot' in c.goal ? this.interactables[c.goal.spot] : 'seek' in c.goal ? this.seekIts[c.goal.seek] : undefined;
+      if (it && 'seek' in c.goal) {
+        it.x = c.model.root.position.x;
+        it.z = c.model.root.position.z;
+      }
       if (it) {
         it.off = false;
         it.deskId = c.desk.def.id;
@@ -169,7 +248,8 @@ export class Court {
   private walkTo(c: Courtier, goal: Goal): void {
     c.goal = goal;
     c.model.stopDancing();
-    const target: Pt | null = 'spot' in goal ? [this.plan.lineup[goal.spot].x, this.plan.lineup[goal.spot].z] : null;
+    const stand = 'spot' in goal ? this.plan.lineup[goal.spot] : 'seek' in goal ? this.stands[goal.seek] : undefined;
+    const target: Pt | null = stand ? [stand.x, stand.z] : null;
     if (c.state === 'seated') {
       if (!target) return;
       this.detach(c);
@@ -271,7 +351,7 @@ export class Court {
     // Up and down the dais steps as it goes, and facing the way it's walking, or the throne once it's in line.
     const g = this.ground(pos.x, pos.z, pos.y + FEET + 0.35) - FEET;
     pos.y += (g - pos.y) * Math.min(1, dt * 14);
-    const face = c.state === 'stand' && 'spot' in c.goal ? this.plan.lineup[c.goal.spot].rotY : c.heading;
+    const face = c.state !== 'stand' ? c.heading : 'spot' in c.goal ? this.plan.lineup[c.goal.spot].rotY : 'seek' in c.goal && this.anchor ? Math.atan2(this.anchor.x - pos.x, this.anchor.z - pos.z) : c.heading;
     root.rotation.set(0, root.rotation.y + wrap(face - root.rotation.y) * Math.min(1, dt * 8), 0);
   }
 

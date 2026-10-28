@@ -7,6 +7,7 @@ import { MCP_READ_ONLY, writeClaudeMcpConfig } from '../office-workers.js';
 import { QUEUE_AGENT_DISALLOWED_TOOLS } from '../stations.js';
 import { answered, notified, wantsPermission } from '../workers/lifecycle.js';
 import { shq } from '../workers/process.js';
+import { noteSubagent } from '../workers/subagents.js';
 import type { WorkerHandle } from '../workers/types.js';
 import { truncate } from '../workers/util.js';
 import type { ProviderAdapter } from './types.js';
@@ -40,6 +41,8 @@ function writeHookSettings(dataDir: string): string {
     ['PreToolUse', undefined],
     ['PostToolUse', undefined],
     ['PostToolUseFailure', undefined],
+    ['SubagentStart', undefined],
+    ['SubagentStop', undefined],
   ];
   // Minimal VPS images sometimes lack curl; the office's own node binary is always there.
   const nodeHook = path.join(dataDir, 'hook.cjs');
@@ -129,7 +132,13 @@ function claudeHook(h: WorkerHandle, event: string, payload: any): boolean {
     h.persist();
   }
   h.scheduleScan();
+  // Its subagents coming and going, and all of them gone when it stops: the ghosts beside its desk.
+  const ghosts = noteSubagent(info, event, payload, now);
   switch (event) {
+    case 'SubagentStart':
+    case 'SubagentStop':
+      if (ghosts) h.emit();
+      break;
     case 'SessionStart':
       if (payload?.source === 'clear') {
         h.clearTask();

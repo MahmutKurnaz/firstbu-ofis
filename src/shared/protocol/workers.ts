@@ -52,6 +52,8 @@ export interface WorkerInfo {
   agentFile?: string;
   /** The task id its role reports under (<reportDir>/<roleTask>/). */
   roleTask?: string;
+  /** Its subagents running now (Claude Code's SubagentStart/Stop hooks), oldest first: ghosts beside its desk. */
+  subagents?: { id: string; type: string; at: number }[];
   /**
    * Set when the worker runs in its own git worktree (path relative to the office dir). `from` is
    * the branch the office was on when the worktree was cut, which its pull request targets.
