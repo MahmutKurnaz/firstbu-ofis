@@ -156,7 +156,7 @@
     {"kind":"parasol","x":4.6,"z":-1.2},
     {"kind":"parasol","x":-4.6,"z":9.6},
     {"kind":"parasol","x":4.6,"z":9.6},
-    {"kind":"counter","x":-4.2,"z":-9.4,"width":4.4,"rotY":0},
+    {"kind":"counter","x":-4.2,"z":-9.4,"width":4,"rotY":0},
     {"kind":"dispenser","x":4.2,"z":-9.6,"rotY":0},
     {"kind":"gong","x":6.6,"z":-6.4,"rotY":-1.5708},
     {"kind":"bench","x":-7.8,"z":18.5,"rotY":1.5708},
