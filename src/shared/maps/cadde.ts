@@ -28,8 +28,8 @@ const west = Math.PI / 2;
 
 /** The offices, in zone order: the lead's at the head of the street, then west and east down it, row by row. */
 const OFFICES: PropConfig[] = [
-  // The head of the street is the executive suite (see SUITE in ./cadde-props.ts): 44 m across.
-  { kind: 'office', x: 0, z: -31, width: 44, length: 10, rotY: 0, style: 'yonetim' },
+  // The head of the street is the executive suite (see SUITE in ./cadde-props.ts): 60 m across.
+  { kind: 'office', x: 0, z: -31, width: 60, length: 10, rotY: 0, style: 'yonetim' },
   ...ROWS.flatMap((z) => [
     { kind: 'office', x: -SIDE_X, z, width: SIDE_FRONT, length: SIDE_DEPTH, rotY: west },
     { kind: 'office', x: SIDE_X, z, width: SIDE_FRONT, length: SIDE_DEPTH, rotY: east },
@@ -38,11 +38,14 @@ const OFFICES: PropConfig[] = [
 
 /** A table in each office, across it toward the back; the design studio's (the fourth) seats three a side. */
 const TABLES: TableConfig[] = [
-  // The suite's desks come first, so they're desk-1…6: the lead behind his desk in his room (the far side, looking out
-  // at the door), his assistant in the lobby in front of it, and four managers along a row of desks beside her.
-  { name: 'Aslan', x: -6, z: -33.6, length: 2.4, seats: 1, rotY: west, sides: 'inner', flip: true, look: 'desk' },
-  { name: 'Asistan', x: -6, z: -28.9, length: 1.8, seats: 1, rotY: west, sides: 'inner', look: 'desk' },
-  { name: 'Müdürler', x: 7, z: -28.9, length: 8, seats: 4, rotY: west, sides: 'inner', look: 'desk' },
+  // The suite's desks come first, so they're desk-1…6: the lead behind his desk in his room (the far side, looking out at the
+  // door), his assistant in hers beside it, and the four managers each in a room of their own (see SUITE in ./cadde-props.ts).
+  { name: 'Aslan', x: -18.5, z: -34.1, length: 2.4, seats: 1, rotY: west, sides: 'inner', flip: true, look: 'desk' },
+  { name: 'Asistan', x: -11.5, z: -33.6, length: 1.4, seats: 1, rotY: west, sides: 'inner', flip: true, look: 'desk' },
+  { name: 'Susamuru', x: -7, z: -33.8, length: 1.8, seats: 1, rotY: west, sides: 'inner', flip: true, look: 'desk' },
+  { name: 'Kaplan', x: -3, z: -33.8, length: 1.8, seats: 1, rotY: west, sides: 'inner', flip: true, look: 'desk' },
+  { name: 'Tavşan', x: 1, z: -33.8, length: 1.8, seats: 1, rotY: west, sides: 'inner', flip: true, look: 'desk' },
+  { name: 'Geyik', x: 5, z: -33.8, length: 1.8, seats: 1, rotY: west, sides: 'inner', flip: true, look: 'desk' },
   ...ROWS.flatMap((z, row) =>
     [-1, 1].map((side, i): TableConfig => {
       const big = row === 0 && i === 1;

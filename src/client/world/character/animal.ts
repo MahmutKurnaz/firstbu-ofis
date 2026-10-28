@@ -13,7 +13,7 @@ import type { Worker } from './worker';
 export const ANIMAL_HEIGHT = 1.85;
 /** How far the little worker's feet are above its root, which the office stands its root that far under the floor for (court.ts's FEET): the character's feet go there too. */
 const FEET = 0.07;
-/** How far over the seat's anchor (the little worker's hips) the character's hips go when it sits: on the seat's top. */
+/** How far over the seat's anchor (the little worker's hips) the lion's hips go when it sits: on the seat's top. Smaller and taller characters have their hips lower and higher by their height. */
 const SEAT_UP = 0.24;
 /** How far toward its table it sits (m), so its hands reach the keyboard. */
 const SIT_FORWARD = 0.1;
@@ -150,7 +150,7 @@ export class AnimalSkin {
       // put them on this one (the seat's anchor is where the little worker's hips go, just under its top).
       this.root.position.y = 0;
       this.root.updateMatrixWorld(true);
-      const seat = this.worker.root.getWorldPosition(this.tmp).y + SEAT_UP;
+      const seat = this.worker.root.getWorldPosition(this.tmp).y + SEAT_UP * (this.height / ANIMAL_HEIGHT);
       const hips = this.hips.getWorldPosition(this.tmp).y;
       this.root.position.y = (seat - hips) / scale;
       this.root.position.z = SIT_FORWARD / scale;

@@ -79,27 +79,65 @@ export function officePoint(p: PropConfig, side: number, out: number): [number, 
   return [p.x + Math.sin(r) * out + Math.cos(r) * side, p.z + Math.cos(r) * out - Math.sin(r) * side];
 }
 
+/** A room of the executive suite: across its office from `from` to `to`, its door at `door` (null: open to the lobby), and which team's color it wears (an index into the template's offices, or -1). */
+export interface SuiteRoom {
+  id: string;
+  label: string;
+  from: number;
+  to: number;
+  door: number | null;
+  team: number;
+}
+
 /**
- * The executive suite (an `office` with style `yonetim`, 44 m across and 10 deep: see shared/maps/cadde.ts): three rooms
- * and a meeting room along its back, glass between them, and a lobby along its front. In the office's own frame
- * (u across, v from its middle toward its door): the rooms are v -4.8..0, the lobby 0..5.
+ * The executive suite (an `office` with style `yonetim`, 60 m across and 10 deep: see shared/maps/cadde.ts): a row of rooms
+ * along its back, each sized to who sits in it (the lead's the biggest, then yours, the managers' a single's each, the
+ * assistant's a pair's, a meeting room for ten), glass between them in brass frames, and a lobby along its front. In
+ * the office's own frame (u across, v from its middle toward its door): the rooms are v `back`..`front`, the lobby `front`..5.
  */
 export const SUITE = {
-  /** The partitions between the rooms and the lobby (v = 0), as [from, to] across: what's left between them are the doors and the open coffee corner. */
-  fronts: [
-    [-21.8, -18],
-    [-16, -7],
-    [-5, 0],
-    [8, 14],
-    [16, 21.8],
-  ] as [number, number][],
-  /** The walls between the rooms, across (they run from the back wall to v = 0). */
-  dividers: [-12, 0, 8],
-  /** Where the doors are, across: Mahmut's room, the lead's room, the meeting room. */
-  doors: { you: -17, lead: -6, meeting: 15 },
+  width: 60,
+  length: 10,
   thick: 0.12,
   back: -4.8,
-} as const;
+  front: 0.6,
+  /** How wide a doorway in a partition is. */
+  gate: 1.4,
+  rooms: [
+    { id: 'you', label: '⭐ Mahmut’un odası', from: -29.8, to: -23, door: -26.4, team: -1 },
+    { id: 'lead', label: '🦁 Aslan Lider', from: -23, to: -14, door: -18.5, team: 0 },
+    { id: 'asst', label: '🐼 Asistan', from: -14, to: -9, door: -11.5, team: 0 },
+    { id: 'fe', label: '🦦 Frontend müdürü', from: -9, to: -5, door: -7, team: 2 },
+    { id: 'be', label: '🐯 Backend müdürü', from: -5, to: -1, door: -3, team: 3 },
+    { id: 'bug', label: '🐰 Hata avı müdürü', from: -1, to: 3, door: 1, team: 4 },
+    { id: 'verify', label: '🦌 Doğrulama müdürü', from: 3, to: 7, door: 5, team: 5 },
+    { id: 'coffee', label: '☕ Kahve köşesi', from: 7, to: 13, door: null, team: -1 },
+    { id: 'meeting', label: '🤝 Toplantı odası · 10 kişilik', from: 13, to: 25, door: 19, team: -1 },
+    { id: 'archive', label: '🗄️ Arşiv', from: 25, to: 29.8, door: 27.4, team: 1 },
+  ] as SuiteRoom[],
+  /** The assistant's room opens into the lead's too: a doorway in the wall between them, from v to v. */
+  between: { u: -14, from: -3.2, to: -1.8 },
+};
+
+/** The partitions along the lobby (v = `front`): what's left of each room's front either side of its door. */
+function frontsOf(rooms: SuiteRoom[]): [number, number][] {
+  return rooms.flatMap((r): [number, number][] => (r.door === null ? [] : [[r.from, r.door - SUITE.gate / 2], [r.door + SUITE.gate / 2, r.to]]));
+}
+
+/** The walls between the rooms, from the back one to the lobby's: across (u) and from-to (v), the lead's with its doorway to the assistant's. */
+function dividersOf(rooms: SuiteRoom[]): { u: number; from: number; to: number }[] {
+  return rooms.slice(1).flatMap((r) =>
+    r.from === SUITE.between.u
+      ? [
+          { u: r.from, from: SUITE.back, to: SUITE.between.from },
+          { u: r.from, from: SUITE.between.to, to: SUITE.front },
+        ]
+      : [{ u: r.from, from: SUITE.back, to: SUITE.front }],
+  );
+}
+
+export const SUITE_FRONTS = frontsOf(SUITE.rooms);
+export const SUITE_DIVIDERS = dividersOf(SUITE.rooms);
 
 /** The suite's partitions as ground, in the office's own frame turned into the world's. */
 function suiteWalls(p: PropConfig): Rect[] {
@@ -108,10 +146,9 @@ function suiteWalls(p: PropConfig): Rect[] {
     const [x, z] = officePoint(p, side, out);
     return boxFootprint(x, z, w, d, o.rotY);
   };
-  const run = SUITE.back / 2;
   return [
-    ...SUITE.fronts.map(([a, b]) => at((a + b) / 2, 0, b - a, SUITE.thick)),
-    ...SUITE.dividers.map((u) => at(u, run, SUITE.thick, -SUITE.back)),
+    ...SUITE_FRONTS.map(([a, b]) => at((a + b) / 2, SUITE.front, b - a, SUITE.thick)),
+    ...SUITE_DIVIDERS.map((d) => at(d.u, (d.from + d.to) / 2, SUITE.thick, d.to - d.from)),
   ];
 }
 

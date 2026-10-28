@@ -333,8 +333,8 @@ export function planMap(input: unknown): MapPlan {
     opt(p.height, `${what}.height`, 0.3, 20);
     opt(p.length, `${what}.length`, 0.3, 120);
     if (p.style !== undefined && (p.kind !== 'office' || p.style !== 'yonetim')) throw new MapError(`${what}.style can only be "yonetim", on an office`);
-    // The suite's rooms are laid out for a 44 x 10 m office (see SUITE in ./cadde-props.ts).
-    if (p.style === 'yonetim' && (p.width !== 44 || p.length !== 10 || !quarterTurn(p.rotY))) throw new MapError(`${what} (a "yonetim" office) has to be width 44 and length 10, facing along x or z`);
+    // The suite's rooms are laid out for a 60 x 10 m office (see SUITE in ./cadde-props.ts).
+    if (p.style === 'yonetim' && (p.width !== 60 || p.length !== 10 || !quarterTurn(p.rotY))) throw new MapError(`${what} (a "yonetim" office) has to be width 60 and length 10, facing along x or z`);
     if (p.light !== undefined && typeof p.light !== 'boolean') throw new MapError(`${what}.light should be true or false`);
     // Its walls are what's in the way, box by box, so they have to be square to the hall.
     if (style === 'cadde' && p.kind === 'office' && !quarterTurn(p.rotY)) throw new MapError(`${what} (an office) has to face along x or z: its rotY should be 0, 1.5708, 3.1416 or -1.5708`);
