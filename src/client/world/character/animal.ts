@@ -190,6 +190,8 @@ export class AnimalSkin {
       if (this.head) look(this.head, glance(this.t, working));
     } else {
       this.root.position.z = 0;
+      // On its feet the clips stand hunched: back up straight (a stride may lean a little).
+      if (this.spine && this.neck) straighten(this.spine, this.neck, this.ahead.set(0, 0, 1).transformDirection(this.worker.root.matrixWorld), this.playing === 'walk' ? 0.12 : 0.05);
       // On its feet, down where the little worker's feet would be.
       this.root.position.y = FEET;
     }

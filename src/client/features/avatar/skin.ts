@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { straighten } from '../../world/character/animal-pose';
 import { polishCharacter, toPhysical } from '../../world/character/polish';
 import type { Model } from '../../world/models';
 import { AVATAR_HEIGHT, FIDGET_EVERY, clipOf, gaitFor, type Clip } from './logic';
@@ -33,6 +34,9 @@ export class PlayerAvatar {
   private actions = new Map<Clip, THREE.AnimationAction>();
   private playing: Clip | null = null;
   private hips: THREE.Object3D | undefined;
+  private spine: THREE.Object3D | undefined;
+  private neck: THREE.Object3D | undefined;
+  private readonly ahead = new THREE.Vector3();
   /** Seconds stood still, when the next wave is due, and until when the one being waved lasts. */
   private still = 0;
   private nextFidget = FIDGET_EVERY[0] + Math.random() * (FIDGET_EVERY[1] - FIDGET_EVERY[0]);
@@ -51,6 +55,8 @@ export class PlayerAvatar {
     this.root.add(body);
     body.traverse((o) => {
       if (!this.hips && /hips/i.test(o.name) && (o as THREE.Bone).isBone) this.hips = o;
+      if (o.name === 'Spine02' && (o as THREE.Bone).isBone) this.spine = o;
+      if (o.name === 'neck' && (o as THREE.Bone).isBone) this.neck = o;
     });
     this.mixer = new THREE.AnimationMixer(body);
     for (const clip of model.clips) {
@@ -98,6 +104,11 @@ export class PlayerAvatar {
     }
     if (this.playing) this.actions.get(this.playing)!.timeScale = rate;
     this.mixer.update(dt);
+    // The library's clips stand a little hunched, shoulders forward: back up straight (a stride may lean more).
+    if (this.spine && this.neck) {
+      this.root.updateMatrixWorld(true);
+      straighten(this.spine, this.neck, this.ahead.set(0, 0, 1).transformDirection(this.root.matrixWorld), this.playing === 'run' ? 0.22 : this.playing === 'walk' ? 0.1 : 0.04);
+    }
   }
 
   /** Moves it so its hips are at `at` (world): on the seat's cushion, whatever the clip's own chair was. Call after update, at its seat. */
