@@ -126,7 +126,7 @@ export function agentConsole(kit: Kit, def: DeskDef): DeskView {
 }
 
 /** The round briefing table, its chairs, and the display on a stand with the meeting's board and sign. */
-export function buildBriefing(kit: Kit): { board?: THREE.Mesh; sign?: THREE.Mesh } {
+export function buildBriefing(kit: Kit, name = '🤝 Briefing room'): { board?: THREE.Mesh; sign?: THREE.Mesh } {
   const cp = kit.plan.council;
   if (!cp) return {};
   const { mats } = kit;
@@ -163,7 +163,7 @@ export function buildBriefing(kit: Kit): { board?: THREE.Mesh; sign?: THREE.Mesh
   sign.position.set(0, 0.92, 0.07);
   stand.add(mesh(box(1.3, 0.42, 0.06), mats.black, 0, 0.92, 0.02));
   stand.add(sign);
-  const title = textPlane('🤝 Briefing room', { bg: '#0f1a26', color: '#cfeeff', border: '#3a5a78', size: 56 });
+  const title = textPlane(name, { bg: '#0f1a26', color: '#cfeeff', border: '#3a5a78', size: 56 });
   title.scale.multiplyScalar(0.62);
   title.position.set(0, 2.98, 0.06);
   stand.add(title);

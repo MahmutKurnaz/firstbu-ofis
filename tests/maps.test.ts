@@ -4,6 +4,7 @@ import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { CASTLE } from '../src/shared/maps/castle.js';
 import { STATION } from '../src/shared/maps/station.js';
+import { CADDE } from '../src/shared/maps/cadde.js';
 import { DESK_BY_ID } from '../src/shared/layout.js';
 import { NavGrid, pathLength } from '../src/shared/nav.js';
 import { BUILTIN_MAPS, DEFAULT_DAIS, OFFICE_PLAN, checkCustomMaps, mapChoices, planMap, planOf, seatHereOn, type MapConfig } from '../src/shared/maps/index.js';
@@ -173,6 +174,7 @@ function mapJson(map: MapConfig, id: string, name: string): string {
 for (const [map, id, name] of [
   [CASTLE, 'my-castle', 'My castle'],
   [STATION, 'my-station', 'My station'],
+  [CADDE, 'my-cadde', 'My street'],
 ] as const) {
   test(`docs/maps/${map.id}.json is the ${map.name.toLowerCase()}, ready to copy into .agent-office/maps/ and change`, () => {
     const file = path.join(import.meta.dirname, '..', 'docs', 'maps', `${map.id}.json`);

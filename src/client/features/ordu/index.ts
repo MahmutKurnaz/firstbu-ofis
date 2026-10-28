@@ -3,6 +3,7 @@
 import type { Ctx } from '../../core/context';
 import { store } from '../../state';
 import { $ } from '../../ui/dom';
+import { defineOrduDoors } from './door';
 import { OrduPanel } from './panel';
 
 export interface OrduDeps {
@@ -21,6 +22,11 @@ export function installOrdu(ctx: Ctx, deps: OrduDeps): OrduPanel {
     $('ordu-count').textContent = roles ? String(roles) : '';
   };
   panel.redraw = draw;
+  // A street office's door: its office in the panel, which comes out if it was put away.
+  defineOrduDoors(ctx, (i) => {
+    $('ordu-panel').classList.remove('hud-off');
+    panel.focusOffice(i);
+  });
   // A new floor (or the first one): ask for its army.
   store.on('floor', () => ctx.net.send({ t: 'ordu.get' }));
   store.on('ordu', draw);

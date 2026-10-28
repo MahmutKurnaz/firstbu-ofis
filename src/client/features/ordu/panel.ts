@@ -31,6 +31,16 @@ export class OrduPanel {
     this.body.replaceChildren(...this.content(view, workers));
   }
 
+  /** Brings the `index`th office into view and makes it flash (its door on the street was used). */
+  focusOffice(index: number) {
+    const el = this.body.querySelector<HTMLElement>(`[data-office="${index}"]`);
+    if (!el) return;
+    el.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    el.classList.remove('ordu-flash');
+    void el.offsetWidth;
+    el.classList.add('ordu-flash');
+  }
+
   private content(view: OrduView | null, workers: Iterable<import('../../../shared/protocol').WorkerInfo>): Node[] {
     if (!view) return [h('p.ordu-note', {}, 'Ekipler yükleniyor…')];
     const out: Node[] = [];
@@ -41,13 +51,15 @@ export class OrduPanel {
       return out;
     }
     let office = '';
+    let officeIndex = -1;
     let team = '';
     let teamEl: HTMLElement | null = null;
     for (const row of roleRows(view, workers)) {
       if (row.office !== office) {
         office = row.office;
+        officeIndex++;
         team = '';
-        out.push(h('h4.ordu-office', {}, `🏢 ${office}`));
+        out.push(h('h4.ordu-office', { 'data-office': String(officeIndex) }, `🏢 ${office}`));
       }
       if (row.team !== team) {
         team = row.team;

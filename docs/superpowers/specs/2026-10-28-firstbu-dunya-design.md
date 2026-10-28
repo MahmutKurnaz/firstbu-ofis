@@ -332,3 +332,16 @@ verir. Bir masaya tıklayıp o terminalde doğrudan yazar. Tüm bunlar için tek
 - Rapor kuralı plandan farklı: işçisi olmayan rollere en yeni rapor atanmıyor (yoksa hepsinde aynı rapor görünürdü).
   Yalnızca verify rolleri en yeni `verify.md`'yi gösterir.
 - FirstBU `git status` değişmedi (24 satır).
+
+## F2 sonuçları (2026-10-28)
+
+- Yeni harita stili `cadde` ve yerleşik "🏙️ Cadde" haritası: ağaçlıklı cadde, 7 cam ofis, ortada kafe (koltuğun,
+  barista, şemsiyeli masalar, tezgâh), çevrede gece ışıkları yanan kuleler, güneyde proje adlı giriş kapısı.
+- Masalar, laptoplar, kiosklar, panolar ve toplantı masası istasyon stilinden yeniden kullanıldı. Taslak
+  varlıklar kodla kuruldu (izin gerektiren dış CC0 indirmesi yapılmadı). `glb` prop türü F4 modelleri için hazır.
+- **Bölge = ofis:** `ordu.json`'daki n. ofis haritadaki n. binaya yerleşir. Tabelada adı, çatıda ve arka duvarda
+  ekip rengi görünür. Deneme: `bug-hunter` işe alındı, `desk-4` (sıradaki boş masa) yerine kendi ofisindeki
+  `desk-10`'a ("Hata laboratuvarı") oturdu.
+- Ofis kapısında **E** → Ekipler panelinde o ofis öne gelir ve yanıp söner. Panel gizliyse açılır.
+- İşini bitiren ajanlar kafedeki koltuğunun önünde sıraya giriyor (kalenin "sıra" davranışı). F3'ün temeli hazır.
+- Testleri yine ayrı bir Sonnet 5.5 ajanı yazdı: 17 yeni test ve `docs/maps/cadde.json` anlık görüntüsü.

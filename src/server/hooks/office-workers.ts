@@ -4,6 +4,7 @@ import { findWorker, readHireRequest, readHomeRequest, readPrRequest, workerRow,
 import { gh } from '../github.js';
 import type { Floor } from '../floor.js';
 import { nextFreeSeat } from '../../shared/layout.js';
+import { mapZones } from '../../shared/maps/index.js';
 import type { WorkerInfo } from '../../shared/protocol.js';
 import type { Ctx } from '../office/context.js';
 import { str } from '../office/input.js';
@@ -149,7 +150,7 @@ export async function officeWorkers(ctx: Ctx, req: http.IncomingMessage, res: ht
   if (ask.role) {
     if (!floor.project.agentProviders.includes('claude')) return send(res, 400, { error: 'This floor has no Claude Code: roles run on Claude Code' });
     // An ordu.json role: its desk, agent, model and effort are the role's, in the shared checkout.
-    const hired = hireRole(floor, ask.role, who, ask.prompt, floor.workers.ownerOf(me.id));
+    const hired = hireRole(floor, ask.role, who, ask.prompt, floor.workers.ownerOf(me.id), mapZones(ctx.maps.plan()).map((z) => z.desks));
     if (typeof hired === 'string') return send(res, 400, { error: hired });
     ctx.toastFloor(floor, `${who}, ${hired.info.name} (${hired.info.role}) işe aldı`);
     if (hired.note) ctx.toastFloor(floor, hired.note, 'warn');

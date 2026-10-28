@@ -69,6 +69,8 @@ export interface World {
   /** Paints it in a floor's colors, so each project looks like itself. */
   setLook(p: FloorPalette): void;
   setProjectName(name: string): void;
+  /** Names and colors the map's zones (a street's offices) after the floor's ordu.json, in order. */
+  setZones?(zones: { name: string; color: string }[]): void;
   /** Animates it; doors open for anyone in `people` who comes up to them. */
   update(t: number, dt: number, people: Iterable<{ x: number; y: number; z: number }>): void;
   /** Lights it its own way, after the sky's had its say (the castle's torchlit hall). `daylight` is 1 by day, 0 at night; `eye` is where you're looking from. */
