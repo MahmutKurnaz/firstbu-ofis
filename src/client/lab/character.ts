@@ -14,11 +14,13 @@ const q = new URLSearchParams(location.search);
 const name = (q.get('model') ?? 'aslan') as ModelName;
 const stepTo = q.has('t') ? Number(q.get('t')) : null;
 const { effect, scene, camera } = stage(document.getElementById('c') as HTMLCanvasElement);
-camera.position.set(0.6, 1.6, 5.2);
+camera.position.set(0.6, 1.8, 6.2);
 camera.lookAt(0.6, 0.6, 0);
 
 /** A bench-high seat, as the street's tables have (BENCH_TOP 0.45, the worker 0.08 below its top). */
 const SEAT = 0.37;
+// A seat scales the little worker on it (station seats: 0.82), as at the office's desks.
+const SEAT_SCALE = 0.82;
 const plain = new Worker('Claude', '#e07a5f');
 plain.root.position.set(-1.8, 0, 0);
 scene.add(plain.root);
@@ -36,6 +38,7 @@ void loadModel(name).then(async () => {
     acts.map(async (a) => {
       const w = new Worker(a.label, '#3d5a80');
       w.root.position.set(a.x, a.seated ? SEAT : 0, 0);
+      if (a.seated) w.root.scale.setScalar(SEAT_SCALE);
       w.walking = a.walking;
       scene.add(w.root);
       const skin = new AnimalSkin(w, await loadModel(name), () => a.seated);
