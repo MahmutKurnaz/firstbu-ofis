@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import type { PropConfig } from '../../../shared/maps';
-import { CADDE_SIZE, type CaddePropKind } from '../../../shared/maps/cadde-props';
+import { CADDE_SIZE, treeLook, type CaddePropKind } from '../../../shared/maps/cadde-props';
 import { loadModel, type ModelName } from '../models';
 import { tree as streetTree } from '../outside';
 import { PROPS as STATION_PROPS } from '../station/props';
@@ -25,11 +25,12 @@ function tree(kit: CaddeKit, p: PropConfig) {
   const g = at(p);
   g.add(mesh(new THREE.CylinderGeometry(CADDE_SIZE.tree * s, CADDE_SIZE.tree * s, 0.12, 20), kit.street.curb, 0, 0.06, 0));
   g.add(mesh(new THREE.CylinderGeometry(CADDE_SIZE.tree * s - 0.1, CADDE_SIZE.tree * s - 0.1, 0.13, 20), kit.street.soil, 0, 0.07, 0, false));
+  const look = treeLook(p);
   const t = streetTree(0.72 * s);
-  t.rotation.y = (p.x * 7 + p.z * 3) % 6.28;
+  t.rotation.y = look.turn;
   g.add(t);
   // Its own tree, in its own round bed, in their place (a 4 m street tree, its bed 2.2 m across: blender/furniture.json).
-  meshy(g, Math.floor(Math.abs(p.x * 7 + p.z * 3)) % 3 === 0 ? 'agac-ince' : 'agac-genis', { scale: s, turn: t.rotation.y, replaces: [...g.children] });
+  meshy(g, look.key, { scale: s, turn: look.turn, replaces: [...g.children] });
   kit.group.add(g);
   kit.colliders.push({ minX: p.x - 0.3, maxX: p.x + 0.3, minZ: p.z - 0.3, maxZ: p.z + 0.3, top: 99 });
 }

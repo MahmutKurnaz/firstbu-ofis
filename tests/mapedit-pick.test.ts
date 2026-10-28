@@ -1,7 +1,8 @@
 // The map editor's panel groups, names, footprints and footprint-aware picking (features/mapedit/logic.ts).
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { CATALOG, GROUPS, footprint, nameOf, pickProp, type Prop } from '../src/client/features/mapedit/logic.js';
+import { CADDE_SIZE } from '../src/shared/maps/cadde-props.js';
+import { CATALOG, PINNED, GROUPS, footprint, nameOf, pickProp, type Prop } from '../src/client/features/mapedit/logic.js';
 
 const P = (kind: string, x: number, z: number, extra: Record<string, unknown> = {}): Prop => ({ kind, x, z, ...extra });
 
@@ -36,14 +37,48 @@ test('nameOf: known kinds are named, unknown kinds are themselves', () => {
   assert.equal(nameOf(P('zeplin', 0, 0)), 'zeplin');
 });
 
-test('footprint: 1.2 x 1.2 when width and length are missing', () => {
-  assert.deepEqual(footprint(P('tree', 0, 0)), [1.2, 1.2]);
+test('footprint: 1.2 x 1.2 when width and length are missing and the kind is unknown', () => {
+  assert.deepEqual(footprint(P('zeplin', 0, 0)), [1.2, 1.2]);
+  assert.deepEqual(footprint(P('glb', 0, 0)), [1.2, 1.2]);
+});
+
+test('footprint: street kinds default to the size of their symbol', () => {
+  const close = (a: [number, number], b: [number, number]) => a.forEach((v, i) => assert.ok(Math.abs(v - b[i]) < 1e-9, `${a} vs ${b}`));
+  close(footprint(P('tree', 0, 0)), [2.2, 2.2]);
+  close(footprint(P('bench', 0, 0)), [CADDE_SIZE.bench.width, CADDE_SIZE.bench.depth]);
+  close(footprint(P('bench', 0, 0)), [2, 0.7]);
+  close(footprint(P('planter', 0, 0)), [3, 0.8]);
+  close(footprint(P('counter', 0, 0)), [4, 1]);
+  close(footprint(P('dispenser', 0, 0)), [1.3, 0.7]);
+  close(footprint(P('parasol', 0, 0)), [2.2, 2.2]);
+  close(footprint(P('lamp', 0, 0)), [0.6, 0.6]);
+  close(footprint(P('gong', 0, 0)), [0.7, 0.7]);
+  close(footprint(P('bench', 0, 0, { scale: 2 })), [4, 1.4]);
+  close(footprint(P('bench', 0, 0, { width: 3 })), [3, 0.7]);
+});
+
+test('a table prop without tableIndex is an ordinary prop', async () => {
+  const { moved, scaled, removed, duplicated, split, fitted } = await import('../src/client/features/mapedit/logic.js');
+  assert.ok(PINNED.has('table'));
+  const t: Prop = { kind: 'table', x: 1, z: 1 };
+  const l: Prop[] = [t, { kind: 'tree', x: 5, z: 5 }];
+  assert.deepEqual(footprint(t), [1.2, 1.2]);
+  assert.equal(moved(l, 0, 3, 4)[0].x, 3);
+  assert.equal(scaled(l, 0, 2)[0].scale, 2);
+  assert.equal(removed(l, 0).length, 1);
+  assert.equal(duplicated(l, 0).length, 3);
+  const s = split(l);
+  assert.equal(s.tables.length, 0);
+  assert.equal(s.props.length, 2);
+  assert.equal(s.props[0].kind, 'table');
+  const b = { minX: -10, maxX: 10, minZ: -10, maxZ: 10 };
+  assert.deepEqual(fitted([{ ...t, x: 99, z: 99 }], 0, b), [{ ...t, x: 99, z: 99 }]);
 });
 
 test('footprint: width and length are used, and scale multiplies both', () => {
   assert.deepEqual(footprint(P('glb', 0, 0, { width: 2, length: 0.5 })), [2, 0.5]);
   assert.deepEqual(footprint(P('glb', 0, 0, { width: 2, length: 0.5, scale: 2 })), [4, 1]);
-  assert.deepEqual(footprint(P('tree', 0, 0, { scale: 2 })), [2.4, 2.4]);
+  assert.deepEqual(footprint(P('zeplin', 0, 0, { scale: 2 })), [2.4, 2.4]);
 });
 
 test('pickProp: a point inside a footprint picks that prop', () => {

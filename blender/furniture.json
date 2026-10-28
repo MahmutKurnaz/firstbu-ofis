@@ -539,6 +539,32 @@
       "range": "Hall statue on a plinth: 2.2-2.6 m. (Common practice.)",
       "src": [],
       "verified": "partly"
+    },
+    "kafe-uzun-masa": {
+      "w": 2.5,
+      "d": 1.4,
+      "h": 0.76,
+      "kind": "street",
+      "range": "Communal café table: 2.4-2.5 m for a module of six, 0.7-0.9 m wide for one row of seats, 1.4 m for two facing rows with the benches outside it, 74-76 cm high.",
+      "src": [
+        "conference-of2go",
+        "desk-din"
+      ],
+      "verified": "sources",
+      "top": 0.76
+    },
+    "kafe-uzun-bank": {
+      "w": 2.5,
+      "d": 0.44,
+      "h": 0.45,
+      "kind": "street",
+      "range": "Café bench for the long table: seat 45 cm high, 35-45 cm deep, 2.4-2.5 m a module for three.",
+      "src": [
+        "bench-wabash",
+        "bench-dambis"
+      ],
+      "verified": "sources",
+      "seat": 0.45
     }
   }
 }

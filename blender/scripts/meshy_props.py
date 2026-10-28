@@ -82,6 +82,9 @@ ESYA = {
     "istasyon-bank": ("space station bench", "A long sleek white and brushed steel bench with a padded dark grey seat and a thin glowing cyan strip along its front, sci-fi, three seats.", False),
     "kargo-sandik": ("space station cargo crate", "A rugged rectangular cargo container in white and orange with black corner guards, ribbed sides, a hazard stripe and a handle on each end, sci-fi.", False),
     "kale-masa": ("medieval long banquet table", "A heavy dark oak plank table with thick turned legs and a stretcher bar, a worn but handsome castle table, rectangular, with a dark red table runner down the middle.", False),
+    # Tur 5: the street's long café table and its benches, in place of the code-drawn white top (docs/KAYNAKLAR.md).
+    "kafe-uzun-masa": ("long cafe communal table, one 2.5 metre module", "A rectangular light-oak plank tabletop, 2.5 metres long and 1.4 metres wide with a thick softly rounded edge, on slim matte-black steel trestle legs at both ends joined by a low stretcher bar, a thin brass inlay line down the middle, nothing on top, the long side shown horizontally.", False),
+    "kafe-uzun-bank": ("long cafe bench, one 2.5 metre module", "A long slim bench 2.5 metres long and only 0.45 metres wide: a cushioned seat in warm cognac leather on a light-oak frame with slim matte-black steel legs, no backrest, the long side shown horizontally.", False),
     "heykel": ("stone knight statue on a plinth", "A weathered grey stone statue of an armoured knight standing with a sword point-down in front of him, on a square stone plinth, castle hall statue.", False),
 }
 

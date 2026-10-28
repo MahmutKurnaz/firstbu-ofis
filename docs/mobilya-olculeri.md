@@ -72,6 +72,8 @@ Kaynaklar: [desk-din](https://yaasa.com/en/blogs/yaasa-blog/schreibtisch-masse),
 | `kargo-sandik` | ofis | 1.20 × 0.80 × 0.80 | — | Cargo crate / small container: 1.2 x 0.8 x 0.8 m. (Common practice.) | — | kısmen |
 | `kale-masa` | ofis | 3.60 × 1.00 × 0.76 | üst 76 cm | Banquet table: 3-4 m long, 0.9-1.1 m wide, 0.76 m high. | [conference-of2go](https://www.officefurniture2go.com/answers/conference-tables/what-size-conference-table-for-10-people.html), [desk-din](https://yaasa.com/en/blogs/yaasa-blog/schreibtisch-masse) | kaynaklı |
 | `heykel` | ofis | 0.90 × 0.90 × 2.40 | — | Hall statue on a plinth: 2.2-2.6 m. (Common practice.) | — | kısmen |
+| `kafe-uzun-masa` | cadde | 2.50 × 1.40 × 0.76 | üst 76 cm | Communal café table: 2.4-2.5 m for a module of six, 0.7-0.9 m wide for one row of seats, 1.4 m for two facing rows with the benches outside it, 74-76 cm high. | [conference-of2go](https://www.officefurniture2go.com/answers/conference-tables/what-size-conference-table-for-10-people.html), [desk-din](https://yaasa.com/en/blogs/yaasa-blog/schreibtisch-masse) | kaynaklı |
+| `kafe-uzun-bank` | cadde | 2.50 × 0.44 × 0.45 | oturak 45 cm | Café bench for the long table: seat 45 cm high, 35-45 cm deep, 2.4-2.5 m a module for three. | [bench-wabash](https://wabashvalley.com/blogs/blog/standard-bench-dimensions), [bench-dambis](https://www.dambis.ee/en/product/park-bench-nisha/) | kaynaklı |
 
 "Kaynaklı": ölçü, listelenen sayfalardaki aralıktan seçildi. "Kısmen": bir standart bulunamadı, yaygın bir ölçü alındı (sayfada belirtildi).
 

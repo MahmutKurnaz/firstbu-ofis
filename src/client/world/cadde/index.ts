@@ -1,13 +1,14 @@
 import * as THREE from 'three';
 import type { FloorPalette } from '../../../shared/floors';
-import type { MapPlan } from '../../../shared/maps';
+import { BENCH_OUT, type MapPlan } from '../../../shared/maps';
 import type { CaddePropKind } from '../../../shared/maps/cadde-props';
 import { NavGrid, type Pt } from '../../../shared/nav';
 // The people first, as the castle's and the station's are: Person (and what it loads) before the
 // rest, so the materials the modules make as they load keep their order.
 import { buildArmchair, buildBarista } from './people';
 import type { Interactable } from '../types';
-import { mergeByMaterial } from '../toon';
+import { mergeByMaterial, mesh, toon } from '../toon';
+import { box } from '../station/kit';
 import type { World } from '../world';
 import { buildBoards } from '../station/boards';
 import { agentConsole, buildBenches, buildBriefing, placeSetting } from '../station/seats';
@@ -59,7 +60,29 @@ export function buildCadde(plan: MapPlan): World {
   dress(kit, c.props ?? []);
   skylineOwn(kit, shell.near);
   buildArmchair(kit);
-  buildBenches(kit);
+  // Its own long table and benches, a module of 2.5 m each along the table (a plain top and rails stand in until they've loaded), in the street's group.
+  buildBenches(kit, (t) => {
+    const holder = new THREE.Group();
+    holder.position.set(t.x, 0, t.z);
+    holder.rotation.y = t.rotY;
+    kit.group.add(holder);
+    const n = Math.max(1, Math.round(t.length / 2.5));
+    const along = t.length / n / 2.5;
+    const stand = [mesh(box(t.width, 0.08, t.length), toon('#c9a77a'), 0, 0.72, 0), ...t.sides.map((side) => mesh(box(0.44, 0.08, t.length - 0.2), toon('#8a4b2f'), side * (t.width / 2 + BENCH_OUT), 0.41, 0))];
+    holder.add(...stand);
+    for (let i = 0; i < n; i++) {
+      const z = -t.length / 2 + ((i + 0.5) * t.length) / n;
+      const top = meshy(holder, 'kafe-uzun-masa', { turn: Math.PI / 2, replaces: i === 0 ? stand : [] });
+      top.position.z = z;
+      top.scale.set(along, 1, t.width / 1.4);
+      for (const side of t.sides) {
+        const seat = meshy(holder, 'kafe-uzun-bank', { turn: Math.PI / 2 });
+        seat.position.set(side * (t.width / 2 + BENCH_OUT), 0, z);
+        seat.scale.set(along, 1, 1);
+      }
+    }
+    return true;
+  });
   buildDesks(kit);
   const overflow = new Map<string, Interactable>();
   for (const def of plan.desks) kit.desks.set(def.id, placeSetting(kit, def, false).view);

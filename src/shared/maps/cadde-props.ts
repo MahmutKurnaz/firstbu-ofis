@@ -49,6 +49,15 @@ export const CADDE_SIZE = {
   dispenser: { width: 1.3, depth: 0.7 },
   glb: 1.5,
 } as const;
+/**
+ * Which model a street tree is and how it's turned (inside its own `rotY`): the prop's own once it has a `model` (the editor
+ * gives one to a tree it moves, so it stays what it was), else worked out from where it stands, which is how a map's trees vary.
+ */
+export function treeLook(p: { x: number; z: number; model?: unknown }): { key: 'agac-ince' | 'agac-genis'; turn: number } {
+  if (p.model === 'meshy-agac-ince' || p.model === 'meshy-agac-genis') return { key: p.model.slice(6) as 'agac-ince' | 'agac-genis', turn: 0 };
+  const h = p.x * 7 + p.z * 3;
+  return { key: Math.floor(Math.abs(h)) % 3 === 0 ? 'agac-ince' : 'agac-genis', turn: h % 6.28 };
+}
 /** How wide the doorway in an office's front is, and how thick its walls are. */
 export const OFFICE_DOOR = 2.4;
 export const OFFICE_WALL = 0.2;

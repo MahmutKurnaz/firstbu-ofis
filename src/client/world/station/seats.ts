@@ -13,30 +13,36 @@ import { BENCH_TOP, TABLE_TOP, box, collide, lit, xz, type Kit } from './kit';
 // captain's chair on it. Everything is where the plan has it (see planMap), as in the castle.
 
 /** The long benches the workers work at, as the plan has them: a white top with a line of light down it, a padded seat down each side. */
-export function buildBenches(kit: Kit) {
+export function buildBenches(kit: Kit, dress?: (t: Kit['plan']['tables'][number]) => boolean) {
   const { mats } = kit;
   for (const t of kit.plan.tables) {
     // A map's own desks are furnished by its builder (the street's executive suite).
     if (t.look === 'desk') continue;
+    // A map's own look for it (the street's Meshy table and benches, which can't be in `kit.still`: that's merged into one mesh) in place of what's drawn here.
+    const own = dress?.(t) === true;
     const g = new THREE.Group();
     g.position.set(t.x, 0, t.z);
     g.rotation.y = t.rotY;
-    g.add(mesh(roundedBox(t.width, 0.08, t.length, 0.08), mats.white, 0, TABLE_TOP - 0.04, 0));
-    g.add(mesh(box(t.width - 0.12, 0.05, t.length - 0.12), mats.metalDark, 0, TABLE_TOP - 0.105, 0, false));
-    g.add(mesh(box(0.1, 0.03, t.length - 0.6), mats.accent, 0, TABLE_TOP + 0.012, 0, false));
-    const legs = Math.max(2, Math.round(t.length / 3.4) + 1);
-    for (let i = 0; i < legs; i++) {
-      const lz = -t.length / 2 + 0.5 + (i * (t.length - 1)) / (legs - 1);
-      g.add(mesh(box(t.width - 0.5, TABLE_TOP - 0.13, 0.22), mats.metalDark, 0, (TABLE_TOP - 0.13) / 2, lz));
-      g.add(mesh(box(t.width - 0.2, 0.05, 0.5), mats.metal, 0, 0.025, lz, false));
+    if (!own) {
+      g.add(mesh(roundedBox(t.width, 0.08, t.length, 0.08), mats.white, 0, TABLE_TOP - 0.04, 0));
+      g.add(mesh(box(t.width - 0.12, 0.05, t.length - 0.12), mats.metalDark, 0, TABLE_TOP - 0.105, 0, false));
+      g.add(mesh(box(0.1, 0.03, t.length - 0.6), mats.accent, 0, TABLE_TOP + 0.012, 0, false));
+      const legs = Math.max(2, Math.round(t.length / 3.4) + 1);
+      for (let i = 0; i < legs; i++) {
+        const lz = -t.length / 2 + 0.5 + (i * (t.length - 1)) / (legs - 1);
+        g.add(mesh(box(t.width - 0.5, TABLE_TOP - 0.13, 0.22), mats.metalDark, 0, (TABLE_TOP - 0.13) / 2, lz));
+        g.add(mesh(box(t.width - 0.2, 0.05, 0.5), mats.metal, 0, 0.025, lz, false));
+      }
     }
     for (const s of t.sides) {
       const bx = s * (t.width / 2 + BENCH_OUT);
-      g.add(mesh(roundedBox(0.44, 0.09, t.length - 0.2, 0.05), mats.pad, bx, BENCH_TOP - 0.045, 0));
-      g.add(mesh(box(0.26, BENCH_TOP - 0.09, t.length - 0.8), mats.metalDark, bx, (BENCH_TOP - 0.09) / 2, 0));
+      if (!own) {
+        g.add(mesh(roundedBox(0.44, 0.09, t.length - 0.2, 0.05), mats.pad, bx, BENCH_TOP - 0.045, 0));
+        g.add(mesh(box(0.26, BENCH_TOP - 0.09, t.length - 0.8), mats.metalDark, bx, (BENCH_TOP - 0.09) / 2, 0));
+      }
       collide(kit, t.x + Math.cos(t.rotY) * bx, t.z - Math.sin(t.rotY) * bx, 0.44, t.length - 0.2, t.rotY, BENCH_TOP);
     }
-    kit.still.add(g);
+    if (!own) kit.still.add(g);
     collide(kit, t.x, t.z, t.width, t.length, t.rotY, TABLE_TOP);
   }
 }

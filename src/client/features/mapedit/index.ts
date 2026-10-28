@@ -9,8 +9,31 @@ import type { Ctx } from '../../core/context';
 import { isTyping } from '../../player';
 import { store } from '../../state';
 import { modalOpen, toast } from '../../ui/dom';
-import { CATALOG, History, added, duplicated, footprint, made, moved, nameOf, nearestProp, pickProp, removed, scaled, swapped, turned, TURN, type Prop } from './logic';
+import {
+  CATALOG,
+  History,
+  added,
+  alignTo,
+  type Guide,
+  duplicated,
+  editables,
+  fitted,
+  footprint,
+  made,
+  moved,
+  nameOf,
+  nearestProp,
+  pickProp,
+  removed,
+  scaled,
+  split,
+  swapped,
+  turned,
+  TURN,
+  type Prop,
+} from './logic';
 import { createPanel } from './panel';
+import { createPlan2d } from './plan2d';
 
 const KEY = 'KeyJ';
 
@@ -55,6 +78,10 @@ export function installMapEdit(ctx: Ctx) {
   let ghost: [number, number] | null = null;
   /** The catalog item chosen in the panel to put down (an index into CATALOG), or -1, and where the pointer last was on the ground. */
   let pick = -1;
+  /** Lined up with what's near while it's dragged (Alt held: not), and the lines it's on. */
+  let align = true;
+  let guides: Guide[] = [];
+  let aligned = false;
   let pointer: [number, number] | null = null;
   const history = new History();
   const ray = new THREE.Raycaster();
@@ -87,17 +114,49 @@ export function installMapEdit(ctx: Ctx) {
   }
 
   const panel = createPanel({
-    turn: (by) => selected >= 0 && commit(turned(props, selected, by * TURN)),
+    turn: (by) => selected >= 0 && commit(fit(turned(props, selected, by * TURN))),
     scale: (up) => selected >= 0 && commit(scaled(props, selected, up ? 1.1 : 1 / 1.1)),
     copy: () => duplicate(),
     remove: () => remove(),
     undo: () => undo(),
     leave: () => leave(),
+    plan: () => togglePlan(),
     choose: (i) => {
       pick = pick === i ? -1 : i;
       show();
     },
     swap: () => pick >= 0 && selected >= 0 && commit(swapped(props, selected, CATALOG[pick])),
+  });
+
+  /** A table that was put or turned where its ends or benches would be outside the hall is pulled back in. */
+  const fit = (list: Prop[]) => (selected >= 0 ? fitted(list, selected, ctx.plan().bounds) : list);
+
+  const plan2d = createPlan2d({
+    press,
+    move: (at, o) => hover(at, o),
+    release,
+    close: () => togglePlan(false),
+    align: () => {
+      align = !align;
+      show();
+    },
+  });
+  function togglePlan(want = !plan2d.isOpen()) {
+    if (want && on) plan2d.show(planState());
+    else plan2d.hide();
+    show();
+  }
+  const planState = () => ({
+    plan: ctx.plan(),
+    props,
+    selected,
+    hovered,
+    ghost: dragging ? ghost : null,
+    pick,
+    pointer,
+    align,
+    guides: dragging ? guides : [],
+    player: { x: ctx.player.pos.x, z: ctx.player.pos.z, facing: ctx.player.facing },
   });
 
   const planOk = () => (ctx.plan().id === 'cadde' || ctx.plan().id === 'duzen') && ctx.plan().style === 'cadde' && Array.isArray(ctx.plan().config?.props);
@@ -122,24 +181,32 @@ export function installMapEdit(ctx: Ctx) {
     const putting = on && pick >= 0 && pointer ? made(CATALOG[pick], pointer[0], pointer[1]) : null;
     const under = on && !dragging && pick < 0 && candidate() >= 0 && candidate() !== selected ? props[candidate()] : null;
     mark(hoverMark, putting ?? under, putting ? pointer : null);
-    label(selTag, on ? p : null, dragging ? ghost : null);
-    label(hoverTag, under ?? putting, putting ? pointer : null, putting ? `+ ${CATALOG[pick].label}` : undefined);
+    if (plan2d.isOpen()) plan2d.draw(planState());
+    const flat = plan2d.isOpen();
+    label(selTag, on && !flat ? p : null, dragging ? ghost : null);
+    label(hoverTag, flat ? null : (under ?? putting), putting ? pointer : null, putting ? `+ ${CATALOG[pick].label}` : undefined);
   }
 
   /** The list is now `next`: remembered, shown, and saved for everyone. */
   function commit(next: Prop[]) {
+    // Nothing changed (a key on something that can't be scaled or taken away): nothing to remember or save.
+    if (JSON.stringify(next) === JSON.stringify(props)) return;
     history.push(props);
     props = next;
     save();
   }
   /** Saved a moment after the last change, so a key held down (or a quick run of them) is one save and one rebuild. */
   let saveTimer: ReturnType<typeof setTimeout> | null = null;
+  /** Until when the map coming back is an echo of an earlier save, which would put the list back as it was a moment ago. */
+  let echoUntil = 0;
   function save() {
     show();
     if (saveTimer) clearTimeout(saveTimer);
     saveTimer = setTimeout(() => {
       saveTimer = null;
-      ctx.net.send({ t: 'map.edit', base: ctx.plan().id, props });
+      const out = split(props);
+      ctx.net.send({ t: 'map.edit', base: ctx.plan().id, props: out.props, tables: out.tables });
+      echoUntil = Date.now() + 2500;
     }, 350);
   }
   function undo(redo = false) {
@@ -158,7 +225,7 @@ export function installMapEdit(ctx: Ctx) {
     show();
   }
   function remove() {
-    if (selected < 0) return;
+    if (selected < 0 || !props[selected] || props[selected].kind === 'office' || (props[selected].kind === 'table' && typeof props[selected].tableIndex === 'number')) return;
     commit(removed(props, selected));
     selected = -1;
     hovered = -1;
@@ -174,13 +241,14 @@ export function installMapEdit(ctx: Ctx) {
       toast('✏️ Düzenleme şimdilik yalnızca cadde haritasında');
       return;
     }
-    props = (ctx.plan().config!.props as Prop[]).map((p) => ({ ...p }));
+    props = editables(ctx.plan().config as Parameters<typeof editables>[0]);
     selected = hovered = pick = -1;
     on = true;
     ctx.player.setView('third');
     show();
   }
   function leave() {
+    plan2d.hide();
     on = false;
     dragging = false;
     ghost = null;
@@ -194,55 +262,73 @@ export function installMapEdit(ctx: Ctx) {
     run: () => (on ? leave() : enter()),
   });
 
+  /** A press at (x, z) on the ground, in 3D or on the plan: puts the chosen catalog item down, or picks what's there up. True when the editor took it. */
+  function press(at: [number, number]): boolean {
+    if (pick >= 0) {
+      // A catalog item is chosen: this click puts it down here.
+      const next = added(props, made(CATALOG[pick], at[0], at[1]));
+      if (next.length > props.length) {
+        commit(next);
+        selected = next.length - 1;
+      } else toast('✏️ Haritada en çok 400 eşya olabilir');
+      show();
+      return true;
+    }
+    const i = pickProp(props, at[0], at[1]);
+    selected = i;
+    if (i < 0) {
+      show();
+      return false;
+    }
+    dragging = true;
+    ghost = [props[i].x, props[i].z];
+    show();
+    return true;
+  }
+  function hover(at: [number, number] | null, o: { alt?: boolean; within?: number } = {}) {
+    if (at) pointer = at;
+    if (!dragging) hovered = at && pick < 0 ? pickProp(props, at[0], at[1]) : -1;
+    else if (at) {
+      const a = align && !o.alt && selected >= 0 ? alignTo(props, selected, at[0], at[1], o.within ?? 0.3) : null;
+      ghost = a?.aligned ? [a.x, a.z] : at;
+      guides = a?.guides ?? [];
+      aligned = !!a?.aligned;
+    }
+    show();
+  }
+  function release() {
+    if (!on || !dragging) return;
+    dragging = false;
+    const to = ghost;
+    ghost = null;
+    // A click that didn't take it anywhere only selects it.
+    const next = to && selected >= 0 ? moved(props, selected, to[0], to[1], !aligned) : null;
+    guides = [];
+    aligned = false;
+    const p = props[selected];
+    if (next && p && (next[selected].x !== p.x || next[selected].z !== p.z) && Math.hypot(to![0] - p.x, to![1] - p.z) > 0.15) commit(fit(next));
+    else show();
+  }
+
   const dom = ctx.renderer.domElement;
   dom.addEventListener(
     'pointerdown',
     (e) => {
       if (!on || e.button !== 0) return;
       const at = point(e);
-      if (!at) return;
-      if (pick >= 0) {
-        // A catalog item is chosen: this click puts it down here.
-        e.stopImmediatePropagation();
-        e.preventDefault();
-        const next = added(props, made(CATALOG[pick], at[0], at[1]));
-        if (next.length > props.length) {
-          commit(next);
-          selected = next.length - 1;
-        } else toast('✏️ Haritada en çok 400 eşya olabilir');
-        return show();
-      }
-      const i = pickProp(props, at[0], at[1]);
-      selected = i;
-      if (i < 0) return show();
+      if (!at || !press(at)) return;
       // Taken over from the camera: this click is the editor's.
       e.stopImmediatePropagation();
       e.preventDefault();
-      dragging = true;
-      ghost = [props[i].x, props[i].z];
-      show();
     },
     true,
   );
   window.addEventListener('pointermove', (e) => {
-    if (!on) return;
-    const at = e.target === dom ? point(e) : null;
-    if (at) pointer = at;
-    if (!dragging) hovered = at && pick < 0 ? pickProp(props, at[0], at[1]) : -1;
-    else if (at) ghost = at;
-    show();
+    // The plan has its own pointer; off the 3D view the pointer is over nothing.
+    if (!on || plan2d.isOpen()) return;
+    hover(e.target === dom ? point(e) : null, { alt: e.altKey });
   });
-  window.addEventListener('pointerup', () => {
-    if (!on || !dragging) return;
-    dragging = false;
-    const to = ghost;
-    ghost = null;
-    // A click that didn't take it anywhere only selects it.
-    const next = to && selected >= 0 ? moved(props, selected, to[0], to[1]) : null;
-    const p = props[selected];
-    if (next && p && (next[selected].x !== p.x || next[selected].z !== p.z) && Math.hypot(to![0] - p.x, to![1] - p.z) > 0.15) commit(next);
-    else show();
-  });
+  window.addEventListener('pointerup', release);
   window.addEventListener(
     'keydown',
     (e) => {
@@ -255,7 +341,15 @@ export function installMapEdit(ctx: Ctx) {
         e.preventDefault();
         e.stopImmediatePropagation();
       };
+      if (e.code === 'KeyP' && !mod) {
+        swallow();
+        return togglePlan();
+      }
       if (e.code === 'Escape') {
+        if (plan2d.isOpen()) {
+          swallow();
+          return togglePlan(false);
+        }
         // First Esc puts the chosen catalog item back, the next leaves.
         if (pick < 0) return leave();
         swallow();
@@ -277,7 +371,7 @@ export function installMapEdit(ctx: Ctx) {
         show();
       } else if (e.code === 'KeyR' && selected >= 0 && !mod) {
         swallow();
-        commit(turned(props, selected, e.shiftKey ? -TURN : TURN));
+        commit(fit(turned(props, selected, e.shiftKey ? -TURN : TURN)));
       } else if ((e.code === 'BracketRight' || e.code === 'BracketLeft') && selected >= 0) {
         swallow();
         commit(scaled(props, selected, e.code === 'BracketRight' ? 1.1 : 1 / 1.1));
@@ -287,15 +381,20 @@ export function installMapEdit(ctx: Ctx) {
   );
   // When the map is rebuilt (by this edit, or someone else's), the list is what the map has now, unless it's being dragged.
   store.on('map', () => {
-    if (!on || dragging || saveTimer) return;
-    if (planOk()) props = (ctx.plan().config!.props as Prop[]).map((p) => ({ ...p }));
+    if (!on || dragging || saveTimer || Date.now() < echoUntil) return;
+    const before = props.length;
+    if (planOk()) props = editables(ctx.plan().config as Parameters<typeof editables>[0]);
+    // Someone else's edit moved the indexes: what was selected can't be told any more.
+    if (props.length !== before) selected = -1;
     selected = Math.min(selected, props.length - 1);
+    hovered = -1;
     show();
   });
   // The editor follows the map: if it isn't the street any more, it's over. The names follow the camera.
   ctx.ticks.add('hud', () => {
     if (!on) return;
     if (!planOk()) return leave();
-    show();
+    // The plan is redrawn when something changes; in 3D the names follow the camera.
+    if (!plan2d.isOpen()) show();
   });
 }

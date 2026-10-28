@@ -1,6 +1,8 @@
 import { mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import type { MapState } from '../shared/protocol.js';
+import { CADDE } from '../shared/maps/cadde.js';
+import { movedTable } from '../shared/maps/tables.js';
 import { OFFICE_MAP, checkCustomMaps, isMapChoice, planOf, type CustomMap, type MapPlan } from '../shared/maps/index.js';
 
 /** The id of the street as someone rearranged it (see saveEdit). */
@@ -70,7 +72,7 @@ export class Maps {
    * The street, rearranged by someone in the editor (see features/mapedit): its props as they put them, saved as a map of
    * your own that extends the street (`duzen.json`) and picked. Null if it went through, or why it didn't.
    */
-  saveEdit(base: string, props: unknown, by: string): string | null {
+  saveEdit(base: string, props: unknown, by: string, tables?: unknown): string | null {
     if (base !== 'cadde' && base !== EDIT_ID) return 'Yalnızca cadde haritası düzenlenebilir';
     // Someone changed the map to another while this was on its way: it's not for that one.
     if (this.pick() === 'castle' || this.pick() === 'station') return 'Harita bu arada değişti: düzenleme kaydedilmedi';
@@ -82,7 +84,28 @@ export class Maps {
       if (o.color !== undefined && !(typeof o.color === 'string' && /^#[0-9a-fA-F]{3,8}$/.test(o.color))) delete o.color;
       return o;
     });
-    const json = { id: EDIT_ID, name: 'Cadde (düzenlenmiş)', icon: '✏️', description: 'Caddenin senin yerleştirdiğin hâli (düzenleme modu).', extends: 'cadde', props: clean };
+    // Tables put somewhere else: the street's own list with those moved (a list in a map replaces the whole one).
+    const moved = new Map<number, { x: number; z: number; rotY: number }>();
+    if (tables !== undefined) {
+      if (!Array.isArray(tables) || tables.length > 40) return 'Masa listesi geçersiz';
+      for (const t of tables) {
+        const o = (typeof t === 'object' && t !== null ? t : {}) as Record<string, unknown>;
+        const base = CADDE.tables[Number(o.i)];
+        const ok = [o.x, o.z, o.rotY].every((v) => typeof v === 'number' && Number.isFinite(v) && Math.abs(v) < 500);
+        if (!Number.isInteger(o.i) || !base || base.look || !ok) return 'Masa listesi geçersiz';
+        moved.set(Number(o.i), { x: Number(o.x), z: Number(o.z), rotY: Number(o.rotY) });
+      }
+    }
+    const changed = [...moved].some(([i, m]) => CADDE.tables[i].x !== m.x || CADDE.tables[i].z !== m.z || (CADDE.tables[i].rotY ?? 0) !== m.rotY);
+    const json = {
+      id: EDIT_ID,
+      name: 'Cadde (düzenlenmiş)',
+      icon: '✏️',
+      description: 'Caddenin senin yerleştirdiğin hâli (düzenleme modu).',
+      extends: 'cadde',
+      props: clean,
+      ...(changed ? { tables: CADDE.tables.map((t, i) => (moved.has(i) ? movedTable(t, moved.get(i)!.x, moved.get(i)!.z, moved.get(i)!.rotY) : t)) } : {}),
+    };
     if (JSON.stringify(json).length > MAX_BYTES) return 'Harita çok büyük';
     const [checked] = checkCustomMaps([{ file: `${EDIT_ID}.json`, json }]);
     if (!checked?.config) return checked?.error ?? 'Harita geçersiz';

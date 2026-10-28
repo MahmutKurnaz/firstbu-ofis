@@ -52,7 +52,14 @@ test('snap rounds to the 0.25 grid, negatives too', () => {
 test('moved snaps and never mutates the input', () => {
   const l = freeze(list());
   const out = moved(l, 1, 7.13, -2.1);
-  assert.deepEqual(out[1], P('tree', 7.25, -2));
+  // a tree that moves is given the model (and turn) it had where it stood, so it stays what it was (frozen)
+  assert.equal(out[1].x, 7.25);
+  assert.equal(out[1].z, -2);
+  assert.equal(out[1].kind, 'tree');
+  assert.ok(out[1].model === 'meshy-agac-ince' || out[1].model === 'meshy-agac-genis');
+  assert.equal(typeof out[1].rotY, 'number');
+  assert.equal(l[1].model, undefined, 'the input tree is untouched');
+  assert.equal(l[1].rotY, undefined);
   assert.notEqual(out, l);
   assert.equal(l[1].x, 5);
   assert.equal(out[2], l[2], 'the others are shared untouched');

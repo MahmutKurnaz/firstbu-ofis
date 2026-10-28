@@ -1,6 +1,10 @@
 // The map editor's arithmetic (features/mapedit): which prop a point on the ground means, and what moving,
 // turning, deleting and copying one makes of the list. Pure, so it can be tested; the list is never changed in place.
 
+import { BENCH_OUT } from '../../../shared/maps';
+import { CADDE_SIZE, treeLook } from '../../../shared/maps/cadde-props';
+import type { TableConfig } from '../../../shared/maps/types';
+
 export type Prop = Record<string, unknown> & {
   kind: string;
   x: number;
@@ -9,6 +13,11 @@ export type Prop = Record<string, unknown> & {
 
 /** What the editor doesn't move: the offices (their walls are the plan's, and their teams are in them). */
 export const FIXED = new Set(['office']);
+/** What can only be moved and turned: a table has its seats, so it isn't made bigger, copied, swapped or taken away. */
+export const PINNED = new Set([...FIXED, 'table']);
+/** One of the editor's stand-ins for the map's tables (see `editables`): a `table` prop with the index of its table. A real `table` prop of the map isn't. */
+export const isTable = (p: Prop) => p.kind === 'table' && typeof p.tableIndex === 'number';
+const pinned = (p: Prop) => FIXED.has(p.kind) || isTable(p);
 
 /** How close (m) a click has to be to a prop's middle to mean it. */
 export const PICK_RADIUS = 1.8;
@@ -19,6 +28,13 @@ export const TURN = Math.PI / 12;
 export const COPY_OFFSET = 1.2;
 /** The most props a map can have (MAP_LIMITS in shared/maps). */
 export const MAX_PROPS = 400;
+
+/** A tree that has no `model` yet gets the one it is now (and its turn), so that where it's put doesn't change what it is (see treeLook). */
+export function frozen(p: Prop): Prop {
+  if (p.kind !== 'tree' || p.model !== undefined) return p;
+  const look = treeLook(p);
+  return { ...p, model: `meshy-${look.key}`, rotY: Math.round((Number(p.rotY ?? 0) + look.turn) * 1e4) / 1e4 };
+}
 
 export const snap = (v: number, step = GRID) => Math.round(v / step) * step;
 
@@ -37,10 +53,11 @@ export function nearestProp(props: readonly Prop[], x: number, z: number, radius
   return best;
 }
 
-/** The list with prop `i` at (x, z), snapped to the grid. */
-export function moved(props: readonly Prop[], i: number, x: number, z: number): Prop[] {
+/** The list with prop `i` at (x, z), snapped to the grid (or exactly there, when it was lined up with something: `grid` false). */
+export function moved(props: readonly Prop[], i: number, x: number, z: number, grid = true): Prop[] {
   if (!props[i] || FIXED.has(props[i].kind)) return props.slice();
-  return props.map((p, k) => (k === i ? { ...p, x: snap(x), z: snap(z) } : p));
+  const at = (v: number) => (grid ? snap(v) : Math.round(v * 1000) / 1000);
+  return props.map((p, k) => (k === i ? { ...frozen(p), x: at(x), z: at(z) } : p));
 }
 
 /** The list with prop `i` turned by `by` radians (kept in -π…π). */
@@ -55,7 +72,7 @@ export function turned(props: readonly Prop[], i: number, by: number): Prop[] {
 
 /** The list with prop `i` scaled by `factor`, within 0.3…3 times. */
 export function scaled(props: readonly Prop[], i: number, factor: number): Prop[] {
-  if (!props[i] || FIXED.has(props[i].kind)) return props.slice();
+  if (!props[i] || pinned(props[i])) return props.slice();
   return props.map((p, k) =>
     k === i
       ? {
@@ -68,13 +85,13 @@ export function scaled(props: readonly Prop[], i: number, factor: number): Prop[
 
 /** The list without prop `i`. */
 export function removed(props: readonly Prop[], i: number): Prop[] {
-  if (!props[i] || FIXED.has(props[i].kind)) return props.slice();
+  if (!props[i] || pinned(props[i])) return props.slice();
   return props.filter((_, k) => k !== i);
 }
 
 /** The list with a copy of prop `i` beside it (the copy is last), or the list as it was when it's full or fixed. */
 export function duplicated(props: readonly Prop[], i: number): Prop[] {
-  if (!props[i] || FIXED.has(props[i].kind) || props.length >= MAX_PROPS) return props.slice();
+  if (!props[i] || pinned(props[i]) || props.length >= MAX_PROPS) return props.slice();
   return [
     ...props,
     {
@@ -182,21 +199,36 @@ export const KIND_NAMES: Record<string, string> = {
   office: 'Ofis',
 };
 
+/** What the street's own kinds cover (m, across × along), when the prop doesn't say: the size of their symbol (see CADDE_SIZE). */
+const KIND_SIZES: Record<string, [number, number]> = {
+  tree: [CADDE_SIZE.tree * 2.75, CADDE_SIZE.tree * 2.75],
+  lamp: [0.6, 0.6],
+  parasol: [CADDE_SIZE.parasol * 2, CADDE_SIZE.parasol * 2],
+  gong: [0.7, 0.7],
+  planter: [CADDE_SIZE.planter.width, CADDE_SIZE.planter.depth],
+  bench: [CADDE_SIZE.bench.width, CADDE_SIZE.bench.depth],
+  counter: [CADDE_SIZE.counter.width, CADDE_SIZE.counter.depth],
+  dispenser: [CADDE_SIZE.dispenser.width, CADDE_SIZE.dispenser.depth],
+};
+
 /** What a prop is called on screen: a catalog item's label, a street kind's name, else its kind. */
 export function nameOf(p: Prop): string {
   if (p.kind === 'glb') {
     const m = String(p.model ?? '');
     return CATALOG.find((c) => c.id === m)?.label ?? (m.replace(/^meshy-/, '') || 'Model');
   }
+  if (isTable(p) && typeof p.name === 'string' && p.name) return p.name;
   return KIND_NAMES[p.kind] ?? p.kind;
 }
 
-/** The ground a prop takes (m, width × length) as it is scaled: 1.2 × 1.2 when the map doesn't say. */
+/** The ground a prop takes (m, width × length) as it is scaled: 1.2 × 1.2 when the map doesn't say; a table's is with its benches. */
 export function footprint(p: Prop): [number, number] {
+  if (isTable(p)) return [(Number(p.width) > 0 ? Number(p.width) : 1.4) + 2 * (BENCH_OUT + 0.22), Number(p.length) || 1.2];
   const s = Number(p.scale ?? 1) || 1;
+  const [dw, dl] = KIND_SIZES[p.kind] ?? [1.2, 1.2];
   const w = Number(p.width);
   const l = Number(p.length);
-  return [(w > 0 ? w : 1.2) * s, (l > 0 ? l : 1.2) * s];
+  return [(w > 0 ? w : dw) * s, (l > 0 ? l : dl) * s];
 }
 
 /** The prop a click at (x, z) means: the smallest one whose footprint holds the point, else the nearest within a metre; -1 for none. */
@@ -234,7 +266,7 @@ export function made(item: CatalogItem, x: number, z: number): Prop {
 /** The list with prop `i` made another catalog item, where it stands and turned as it was. */
 export function swapped(props: readonly Prop[], i: number, item: CatalogItem): Prop[] {
   const p = props[i];
-  if (!p || FIXED.has(p.kind)) return props.slice();
+  if (!p || pinned(p)) return props.slice();
   return props.map((q, k) =>
     k === i
       ? {
@@ -278,4 +310,87 @@ export class History {
   get canUndo() {
     return this.past.length > 0;
   }
+}
+
+/** What the editor works on: the map's props, and its tables that aren't desks as `table` props (with `tableIndex` into the map's list of tables). */
+export function editables(config: { props?: readonly Prop[]; tables?: readonly TableConfig[] }): Prop[] {
+  const tables = (config.tables ?? []).flatMap((t, i): Prop[] =>
+    t.look ? [] : [{ kind: 'table', x: t.x, z: t.z, rotY: t.rotY ?? 0, length: t.length, width: t.width ?? 1.4, name: t.name ?? `Masa ${i + 1}`, tableIndex: i }],
+  );
+  return [...(config.props ?? []).map((p) => ({ ...p })), ...tables];
+}
+
+/** The editor's list split for saving: the real props, and where each table was put. */
+export function split(list: readonly Prop[]): { props: Prop[]; tables: { i: number; x: number; z: number; rotY: number }[] } {
+  const props: Prop[] = [];
+  const tables: { i: number; x: number; z: number; rotY: number }[] = [];
+  for (const p of list) {
+    if (isTable(p)) tables.push({ i: Number(p.tableIndex), x: p.x, z: p.z, rotY: Number(p.rotY ?? 0) });
+    else props.push(p);
+  }
+  return { props, tables };
+}
+
+/** Prop `i` pulled back inside `b` if it's a table (its ends and its benches have to be in the hall), else as it is. */
+export function fitted(props: readonly Prop[], i: number, b: { minX: number; maxX: number; minZ: number; maxZ: number }): Prop[] {
+  const p = props[i];
+  if (!p || !isTable(p)) return props.slice();
+  const [w, l] = footprint(p);
+  const r = Number(p.rotY ?? 0);
+  const hx = (Math.abs(Math.sin(r)) * l + Math.abs(Math.cos(r)) * w) / 2 + 0.3;
+  const hz = (Math.abs(Math.cos(r)) * l + Math.abs(Math.sin(r)) * w) / 2 + 0.3;
+  const x = Math.min(b.maxX - hx, Math.max(b.minX + hx, p.x));
+  const z = Math.min(b.maxZ - hz, Math.max(b.minZ + hz, p.z));
+  return x === p.x && z === p.z ? props.slice() : props.map((q, k) => (k === i ? { ...q, x, z } : q));
+}
+
+/** A line the dragged prop was lined up on: `x` or `z` at `at` (m). */
+export interface Guide {
+  axis: 'x' | 'z';
+  at: number;
+}
+
+/** What a prop covers across and along the ground, turned as it is: its half-widths in x and z. */
+function extent(p: Prop): [number, number] {
+  const [w, l] = footprint(p);
+  const r = Number(p.rotY ?? 0);
+  return [(Math.abs(Math.sin(r)) * l + Math.abs(Math.cos(r)) * w) / 2, (Math.abs(Math.cos(r)) * l + Math.abs(Math.sin(r)) * w) / 2];
+}
+
+/**
+ * Prop `i` put down at (x, z), lined up with the others: its left, middle or right on the left, middle or right of another
+ * (so side by side, flush, or in a row), and the same for front, middle and back, when they're within `within` metres.
+ * Returns where it ends up and the lines it's on; `aligned` is false when nothing was close (then it's just (x, z)).
+ */
+export function alignTo(props: readonly Prop[], i: number, x: number, z: number, within = 0.3): { x: number; z: number; guides: Guide[]; aligned: boolean } {
+  const me = props[i];
+  if (!me) return { x, z, guides: [], aligned: false };
+  const [hx, hz] = extent(me);
+  const guides: Guide[] = [];
+  const best = (center: number, half: number, axis: 'x' | 'z'): number => {
+    let delta = 0;
+    let gap = within;
+    let line: number | null = null;
+    props.forEach((o, k) => {
+      if (k === i) return;
+      const [ox, oz] = extent(o);
+      const oc = axis === 'x' ? o.x : o.z;
+      const oh = axis === 'x' ? ox : oz;
+      for (const mine of [-half, 0, half]) {
+        for (const theirs of [-oh, 0, oh]) {
+          const d = oc + theirs - (center + mine);
+          if (Math.abs(d) < gap) {
+            gap = Math.abs(d);
+            delta = d;
+            line = oc + theirs;
+          }
+        }
+      }
+    });
+    if (line !== null) guides.push({ axis, at: line });
+    return delta;
+  };
+  const nx = x + best(x, hx, 'x');
+  const nz = z + best(z, hz, 'z');
+  return { x: nx, z: nz, guides, aligned: guides.length > 0 };
 }

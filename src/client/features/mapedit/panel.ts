@@ -16,6 +16,7 @@ export interface PanelActions {
   remove(): void;
   undo(): void;
   leave(): void;
+  plan(): void;
   choose(i: number): void;
   swap(): void;
 }
@@ -36,7 +37,9 @@ export function createPanel(act: PanelActions) {
   ).join('');
   el.innerHTML =
     '<div style="display:flex;justify-content:space-between;align-items:center"><b>✏️ Düzenleme modu</b><button data-a="leave" title="Kapat (J)" style="border:0;background:none;color:#eef3f8;font-size:18px;cursor:pointer">✕</button></div>' +
-    '<div data-sel style="margin-top:6px"></div>' +
+    '<div style="margin-top:6px"><button data-a="plan" style="' +
+    BTN +
+    ';background:#3b5f8a">📐 2D plan (P)</button></div><div data-sel style="margin-top:6px"></div>' +
     '<div style="margin-top:10px;border-top:1px solid #fff2;padding-top:6px"><b>Katalog</b> <span style="opacity:.7">tıkla, sonra haritada yere tıkla</span></div>' +
     `<div data-cat>${items}</div>` +
     '<div style="margin-top:8px;opacity:.6;font-size:12px">Kısayollar: R döndür · [ ] boyut · Delete sil · Ctrl+D kopyala · Ctrl+Z geri al · J çık</div>';
@@ -56,10 +59,13 @@ export function createPanel(act: PanelActions) {
     else if (a === 'undo') act.undo();
     else if (a === 'swap') act.swap();
     else if (a === 'leave') act.leave();
+    else if (a === 'plan') act.plan();
   });
   document.body.appendChild(el);
   const sel = el.querySelector('[data-sel]') as HTMLElement;
 
+  /** What the panel shows now: it's redrawn only when this changes, or a button is gone from under the pointer between the press and the release. */
+  let shown = '';
   function render(on: boolean, s: PanelState) {
     el.style.display = on ? 'block' : 'none';
     if (!on) return;
@@ -70,18 +76,19 @@ export function createPanel(act: PanelActions) {
     if (chosen) h += `<div style="color:#8fe39a">➕ Seçtiğin: <b>${esc(chosen.label)}</b>. Haritada boş bir yere tıkla, oraya koyulur.</div>`;
     if (p) {
       const [w, l] = footprint(p);
+      const table = p.kind === 'table' && typeof p.tableIndex === 'number';
       h +=
         `<div style="color:#ffb547;margin-top:4px">Seçili: <b>${esc(nameOf(p))}</b><br><span style="opacity:.85">konum ${p.x.toFixed(1)}, ${p.z.toFixed(1)} · ${w.toFixed(1)}×${l.toFixed(1)} m${p.rotY ? ` · ${(Number(p.rotY) * 57.3).toFixed(0)}°` : ''}</span></div>` +
-        btn('turn', '↻ Döndür') +
-        btn('smaller', '− Küçült') +
-        btn('bigger', '+ Büyüt') +
-        btn('copy', '⧉ Kopyala') +
-        btn('remove', '🗑 Sil') +
-        btn('undo', '↶ Geri al', !s.canUndo) +
-        (chosen ? `<br>${btn('swap', `🔁 Bunu «${esc(chosen.label)}» yap`)}` : '<div style="opacity:.65;font-size:12px">Sürükleyip bırakarak taşı.</div>');
+        (table
+          ? btn('turn', '↻ Döndür') + btn('undo', '↶ Geri al', !s.canUndo) + '<div style="opacity:.65;font-size:12px">Masa: koltukları ve bankları onunla gelir. Sürükleyerek taşı.</div>'
+          : btn('turn', '↻ Döndür') + btn('smaller', '− Küçült') + btn('bigger', '+ Büyüt') + btn('copy', '⧉ Kopyala') + btn('remove', '🗑 Sil') + btn('undo', '↶ Geri al', !s.canUndo)) +
+        (chosen && !table ? `<br>${btn('swap', `🔁 Bunu «${esc(chosen.label)}» yap`)}` : table ? '' : '<div style="opacity:.65;font-size:12px">Sürükleyip bırakarak taşı.</div>');
     } else if (!chosen)
       h += `<div style="opacity:.75;margin-top:4px">Hiçbir şey seçili değil. Haritadaki bir eşyaya tıkla ya da yanına yürü (mavi çerçeveli olanı <b>Enter</b> seçer), sürükleyip taşı.</div>${btn('undo', '↶ Geri al', !s.canUndo)}`;
-    sel.innerHTML = h;
+    if (h !== shown) {
+      shown = h;
+      sel.innerHTML = h;
+    }
     el.querySelectorAll<HTMLElement>('[data-a="choose"]').forEach((b) => {
       b.style.background = Number(b.dataset.i) === s.pick ? '#3b7d4a' : '#2c3644';
     });

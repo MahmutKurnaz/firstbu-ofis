@@ -51,6 +51,8 @@ export const MESHY_KEYS = [
   'kargo-sandik',
   'kale-masa',
   'heykel',
+  'kafe-uzun-masa',
+  'kafe-uzun-bank',
 ] as const;
 export type MeshyKey = (typeof MESHY_KEYS)[number];
 

@@ -105,3 +105,14 @@ Onay: Mahmut, 2026-10-28 ("onlara üret", "Hepsini yapmaya başla"; ~600 krediye
 Bakiye 2.115 → 1.611 (bu iki tur; Tuğer işi ayrıca, yerel dalda). Yerleştirilenler: tur 3'ten kafe seti ve takım ofisi lounge'u; tur 4'ten çatı şezlongları, kale heykelleri, istasyon sandıkları. Hazır ama yerleştirilmeyenler: puf, ateş çukuru, istasyon bankı, kale masası (haritaların masaları plandan çiziliyor).
 
 Binalar (8 yeni cadde binası) Blender'da elle modellendi, kredi harcanmadı: `blender/scripts/build_buildings.py`.
+
+## Eşya turu 5 (Meshy, doğrudan) — caddenin uzun masası ve bankları
+
+Onay: Mahmut, 2026-10-28 ("yap hepsini"; masa tasarımı için ~80 kredi). Betikler: `blender/scripts/meshy_props.py` (`kafe-uzun-masa`, `kafe-uzun-bank`), `build_meshy_props.py`. Her biri 2.5 m'lik bir modül; kafe masası uzunluğuna göre modül sayısı kadar yan yana dizilir (`world/cadde/index.ts`).
+
+| Tarih | Ne | Kredi |
+| --- | --- | --- |
+| 2026-10-28 | 2 eşya × 2 görsel (nano-banana-2) | 24 |
+| 2026-10-28 | 2 × 3D (meshy-7.1, dokulu, 8k üçgen) | 60 |
+
+Toplam 84; bakiye yaklaşık 1.611 → 1.527.
