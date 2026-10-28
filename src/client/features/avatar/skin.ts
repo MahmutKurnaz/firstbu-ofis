@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { polishCharacter, toPhysical } from '../../world/character/polish';
 import type { Model } from '../../world/models';
 import { AVATAR_HEIGHT, clipOf, gaitFor, type Clip } from './logic';
 
@@ -41,14 +42,8 @@ export class PlayerAvatar {
     const k = AVATAR_HEIGHT / (box.max.y - box.min.y || 1);
     body.scale.setScalar(k);
     body.position.y = -box.min.y * k;
-    body.traverse((o) => {
-      const m = o as THREE.Mesh;
-      if (!m.isMesh) return;
-      m.castShadow = m.receiveShadow = true;
-      // Skinned and big: never culled by a stale bounding box, and no toon outline round a photo-like face.
-      m.frustumCulled = false;
-      for (const mat of Array.isArray(m.material) ? m.material : [m.material]) mat.userData.outlineParameters = { visible: false };
-    });
+    toPhysical(body);
+    polishCharacter(body);
     this.root.add(body);
     body.traverse((o) => {
       if (!this.hips && /hips/i.test(o.name) && (o as THREE.Bone).isBone) this.hips = o;

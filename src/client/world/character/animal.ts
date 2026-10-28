@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import type { Model } from '../models';
+import { polishCharacter, toPhysical } from './polish';
 import { glance, look, reach, straighten } from './animal-pose';
 import type { Worker } from './worker';
 
@@ -72,10 +73,8 @@ export class AnimalSkin {
     const h = box.max.y - box.min.y || 1;
     body.scale.setScalar(this.height / h);
     body.position.y = -box.min.y * (this.height / h);
-    body.traverse((o) => {
-      const m = o as THREE.Mesh;
-      if (m.isMesh) m.castShadow = m.receiveShadow = true;
-    });
+    toPhysical(body);
+    polishCharacter(body);
     this.root.add(body);
     body.traverse((o) => {
       if (!this.hips && /hips/i.test(o.name) && (o as THREE.Bone).isBone) this.hips = o;

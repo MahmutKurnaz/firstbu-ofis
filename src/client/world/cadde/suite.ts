@@ -44,7 +44,7 @@ export function furnishSuite(kit: CaddeKit, p: PropConfig) {
   rug(-11.5, -2.4, 2.6, 2.2, '#8a5a44');
   for (const [r, c] of [['fe', 2], ['be', 3], ['bug', 4], ['verify', 5]] as const) {
     const room = SUITE.rooms.find((x) => x.id === r)!;
-    rug((room.from + room.to) / 2, -2.6, 2.4, 2.2, TEAM_COLORS[c] + '99');
+    rug((room.from + room.to) / 2, -2.6, 2.4, 2.2, TEAM_COLORS[c]);
   }
 
   // Glass between the rooms and the lobby, a low panel under it, a brass rail on top and brass posts.
