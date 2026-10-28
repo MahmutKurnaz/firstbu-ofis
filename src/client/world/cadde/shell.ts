@@ -1,3 +1,4 @@
+import { meshy } from './meshy';
 import * as THREE from 'three';
 import type { Pt } from '../../../shared/nav';
 import { canvasTexture } from '../texture';
@@ -142,6 +143,8 @@ export function buildShell(kit: CaddeKit): { doorAt: THREE.Vector3; out: Pt; nea
   gate.position.copy(doorAt);
   for (const sx of [-1, 1]) gate.add(mesh(box(0.6, 5.2, 0.6), kit.street.frame, sx * 3.2, 2.6, 0));
   gate.add(mesh(box(7.2, 0.7, 0.7), kit.street.frame, 0, 5.4, 0));
+  // Its own gateway (7 m between its posts, 4.6 m high), in place of the pillars and beam.
+  meshy(gate, 'kapi', { replaces: [...gate.children] });
   kit.group.add(gate);
   let sign: THREE.Mesh<THREE.PlaneGeometry, THREE.MeshBasicMaterial> | null = null;
   const christen = (name: string) => {
@@ -153,7 +156,7 @@ export function buildShell(kit: CaddeKit): { doorAt: THREE.Vector3; out: Pt; nea
     }
     sign = textPlane(`🏙️ ${name || 'Ajan Şehri'}`, { bg: '#2f343b', color: '#ffffff', border: '#ffb547', size: 72 });
     sign.scale.multiplyScalar(1.4);
-    sign.position.set(0, 5.4, -0.37);
+    sign.position.set(0, 3.85, -0.3);
     sign.rotation.y = Math.PI;
     gate.add(sign);
   };

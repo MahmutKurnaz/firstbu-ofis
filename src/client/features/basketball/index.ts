@@ -67,7 +67,7 @@ export function installBasketball(ctx: Ctx, deps: BasketballDeps) {
 
   /** E at the ball: it's yours, if nobody beats you to it. */
   function takeBall() {
-    if (ctx.carrying()) return toast('🗂️ Your hands are full: put the card back first (Q)', 'warn');
+    if (ctx.carrying()) return toast('🗂️ Elin dolu: önce kartı geri koy (Q)', 'warn');
     if (ball.holder) return;
     deps.reach();
     ctx.sound.ball('bounce', ball.at, 1.5);
@@ -79,7 +79,7 @@ export function installBasketball(ctx: Ctx, deps: BasketballDeps) {
 
   ctx.interactions.define('ball', {
     reach: 3.2,
-    hint: () => ({ k: String(ball.still), parts: [hintTitle('🏀 Basketball'), ball.still ? aside('shoot some hoops') : '', key('E', ball.still ? 'Pick it up' : 'Catch it!')] }),
+    hint: () => ({ k: String(ball.still), parts: [hintTitle('🏀 Basketbol'), ball.still ? aside('biraz basket at') : '', key('E', ball.still ? 'Al' : 'Yakala!')] }),
     use: onE(() => takeBall()),
   });
 
@@ -169,12 +169,12 @@ export function installBasketball(ctx: Ctx, deps: BasketballDeps) {
     const mine = b.by === store.you;
     const points = b.three ? 3 : 2;
     const peer = store.peers.get(b.by);
-    const how = b.swish ? 'SWISH! ' : b.bank ? 'BANK! ' : '';
-    popScore(mine ? `${how}+${points}` : `${clip(peer?.name ?? 'Someone', 16)} ${how}+${points}`, mine ? store.profile.color : (peer?.color ?? '#ff6b1a'));
+    const how = b.swish ? 'FIŞŞ! ' : b.bank ? 'TAHTA! ' : '';
+    popScore(mine ? `${how}+${points}` : `${clip(peer?.name ?? 'Biri', 16)} ${how}+${points}`, mine ? store.profile.color : (peer?.color ?? '#ff6b1a'));
     if (mine) {
       streak++;
-      const said = b.swish ? 'Swish!' : b.bank ? 'Off the glass!' : 'In off the rim!';
-      toast(`🏀 ${said} +${points} from ${b.distance.toFixed(1)} m${streak > 1 ? ` · 🔥 ${streak} in a row` : ''}`);
+      const said = b.swish ? 'Fişş!' : b.bank ? 'Tahtadan!' : 'Çemberden girdi!';
+      toast(`🏀 ${said} +${points} · ${b.distance.toFixed(1)} m${streak > 1 ? ` · 🔥 üst üste ${streak}` : ''}`);
     }
     if (b.three || (mine && streak >= 3)) ctx.confetti.burst(HOOP.rim.x + 0.3, HOOP.rim.y, HOOP.rim.z, 140, 0.7);
   };
@@ -240,10 +240,10 @@ export function installBasketball(ctx: Ctx, deps: BasketballDeps) {
     return {
       k: `${streak}|${first}|${!!windFrom}`,
       parts: [
-        h('span.title', {}, '🏀 Ball in hand'),
-        streak > 1 ? aside(`🔥 ${streak} in a row`) : '',
-        windFrom ? aside('let go in the green!') : key(first ? 'E / Click' : 'E', 'Hold to shoot'),
-        key('Q', 'Drop it'),
+        h('span.title', {}, '🏀 Top elinde'),
+        streak > 1 ? aside(`🔥 üst üste ${streak}`) : '',
+        windFrom ? aside('yeşilde bırak!') : key(first ? 'E / Tık' : 'E', 'Basılı tut, at'),
+        key('Q', 'Bırak'),
       ],
     };
   }

@@ -26,7 +26,7 @@ test('the castle has a dungeon, and locks up whoever is sent home in it', () => 
   const d = plan.dungeon!;
   assert.ok(d, 'a dungeon under the hall');
   assert.ok(plan.sendHome?.keeps, 'workers sent home are kept');
-  assert.equal(plan.sendHome!.escort!.name, 'Kingsguard');
+  assert.equal(plan.sendHome!.escort!.name, 'Kraliyet Muhafızı');
   assert.ok(plan.sendHome!.escort!.post.below, 'on watch down in the dungeon');
   assert.ok(d.floor < -4 && d.ceiling < 0, 'under the floor');
   assert.equal(d.steps.at(-1)!.top, d.floor, 'the stairs go all the way down');
@@ -109,11 +109,11 @@ test('a map of your own can script sending workers home its own way, and says wh
     },
     { file: 'door.json', json: { id: 'door', name: 'Out', extends: 'castle', dungeon: null, sendHome: { escort: null, steps: [{ do: 'pack' }, { do: 'walk', to: 'door' }] } } },
   ]);
-  assert.match(kind.error!, /"dance", which isn't a step there is/);
-  assert.match(noEscort.error!, /an escort fetching the worker, and no escort/);
-  assert.match(noDungeon.error!, /and the map has no dungeon/);
-  assert.match(after.error!, /locked up by then, so only its escort/);
-  assert.match(place.error!, /should be one of "door", "stairs"/);
+  assert.match(kind.error!, /"dance" yapıyor ama böyle bir adım yok/);
+  assert.match(noEscort.error!, /çalışanı almaya giden bir muhafız var ama muhafız yok/);
+  assert.match(noDungeon.error!, /ama haritada zindan yok/);
+  assert.match(after.error!, /hapsedilmiş, bundan sonra yalnızca muhafızı/);
+  assert.match(place.error!, /şunlardan biri olmalı: "door", "stairs"/);
   assert.equal(ok.error, undefined);
   const quick = planOf('ok', [ok]).sendHome!;
   assert.ok(quick.keeps);
@@ -138,10 +138,10 @@ test('a dungeon has to fit: under the hall, its stairs clear of the tables, its 
     { file: 'steep.json', json: { id: 'steep', name: 'x', extends: 'castle', dungeon: { stairs: { rotY: 0.3 } } } },
     { file: 'ok.json', json: { id: 'mine', name: 'x', extends: 'castle', dungeon: cells([]) } },
   ]);
-  assert.match(outside.error!, /dungeon should be under the hall/);
-  assert.match(table.error!, /stairs come up through something in the hall/);
-  assert.match(overlap.error!, /runs into dungeon\.cells\[0\]/);
-  assert.match(steep.error!, /should be a quarter turn/);
+  assert.match(outside.error!, /zindan salonun altında/);
+  assert.match(table.error!, /zindan merdiveni salondaki bir şeyin/);
+  assert.match(overlap.error!, /dungeon\.cells\[0\] ile çakışıyor/);
+  assert.match(steep.error!, /çeyrek tur olmalı/);
   assert.equal(ok.error, undefined);
   const d = planOf('mine', [ok]).dungeon!;
   assert.equal(d.cells.length, 1);

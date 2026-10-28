@@ -169,18 +169,18 @@ export class Upgrader {
         error: undefined,
       });
     } catch (err) {
-      this.set({ checking: false, checkedAt: Date.now(), error: `Couldn't check for updates: ${(err as Error).message}` });
+      this.set({ checking: false, checkedAt: Date.now(), error: `Güncellemeler kontrol edilemedi: ${(err as Error).message}` });
     }
   }
 
   /** Starts building the newest version. Returns why it can't, if it can't. */
   async start(by: string): Promise<string | undefined> {
-    if (!this.branch) return "This office can't upgrade itself (it wasn't installed by deploy/provision.sh or deploy/aws.sh)";
-    if (this.busy) return 'An upgrade is already running';
+    if (!this.branch) return 'Bu ofis kendini güncelleyemez (deploy/provision.sh ya da deploy/aws.sh ile kurulmamış)';
+    if (this.busy) return 'Bir güncelleme zaten sürüyor';
     await this.check();
-    if (this.busy) return 'An upgrade is already running';
+    if (this.busy) return 'Bir güncelleme zaten sürüyor';
     const sha = this.latestSha;
-    if (!sha) return this.state.error ?? 'The office is already up to date';
+    if (!sha) return this.state.error ?? 'Ofis zaten güncel';
     this.set({ phase: 'building', by, error: undefined });
     void this.build(sha);
     return undefined;
@@ -207,7 +207,7 @@ export class Upgrader {
       }
     } catch (err) {
       await rm(STAGE, { recursive: true, force: true }).catch(() => {});
-      this.set({ phase: 'failed', error: `The upgrade failed, so the office stays on ${this.state.current?.sha}.\n\n${(err as Error).message}` });
+      this.set({ phase: 'failed', error: `Güncelleme başarısız oldu, bu yüzden ofis ${this.state.current?.sha} sürümünde kalıyor.\n\n${(err as Error).message}` });
       return;
     }
     this.set({ phase: 'restarting' });

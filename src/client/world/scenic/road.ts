@@ -121,19 +121,19 @@ export function buildSigns(kit: ScenicKit) {
     g.rotation.y = Math.PI;
     parts.meadow.add(g);
     colliders.push({ minX: 20.6, maxX: 27.4, minZ: 36.8, maxZ: 37.2, bottom: G, top: G + 5.6 });
-    const title = textPlane('🏎️ SCENIC LOOP', { color: '#ffd166', size: 72 });
+    const title = textPlane('🏎️ MANZARA YOLU', { color: '#ffd166', size: 72 });
     title.scale.setScalar(1.35);
     title.position.set(24, G + 4.75, 36.85);
     title.rotation.y = Math.PI;
-    const sub = textPlane('🌾 farm · 🌲 pines · 🏔️ mountains · 🏖️ beach — 1.4 km, either way ⟷', { color: '#f1faee', size: 44 });
+    const sub = textPlane('🌾 çiftlik · 🌲 çamlar · 🏔️ dağlar · 🏖️ plaj — 1,4 km, iki yöne de ⟷', { color: '#f1faee', size: 44 });
     const w = (sub.geometry.parameters as { width: number }).width;
     sub.scale.setScalar(7.8 / w);
     sub.position.set(24, G + 3.55, 36.85);
     sub.rotation.y = Math.PI;
     labels.add(title, sub);
   }
-  signpost(parts.meadow, labels, STREET_END - 14, 20.2, -Math.PI / 2, '🏔️ Scenic Loop ⟶', 4.6);
-  signpost(parts.meadow, labels, -STREET_END + 14, 20.2, Math.PI / 2, '⟵ Scenic Loop 🏖️', 4.6);
+  signpost(parts.meadow, labels, STREET_END - 14, 20.2, -Math.PI / 2, '🏔️ Manzara Yolu ⟶', 4.6);
+  signpost(parts.meadow, labels, -STREET_END + 14, 20.2, Math.PI / 2, '⟵ Manzara Yolu 🏖️', 4.6);
 
   // At the start of each stretch, a sign on the right (going round clockwise), facing the traffic.
   for (const place of ['farm', 'forest', 'mountains', 'beach', 'coast'] as Place[]) {

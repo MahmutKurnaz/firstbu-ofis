@@ -98,7 +98,7 @@ export class BoardTexture {
     }
     const open = (state.items as (GhIssue | GhPull)[]).filter((i) => i.state === 'OPEN');
     if (!open.length) {
-      const note = state.error ? `⚠️ ${state.error}` : state.loading && !state.fetchedAt ? 'Loading…' : this.kind === 'issues' ? 'No open issues 🎉' : 'No open PRs';
+      const note = state.error ? `⚠️ ${state.error}` : state.loading && !state.fetchedAt ? 'Yükleniyor…' : this.kind === 'issues' ? 'Açık issue yok 🎉' : 'Açık PR yok';
       g.font = '800 40px Nunito, ui-rounded, system-ui, sans-serif';
       const lines = wrap(g, note.replace(/`/g, ''), 760, 4);
       const boxH = 60 + lines.length * 50;
@@ -166,7 +166,7 @@ export class BoardTexture {
         g.stroke();
         g.fillStyle = '#5c5f73';
         g.font = `800 ${Math.round(fs * 0.78)}px Nunito, ui-rounded, system-ui, sans-serif`;
-        g.fillText(clip(g, `${w.name} · ${store.plan().byId.get(w.deskId)?.label ?? 'desk'}`, nw - 28 - r * 2 - 8), -nw / 2 + 14 + r * 2 + 8, y + fs * 0.28);
+        g.fillText(clip(g, `${w.name} · ${store.plan().byId.get(w.deskId)?.label ?? 'masa'}`, nw - 28 - r * 2 - 8), -nw / 2 + 14 + r * 2 + 8, y + fs * 0.28);
       }
       g.beginPath();
       g.arc(0, -nh / 2 + 10, 11, 0, Math.PI * 2);
@@ -181,7 +181,7 @@ export class BoardTexture {
       g.fillStyle = '#2b2d42';
       g.font = '800 26px Nunito, ui-rounded, system-ui, sans-serif';
       g.textAlign = 'right';
-      g.fillText(`+${open.length - cols * rows} more`, W - 20, H - 16);
+      g.fillText(`+${open.length - cols * rows} daha`, W - 20, H - 16);
       g.textAlign = 'left';
     }
     this.texture.needsUpdate = true;
@@ -207,7 +207,7 @@ export class ServicesBoardTexture {
   render(items: ServiceInfo[], workers: Map<string, WorkerInfo>) {
     const rows = items.map((s) => {
       const w = workers.get(s.workerId);
-      return { port: s.port, title: s.title || s.command, who: [w?.name ?? 'A worker', w?.worktree?.branch].filter(Boolean).join(' · '), color: w?.color ?? '#8d99ae' };
+      return { port: s.port, title: s.title || s.command, who: [w?.name ?? 'Bir çalışan', w?.worktree?.branch].filter(Boolean).join(' · '), color: w?.color ?? '#8d99ae' };
     });
     // Worker updates stream in constantly; only redraw when what's shown changes.
     const key = JSON.stringify(rows);
@@ -225,10 +225,10 @@ export class ServicesBoardTexture {
       g.textAlign = 'center';
       g.fillStyle = '#e9ecef';
       g.font = '900 52px Nunito, ui-rounded, system-ui, sans-serif';
-      g.fillText('No web servers running', W / 2, H / 2 - 20);
+      g.fillText('Çalışan web sunucusu yok', W / 2, H / 2 - 20);
       g.fillStyle = 'rgba(233,236,239,.6)';
       g.font = '700 32px Nunito, ui-rounded, system-ui, sans-serif';
-      g.fillText('When a worker starts one, it shows up here', W / 2, H / 2 + 36);
+      g.fillText('Bir çalışan başlatınca burada görünür', W / 2, H / 2 + 36);
       g.textAlign = 'left';
       this.texture.needsUpdate = true;
       return;
@@ -264,7 +264,7 @@ export class ServicesBoardTexture {
       g.fillStyle = '#e9ecef';
       g.font = '800 26px Nunito, ui-rounded, system-ui, sans-serif';
       g.textAlign = 'right';
-      g.fillText(`+${rows.length - shown.length} more`, W - 24, H - 10);
+      g.fillText(`+${rows.length - shown.length} daha`, W - 24, H - 10);
       g.textAlign = 'left';
     }
     this.texture.needsUpdate = true;
@@ -295,18 +295,18 @@ export class QueueBoardTexture {
     const rows = [
       ...running.map((t) => {
         const w = t.workerId ? workers.get(t.workerId) : undefined;
-        const st = { starting: 'starting', idle: 'ready', working: 'working', needs_input: 'needs input ✋', done: 'done', exited: 'stopped', offline: 'asleep' }[w?.status ?? 'working'];
-        return { icon: '🤖', text: name(t), side: `${t.workerName ?? 'a worker'} · ${st}`, color: '#1e8f4e' };
+        const st = { starting: 'başlıyor', idle: 'hazır', working: 'çalışıyor', needs_input: 'sana ihtiyacı var ✋', done: 'bitti', exited: 'durdu', offline: 'uyuyor' }[w?.status ?? 'working'];
+        return { icon: '🤖', text: name(t), side: `${t.workerName ?? 'bir çalışan'} · ${st}`, color: '#1e8f4e' };
       }),
-      ...queued.map((t, i) => ({ icon: '⏳', text: name(t), side: i === 0 ? 'up next' : `${i + 1}${['th', 'st', 'nd', 'rd'][i + 1 <= 3 ? i + 1 : 0]} in line`, color: '#2b2d42' })),
+      ...queued.map((t, i) => ({ icon: '⏳', text: name(t), side: i === 0 ? 'sırada' : `${i + 1}. sırada`, color: '#2b2d42' })),
       ...done.map((t) => ({
         icon: t.outcome === 'done' ? '✅' : '⚠️',
         text: name(t),
-        side: t.pr ? `PR #${t.pr.number}${t.pr.state === 'MERGED' ? ' · merged' : ''}` : t.outcome === 'done' ? 'done' : t.outcome === 'failed' ? "didn't start" : t.outcome === 'killed' ? 'sent home' : 'stopped',
+        side: t.pr ? `PR #${t.pr.number}${t.pr.state === 'MERGED' ? ' · birleşti' : ''}` : t.outcome === 'done' ? 'bitti' : t.outcome === 'failed' ? 'başlamadı' : t.outcome === 'killed' ? 'eve gönderildi' : 'durdu',
         color: '#8a8f98',
       })),
     ];
-    const summary = state.maxWorkers === 0 ? 'paused' : `${running.length} working · ${queued.length} waiting · up to ${state.maxWorkers} at once`;
+    const summary = state.maxWorkers === 0 ? 'duraklatıldı' : `${running.length} çalışıyor · ${queued.length} bekliyor · aynı anda en fazla ${state.maxWorkers}`;
     const key = JSON.stringify([rows, summary]);
     if (key === this.drawn) return;
     this.drawn = key;
@@ -332,7 +332,7 @@ export class QueueBoardTexture {
     g.textAlign = 'left';
     g.fillStyle = '#1f5fbf';
     g.font = `900 52px ${font}`;
-    g.fillText('Task queue', 40, 76);
+    g.fillText('Görev kuyruğu', 40, 76);
     // A hand-drawn underline.
     g.strokeStyle = '#1f5fbf';
     g.lineWidth = 5;
@@ -350,10 +350,10 @@ export class QueueBoardTexture {
       g.textAlign = 'center';
       g.fillStyle = '#2b2d42';
       g.font = `900 50px ${font}`;
-      g.fillText('Nothing queued', W / 2, H / 2 - 10);
+      g.fillText('Kuyrukta bir şey yok', W / 2, H / 2 - 10);
       g.fillStyle = '#6b7280';
       g.font = `700 30px ${font}`;
-      g.fillText('Add issues from the 📌 Issues board, or press E here', W / 2, H / 2 + 44);
+      g.fillText('📌 Issue panosundan issue ekle ya da buradayken E’ye bas', W / 2, H / 2 + 44);
       g.textAlign = 'left';
       this.texture.needsUpdate = true;
       return;
@@ -386,7 +386,7 @@ export class QueueBoardTexture {
       g.fillStyle = '#6b7280';
       g.font = `800 24px ${font}`;
       g.textAlign = 'right';
-      g.fillText(`+${rows.length - shown.length} more`, W - 44, H - 34);
+      g.fillText(`+${rows.length - shown.length} daha`, W - 44, H - 34);
       g.textAlign = 'left';
     }
     this.texture.needsUpdate = true;

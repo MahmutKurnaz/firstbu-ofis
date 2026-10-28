@@ -23,7 +23,7 @@ export function installVoice(ctx: Ctx, deps: VoiceDeps) {
   async function joinVoice() {
     const err = await voice.joinVoice(ctx.settings.pushToTalk);
     if (err) toast(err, 'warn');
-    else if (ctx.settings.pushToTalk && voice.inVoice) toast('🎙️ In voice, muted: hold V to talk');
+    else if (ctx.settings.pushToTalk && voice.inVoice) toast('🎙️ Seste, susturuldun: konuşmak için V’ye basılı tut');
   }
   ctx.keys.bind({
     code: 'KeyV',
@@ -56,12 +56,12 @@ export function installVoice(ctx: Ctx, deps: VoiceDeps) {
   function currentShares(): [string, MediaStream][] {
     const out: [string, MediaStream][] = [];
     const local = voice.localScreen;
-    if (local) out.push(['You', local]);
+    if (local) out.push(['Sen', local]);
     for (const [id, s] of voice.remoteScreens()) {
       const peer = store.peers.get(id);
       // A screen shared on another floor is on that floor's TV.
       if (peer && !store.onMyFloor(peer)) continue;
-      out.push([peer?.name ?? 'Someone', s]);
+      out.push([peer?.name ?? 'Biri', s]);
     }
     return out;
   }
@@ -69,17 +69,17 @@ export function installVoice(ctx: Ctx, deps: VoiceDeps) {
   function refreshShares() {
     const shares = currentShares();
     // Remote shares win the TV; your own share is what others see anyway.
-    const pick = shares.find(([who]) => who !== 'You') ?? shares[0];
+    const pick = shares.find(([who]) => who !== 'Sen') ?? shares[0];
     const stream = pick?.[1] ?? null;
     deps.tv.show(stream);
     const box = $('shares');
     box.replaceChildren(
       ...shares
-        .filter(([who]) => who !== 'You')
+        .filter(([who]) => who !== 'Sen')
         .map(([who, s]) => {
           const v = h('video', { autoplay: true, playsinline: true, muted: true }) as HTMLVideoElement;
           v.srcObject = s;
-          return h('div.share-thumb', { onclick: () => watchShare(), title: 'Watch full screen' }, v, h('span.who', {}, `🖥️ ${who}`));
+          return h('div.share-thumb', { onclick: () => watchShare(), title: 'Tam ekran izle' }, v, h('span.who', {}, `🖥️ ${who}`));
         }),
     );
     ctx.hint.invalidate();
@@ -94,11 +94,11 @@ export function installVoice(ctx: Ctx, deps: VoiceDeps) {
     }
     const video = h('video', { autoplay: true, playsinline: true, muted: true }) as HTMLVideoElement;
     // What's on the TV: someone else's screen before your own.
-    const [who, stream] = streams.find(([name]) => name !== 'You') ?? streams[0];
+    const [who, stream] = streams.find(([name]) => name !== 'Sen') ?? streams[0];
     video.srcObject = stream;
-    const close = h('button.btn.close', { 'aria-label': 'Close' }, '✕');
-    const el = h('div.modal.viewer', { role: 'dialog', 'aria-label': 'Screen share' }, h('header', {}, h('h2', {}, `🖥️ ${who}'s screen`), close), video);
-    const modal = openModal(el, { doing: `🖥️ watching ${who}'s screen`, onClose: () => (video.srcObject = null) });
+    const close = h('button.btn.close', { 'aria-label': 'Kapat' }, '✕');
+    const el = h('div.modal.viewer', { role: 'dialog', 'aria-label': 'Ekran paylaşımı' }, h('header', {}, h('h2', {}, `🖥️ ${who} kişisinin ekranı`), close), video);
+    const modal = openModal(el, { doing: `🖥️ ${who} kişisinin ekranını izliyor`, onClose: () => (video.srcObject = null) });
     close.addEventListener('click', () => modal.close());
   }
 
@@ -111,8 +111,8 @@ export function installVoice(ctx: Ctx, deps: VoiceDeps) {
   voice.onFailed((id) => {
     if (unreachable.has(id)) return;
     unreachable.add(id);
-    const who = store.peers.get(id)?.name ?? 'someone';
-    toast(`🎙️ Can't connect voice with ${who}: a network between you blocks direct calls. The office needs a TURN server (see self-hosting docs).`, 'warn');
+    const who = store.peers.get(id)?.name ?? 'biri';
+    toast(`🎙️ ${who} ile ses bağlanamadı: aranızdaki bir ağ doğrudan aramaları engelliyor. Ofis için bir TURN sunucusu gerekir (self-hosting dokümanlarına bak).`, 'warn');
   });
   ctx.messages.on('peer.join', () => voice.syncPeers());
   ctx.messages.on('peer.leave', () => voice.syncPeers());

@@ -10,12 +10,44 @@ import dogPugUrl from '../models/dog-pug.glb?url';
 import dogPupUrl from '../models/dog-pup.glb?url';
 import dogPomeranianUrl from '../models/dog-pomeranian.glb?url';
 import dogShibaUrl from '../models/dog-shiba.glb?url';
+import geyikUrl from '../models/geyik.glb?url';
+import kaplanUrl from '../models/kaplan.glb?url';
+import kizilPandaUrl from '../models/kizil-panda.glb?url';
+import susamuruUrl from '../models/susamuru.glb?url';
+import tavsanUrl from '../models/tavsan.glb?url';
+import mirketUrl from '../models/mirket.glb?url';
+import tilkiUrl from '../models/tilki.glb?url';
+import koalaUrl from '../models/koala.glb?url';
+import pandaUrl from '../models/panda.glb?url';
+import sincapUrl from '../models/sincap.glb?url';
+import ceylanUrl from '../models/ceylan.glb?url';
+import penguenUrl from '../models/penguen.glb?url';
+import baykusUrl from '../models/baykus.glb?url';
+import kurtUrl from '../models/kurt.glb?url';
+import ayiUrl from '../models/ayi.glb?url';
+import filUrl from '../models/fil.glb?url';
+import zurafaUrl from '../models/zurafa.glb?url';
+import kediUrl from '../models/kedi.glb?url';
+import goldenUrl from '../models/golden.glb?url';
+import kunduzUrl from '../models/kunduz.glb?url';
+import kartalUrl from '../models/kartal.glb?url';
+import bukalemunUrl from '../models/bukalemun.glb?url';
+import kanguruUrl from '../models/kanguru.glb?url';
+import npcBaristaUrl from '../models/npc-barista.glb?url';
+import npcBekciUrl from '../models/npc-bekci.glb?url';
+import npcCicekciUrl from '../models/npc-cicekci.glb?url';
+import npcKuryeUrl from '../models/npc-kurye.glb?url';
+import npcDedeUrl from '../models/npc-dede.glb?url';
+import npcRehberUrl from '../models/npc-rehber.glb?url';
+import npcKarsilayiciUrl from '../models/npc-karsilayici.glb?url';
+import sehirBinalariUrl from '../models/sehir-binalari.glb?url';
 import kaykitCafeUrl from '../models/kaykit-cafe.glb?url';
 import kaykitCityUrl from '../models/kaykit-city.glb?url';
 import kaykitFurnitureUrl from '../models/kaykit-furniture.glb?url';
 import kitchenUrl from '../models/kitchen.glb?url';
 import mahmutUrl from '../models/mahmut.glb?url';
 import loungeUrl from '../models/lounge.glb?url';
+import meshyPropsUrl from '../models/meshy-props.glb?url';
 import plantsUrl from '../models/plants.glb?url';
 import { toon } from './toon';
 
@@ -35,12 +67,48 @@ const MODELS = {
   // Our own characters (blender/scripts/build_aslan.py): only a worker wearing one loads it.
   aslan: { url: aslanUrl, preload: false },
   'aslan-sevimli': { url: aslanSevimliUrl, preload: false },
+  // The management team (docs/karakterler.md): kızıl panda, susamuru, kaplan, tavşan, geyik.
+  'kizil-panda': { url: kizilPandaUrl, preload: false },
+  susamuru: { url: susamuruUrl, preload: false },
+  kaplan: { url: kaplanUrl, preload: false },
+  tavsan: { url: tavsanUrl, preload: false },
+  geyik: { url: geyikUrl, preload: false },
+  // The rest of the cast (docs/karakterler.md): the other roles, the ten spare animals, the street's own people (NPCs).
+  mirket: { url: mirketUrl, preload: false },
+  tilki: { url: tilkiUrl, preload: false },
+  koala: { url: koalaUrl, preload: false },
+  panda: { url: pandaUrl, preload: false },
+  sincap: { url: sincapUrl, preload: false },
+  ceylan: { url: ceylanUrl, preload: false },
+  penguen: { url: penguenUrl, preload: false },
+  baykus: { url: baykusUrl, preload: false },
+  kurt: { url: kurtUrl, preload: false },
+  ayi: { url: ayiUrl, preload: false },
+  fil: { url: filUrl, preload: false },
+  zurafa: { url: zurafaUrl, preload: false },
+  kedi: { url: kediUrl, preload: false },
+  golden: { url: goldenUrl, preload: false },
+  kunduz: { url: kunduzUrl, preload: false },
+  kartal: { url: kartalUrl, preload: false },
+  bukalemun: { url: bukalemunUrl, preload: false },
+  kanguru: { url: kanguruUrl, preload: false },
+  "npc-barista": { url: npcBaristaUrl, preload: false },
+  "npc-bekci": { url: npcBekciUrl, preload: false },
+  "npc-cicekci": { url: npcCicekciUrl, preload: false },
+  "npc-kurye": { url: npcKuryeUrl, preload: false },
+  "npc-dede": { url: npcDedeUrl, preload: false },
+  "npc-rehber": { url: npcRehberUrl, preload: false },
+  "npc-karsilayici": { url: npcKarsilayiciUrl, preload: false },
   // Your own character, from Mahmut's photos (features/avatar/).
   mahmut: { url: mahmutUrl, preload: false },
   // The street's CC0 drafts (KayKit, see blender/scripts/build_kaykit.py): only the street loads them.
   'kaykit-city': { url: kaykitCityUrl, preload: false },
   'kaykit-furniture': { url: kaykitFurnitureUrl, preload: false },
   'kaykit-cafe': { url: kaykitCafeUrl, preload: false },
+  // The street's own furniture, made with Meshy (world/cadde/meshy.ts).
+  'meshy-props': { url: meshyPropsUrl, preload: false },
+  // The skyline's own buildings, modelled in Blender (world/cadde/skyline.ts).
+  'sehir-binalari': { url: sehirBinalariUrl, preload: false },
   lounge: { url: loungeUrl, preload: true },
   plants: { url: plantsUrl, preload: true },
 } satisfies Record<string, { url: string; preload: boolean }>;

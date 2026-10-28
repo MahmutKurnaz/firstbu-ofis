@@ -52,13 +52,13 @@ export function installBar(ctx: Ctx, deps: BarDeps) {
 
   /** What the bartender says as they slide it over. */
   const CHEERS: Record<string, string> = {
-    beer: 'Cheers! 🍻',
-    wine: 'Salud!',
-    martini: 'Shaken, not stirred',
+    beer: 'Şerefe! 🍻',
+    wine: 'Şerefe!',
+    martini: 'Çalkalanmış, karıştırılmamış',
     maitai: 'Aloha!',
-    shot: 'Salt, shot, lime… whoa',
-    mojito: 'Fresh and minty',
-    water: 'Good call. Stay hydrated',
+    shot: 'Tuz, shot, limon… vay be',
+    mojito: 'Ferah ve naneli',
+    water: 'İyi seçim. Su içmeye devam',
   };
 
   /** E at the bar: the menu. */
@@ -67,7 +67,7 @@ export function installBar(ctx: Ctx, deps: BarDeps) {
     openBar({ cutOff: booze.cutOff(performance.now() / 1000), order: orderDrink });
   }
 
-  /** The bartender comes over and pours it (a water, if you've had enough), and slides it across to you. */
+  /** The bartender comes over and pours it (a water, if bu kadar yeter), and slides it across to you. */
   function orderDrink(d: Drink) {
     const r = deps.roof();
     if (!r || !ctx.upTop()) return;
@@ -76,21 +76,21 @@ export function installBar(ctx: Ctx, deps: BarDeps) {
     r.serve(ctx.player.pos.z);
     ctx.sound.pour(r.pourAt);
     queueDrunkVisionWarmup();
-    if (cut) toast("🙅 The bartender slides you a water instead: you've had enough", 'warn');
+    if (cut) toast("🙅 Barmen sana su uzatıyor: bu kadar yeter", 'warn');
     setTimeout(() => {
       if (!ctx.upTop()) return;
       drunkVision.prepare();
       booze.drink(drink, performance.now() / 1000);
       deps.reach();
       if (ctx.player.view === 'first') ctx.hands.sip();
-      if (!cut) toast(`${drink.emoji} ${drink.name}. ${CHEERS[drink.id] ?? 'Enjoy!'}`);
+      if (!cut) toast(`${drink.emoji} ${drink.name}. ${CHEERS[drink.id] ?? 'Afiyet olsun!'}`);
     }, 1500);
   }
 
   ctx.messages.on('horn', (msg) => {
     if (!ctx.upTop()) return;
     ctx.sound.horn();
-    if (msg.by !== store.profile.name) toast(`📯 ${msg.by} blew the air horn!`);
+    if (msg.by !== store.profile.name) toast(`📯 ${msg.by} korneyi öttürdü!`);
   });
   let lastHorn = 0;
   /** E at the DJ booth: the air horn, for everyone on the roof. */
@@ -105,7 +105,7 @@ export function installBar(ctx: Ctx, deps: BarDeps) {
     reach: 3.5,
     hint: () => {
       const cut = booze.cutOff(performance.now() / 1000);
-      return { k: String(cut), parts: [hintTitle('🍸 Sky Bar'), aside(cut ? "you've had enough" : 'drinks on the house'), key('E', cut ? 'Ask for water' : 'Order a drink')] };
+      return { k: String(cut), parts: [hintTitle('🍸 Gökyüzü Barı'), aside(cut ? "bu kadar yeter" : 'içkiler bizden'), key('E', cut ? 'Su iste' : 'İçki söyle')] };
     },
     use: onE(() => showBar()),
   });
@@ -113,8 +113,8 @@ export function installBar(ctx: Ctx, deps: BarDeps) {
     reach: 6,
     hint: () => {
       const f = djFrame(deps.djAt());
-      const what = f.part === 'drop' ? '🔥 the drop' : f.part === 'build' ? 'building up…' : f.part === 'breakdown' ? 'the breakdown' : 'mixing in the next track';
-      return { k: what, parts: [hintTitle('🎧 DJ Merge Conflict'), aside(`drum & bass · ${what}`), key('E', '📯 Air horn!')] };
+      const what = f.part === 'drop' ? '🔥 drop' : f.part === 'build' ? 'yükseliyor…' : f.part === 'breakdown' ? 'breakdown' : 'sıradaki parçaya geçiyor';
+      return { k: what, parts: [hintTitle('🎧 DJ Merge Conflict'), aside(`drum & bass · ${what}`), key('E', '📯 Korna!')] };
     },
     use: onE(() => blowHorn()),
   });
@@ -125,7 +125,7 @@ export function installBar(ctx: Ctx, deps: BarDeps) {
   let nextSip = 0;
   /** The drink in your hand everyone else was last told about. */
   let shownDrink: DrinkId | null = null;
-  const FEELINGS = ['😌 You feel sober again', '🥴 You’re feeling a little tipsy', '🌀 Whoa… is the city spinning?', '🤪 You’re wasted. Maybe have some water'];
+  const FEELINGS = ['😌 Ayıldın', '🥴 Biraz keyiflendin', '🌀 Vay… şehir mi dönüyor?', '🤪 İyice kafayı buldun. Biraz su iç belki'];
 
   /** Every frame: how drunk you are, the glass in your hand, hiccups and the odd sip. */
   function drinking(now: number) {

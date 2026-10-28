@@ -98,7 +98,7 @@ export function installBarGames(ctx: Ctx, deps: BarGamesDeps) {
   function stepUp(game: BarGame) {
     if (thrower.active || ctx.trip() || ctx.activities.running('climber')) return;
     const other = lineTaken(game);
-    if (other) return toast(`${game === 'darts' ? '🎯' : '🪓'} ${other} is throwing — wait your turn`, 'warn');
+    if (other) return toast(`${game === 'darts' ? '🎯' : '🪓'} ${other} atış yapıyor — sıranı bekle`, 'warn');
     if (ctx.player.seat) deps.standUp();
     ctx.activities.stopAll('start');
     deps.stopWalking();
@@ -107,12 +107,12 @@ export function installBarGames(ctx: Ctx, deps: BarGamesDeps) {
 
   /** At the dart board or the axe lane: who's throwing, or your best round, and E to step up. */
   function throwHint(game: BarGame): Hint {
-    const name = game === 'darts' ? '🎯 Darts' : '🪓 Axe throwing';
+    const name = game === 'darts' ? '🎯 Dart' : '🪓 Balta atma';
     const other = lineTaken(game);
-    if (other) return { k: `taken|${other}`, parts: [hintTitle(name), aside(`${clip(other, 24)} is throwing`)] };
+    if (other) return { k: `taken|${other}`, parts: [hintTitle(name), aside(`${clip(other, 24)} atış yapıyor`)] };
     const best = throwBests[game];
-    const about = best !== undefined ? `your best round: ${best}` : game === 'darts' ? 'three darts a visit' : 'five axes a round';
-    return { k: about, parts: [hintTitle(name), aside(about), key('E', game === 'darts' ? 'Step up to the oche' : 'Step up to the line')] };
+    const about = best !== undefined ? `en iyi turun: ${best}` : game === 'darts' ? 'tura üç ok' : 'tura beş balta';
+    return { k: about, parts: [hintTitle(name), aside(about), key('E', game === 'darts' ? 'Atış çizgisine geç' : 'Çizgiye geç')] };
   }
   ctx.interactions.define('darts', {
     reach: 4,
@@ -127,8 +127,8 @@ export function installBarGames(ctx: Ctx, deps: BarGamesDeps) {
 
   /** What a throw says over the target as it lands. */
   function tossPop(game: BarGame, s: Score): string {
-    if (game === 'darts') return s.points === 0 ? 'Miss' : s.label === 'Bull' ? 'BULL!' : s.label;
-    return s.label === 'Killshot' ? 'KILLSHOT!' : s.label === 'Bull' ? 'BULLSEYE!' : s.points === 0 ? (s.label === 'Drop' ? 'Clank!' : '0') : `+${s.points}`;
+    if (game === 'darts') return s.points === 0 ? 'ISKA' : s.label === 'Bull' ? 'ORTA!' : s.label;
+    return s.label === 'Killshot' ? 'ÖLÜMCÜL!' : s.label === 'Bull' ? 'TAM İSABET!' : s.points === 0 ? (s.label === 'Drop' ? 'Tang!' : '0') : `+${s.points}`;
   }
 
   /** A throw at a game up here, by you or anyone else: it flies, lands, and goes up on the chalkboard. */
@@ -142,7 +142,7 @@ export function installBarGames(ctx: Ctx, deps: BarGamesDeps) {
     // A new round (or somebody else's): the last one's darts come out of the board first.
     if (toss.n === 1 || !round || round.by !== by) {
       r.games.clear(game);
-      round = rounds[game] = { by, name: mine ? store.profile.name : (peer?.name ?? 'Someone'), color: mine ? store.profile.color : (peer?.color ?? '#8ecae6'), scores: [] };
+      round = rounds[game] = { by, name: mine ? store.profile.name : (peer?.name ?? 'Biri'), color: mine ? store.profile.color : (peer?.color ?? '#8ecae6'), scores: [] };
       r.games.chalk(game, round);
       if (mine) thrower.setInfo('');
     }
@@ -177,7 +177,7 @@ export function installBarGames(ctx: Ctx, deps: BarGamesDeps) {
       ctx.sound.toss('cheer', f);
       ctx.confetti.burst(f.x + f.out.x * 0.5, f.y + 0.4, f.z + f.out.z * 0.5, 200, 0.9);
     }
-    const what = game === 'darts' ? (total === 180 ? 'ONE HUNDRED AND EIGHTY!' : `${total} with three darts`) : `${total} of 40 with five axes`;
+    const what = game === 'darts' ? (total === 180 ? 'YÜZ SEKSEN!' : `üç okla ${total}`) : `beş baltayla 40’ta ${total}`;
     const icon = game === 'darts' ? '🎯' : '🪓';
     if (!mine) {
       if (great) toast(`${icon} ${name}: ${what}`);
@@ -189,7 +189,7 @@ export function installBarGames(ctx: Ctx, deps: BarGamesDeps) {
       throwBests[game] = total;
       saveThrowBests();
     }
-    toast(`${icon} ${what}${beat && best !== undefined ? ' — your best yet!' : ''}`);
+    toast(`${icon} ${what}${beat && best !== undefined ? ' — şimdiye kadarki en iyin!' : ''}`);
   }
 
   ctx.messages.on('toss', (msg) => theirToss(msg.id, { game: msg.game, u: msg.u, v: msg.v, stick: msg.stick, n: msg.n }));
@@ -206,7 +206,7 @@ export function installBarGames(ctx: Ctx, deps: BarGamesDeps) {
   /** At the dart board or the axe lane: how to aim and throw, and how to step back. */
   function renderThrowHint(el: HTMLElement) {
     const stage = thrower.doing;
-    ctx.hint.draw(el, `throw|${stage === 'wind'}`, () => (stage === 'wind' ? [h('span.title', {}, 'Let go in the green!')] : [key('Mouse', 'Aim'), key('Space', 'Hold to throw'), key('E', 'Step back')]));
+    ctx.hint.draw(el, `throw|${stage === 'wind'}`, () => (stage === 'wind' ? [h('span.title', {}, 'Yeşilde bırak!')] : [key('Fare', 'Nişan al'), key('Space', 'Basılı tut, at'), key('E', 'Geri çekil')]));
   }
 
   // At the oche or the line, the view narrows onto the target.

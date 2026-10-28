@@ -2,10 +2,10 @@
   "version": 1,
   "reportDir": ".claude/work",
   "offices": [
-    { "id": "kafe", "name": "Kafe meydanı", "teams": [
+    { "id": "yonetim", "name": "Yönetim", "teams": [
       { "id": "liderlik", "name": "Liderlik", "color": "#e8b931", "roles": [
-        { "name": "lead", "title": "Aslan Lider", "character": "aslan", "model": "opus", "effort": "high", "brief": "ordu/roller/lead.md", "resident": true },
-        { "name": "prompt-refiner", "title": "Kızıl Panda", "agent": "prompt-refiner", "character": "kizil-panda" }
+        { "name": "lead", "desk": "desk-1", "title": "Aslan Lider", "character": "aslan", "model": "opus", "effort": "high", "brief": "ordu/roller/lead.md", "resident": true },
+        { "name": "prompt-refiner", "desk": "desk-2", "title": "Kızıl Panda", "agent": "prompt-refiner", "character": "kizil-panda" }
       ] }
     ] },
     { "id": "kesif", "name": "Keşif ofisi", "teams": [
@@ -16,27 +16,27 @@
     ] },
     { "id": "tasarim", "name": "Tasarım stüdyosu", "teams": [
       { "id": "frontend", "name": "Frontend", "color": "#ff7a6b", "roles": [
-        { "name": "fe-lead", "title": "Susamuru", "agent": "fe-lead", "character": "susamuru" },
+        { "name": "fe-lead", "desk": "desk-3", "title": "Susamuru", "agent": "fe-lead", "character": "susamuru" },
         { "name": "fe-expert", "title": "Tilki", "agent": "fe-expert", "character": "tilki" },
         { "name": "admin-dev", "title": "Koala", "agent": "admin-dev", "character": "koala" }
       ] }
     ] },
     { "id": "muhendislik", "name": "Mühendislik ofisi", "teams": [
       { "id": "backend", "name": "Backend", "color": "#4a8fe7", "roles": [
-        { "name": "be-lead", "title": "Kaplan", "agent": "be-lead", "character": "kaplan" },
+        { "name": "be-lead", "desk": "desk-4", "title": "Kaplan", "agent": "be-lead", "character": "kaplan" },
         { "name": "be-expert", "title": "Panda", "agent": "be-expert", "character": "panda" }
       ] }
     ] },
     { "id": "hata", "name": "Hata laboratuvarı", "teams": [
       { "id": "hata", "name": "Hata avı", "color": "#9b6bdf", "roles": [
-        { "name": "bug-hunter", "title": "Tavşan", "agent": "bug-hunter", "character": "tavsan" },
+        { "name": "bug-hunter", "desk": "desk-5", "title": "Tavşan", "agent": "bug-hunter", "character": "tavsan" },
         { "name": "quick-fix", "title": "Sincap", "agent": "quick-fix", "character": "sincap" }
       ] }
     ] },
     { "id": "test", "name": "Test laboratuvarı", "teams": [
       { "id": "dogrulama", "name": "Doğrulama", "color": "#2bb5b0", "roles": [
         { "name": "verify-fe", "title": "Ceylan", "agent": "verify-fe", "character": "ceylan" },
-        { "name": "verify-be", "title": "Geyik", "agent": "verify-be", "character": "geyik" }
+        { "name": "verify-be", "desk": "desk-6", "title": "Geyik", "agent": "verify-be", "character": "geyik" }
       ] }
     ] },
     { "id": "guvenlik", "name": "Güvenlik merkezi", "teams": [

@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import type { Model } from '../models';
+import { polishCharacter, toPhysical } from './polish';
 import { glance, look, reach, straighten } from './animal-pose';
 import type { Worker } from './worker';
 
@@ -9,22 +10,23 @@ import type { Worker } from './worker';
 // tag, bubble and globe stay as they are, over the character's head.
 
 /** How tall the characters stand (m), whatever the seat or hall scales the little workers to: the lead a little taller than you (1.7 m), as Mahmut asked. */
+/** The lead lion's height, and what a character without one of its own stands at (m). */
 export const ANIMAL_HEIGHT = 1.85;
 /** How far the little worker's feet are above its root, which the office stands its root that far under the floor for (court.ts's FEET): the character's feet go there too. */
 const FEET = 0.07;
-/** How far over the seat's anchor (the little worker's hips) the character's hips go when it sits: on the seat's top. */
+/** How far over the seat's anchor (the little worker's hips) the lion's hips go when it sits: on the seat's top. Smaller and taller characters have their hips lower and higher by their height. */
 const SEAT_UP = 0.24;
 /** How far toward its table it sits (m), so its hands reach the keyboard. */
 const SIT_FORWARD = 0.1;
-/** Where its hands go on the keyboard while it works, from its seat's anchor (m): out to each side, up (over the floor), and forward. */
-const KEYS = { side: 0.17, up: 0.82, forward: 0.62 };
+/** Where its hands go on the keyboard while it works, from its seat's anchor (m): out to each side, up (over the floor: the desk's 0.76 m and the laptop's thickness), and forward (a 16 inch laptop's keys). */
+const KEYS = { side: 0.1, up: 0.785, forward: 0.72 };
 /** How tall it is sat down, of its height standing; and how far over its head its name tag goes (m). */
 const SITTING = 0.92;
 const TAG_GAP = 0.2;
 /** How long one clip takes to blend into the next (s). */
 const BLEND = 0.25;
 
-export type AnimalClip = 'idle' | 'walk' | 'sit' | 'drink';
+export type AnimalClip = 'idle' | 'walk' | 'sit' | 'drink' | 'skill';
 /** How often it stops for a sip of coffee, sat at its desk (s): somewhere between these. */
 const SIP_EVERY: [number, number] = [25, 45];
 
@@ -51,6 +53,9 @@ export class AnimalSkin {
   /** When its next sip of coffee is due (its own clock, see t), and when the one it's having is over. */
   private nextSip = SIP_EVERY[0] * Math.random();
   private sipping = 0;
+  /** When its next gesture is due, and until when the one it's making lasts. */
+  private nextSkill = 6 + Math.random() * 12;
+  private skilling = 0;
   /** The cup in its right hand while it drinks. */
   private cup: THREE.Group | null = null;
   private readonly key = new THREE.Vector3();
@@ -60,6 +65,8 @@ export class AnimalSkin {
     model: Model,
     /** Whether the worker's root is in its seat right now (the views know: it's parented to the desk's seat). */
     private seated: () => boolean,
+    /** How tall it stands (m): each character its own, from docs/karakterler.md. */
+    private readonly height = ANIMAL_HEIGHT,
   ) {
     const body = model.scene;
     // Stood on the floor at its origin, as tall as a worker. Measured as it's drawn, skinned on its
@@ -67,12 +74,10 @@ export class AnimalSkin {
     body.updateMatrixWorld(true);
     const box = new THREE.Box3().setFromObject(body, true);
     const h = box.max.y - box.min.y || 1;
-    body.scale.setScalar(ANIMAL_HEIGHT / h);
-    body.position.y = -box.min.y * (ANIMAL_HEIGHT / h);
-    body.traverse((o) => {
-      const m = o as THREE.Mesh;
-      if (m.isMesh) m.castShadow = m.receiveShadow = true;
-    });
+    body.scale.setScalar(this.height / h);
+    body.position.y = -box.min.y * (this.height / h);
+    toPhysical(body);
+    polishCharacter(body);
     this.root.add(body);
     body.traverse((o) => {
       if (!this.hips && /hips/i.test(o.name) && (o as THREE.Bone).isBone) this.hips = o;
@@ -87,8 +92,13 @@ export class AnimalSkin {
     this.mixer = new THREE.AnimationMixer(body);
     for (const clip of model.clips) {
       const name = clip.name.toLowerCase();
-      const key: AnimalClip | undefined = name.includes('drink') ? 'drink' : name.includes('walk') ? 'walk' : name.includes('sit') ? 'sit' : name.includes('idle') ? 'idle' : undefined;
+      const key: AnimalClip | undefined = name.includes('drink') ? 'drink' : name.includes('skill') ? 'skill' : name.includes('walk') ? 'walk' : name.includes('sit') ? 'sit' : name.includes('idle') ? 'idle' : undefined;
       if (key && !this.actions.has(key)) this.actions.set(key, this.mixer.clipAction(clip));
+    }
+    const gesture = this.actions.get('skill');
+    if (gesture) {
+      gesture.setLoop(THREE.LoopOnce, 1);
+      gesture.clampWhenFinished = true;
     }
     // A sip is played once through, then it's back to work, a cup in its hand meanwhile.
     const sip = this.actions.get('drink');
@@ -128,6 +138,17 @@ export class AnimalSkin {
         want = 'drink';
       }
     } else this.sipping = 0;
+    // On its feet and waiting: now and then its own gesture (the role's skill clip), once through.
+    const skill = this.actions.get('skill');
+    if (skill && want === 'idle') {
+      if (this.skilling > this.t) want = 'skill';
+      else if (this.t >= this.nextSkill) {
+        this.skilling = this.t + skill.getClip().duration;
+        this.nextSkill = this.skilling + 10 + Math.random() * 14;
+        skill.reset();
+        want = 'skill';
+      }
+    }
     const next = this.actions.has(want) ? want : this.actions.has('idle') ? 'idle' : null;
     if (next && next !== this.playing) {
       const to = this.actions.get(next)!;
@@ -147,7 +168,7 @@ export class AnimalSkin {
       // put them on this one (the seat's anchor is where the little worker's hips go, just under its top).
       this.root.position.y = 0;
       this.root.updateMatrixWorld(true);
-      const seat = this.worker.root.getWorldPosition(this.tmp).y + SEAT_UP;
+      const seat = this.worker.root.getWorldPosition(this.tmp).y + SEAT_UP * (this.height / ANIMAL_HEIGHT);
       const hips = this.hips.getWorldPosition(this.tmp).y;
       this.root.position.y = (seat - hips) / scale;
       this.root.position.z = SIT_FORWARD / scale;
@@ -169,6 +190,9 @@ export class AnimalSkin {
       if (this.head) look(this.head, glance(this.t, working));
     } else {
       this.root.position.z = 0;
+      // On its feet the clips stand hunched: back up straight (a stride may lean a little).
+      // (not its own gesture: a bow stays a bow)
+      if (this.spine && this.neck && this.playing !== 'skill') straighten(this.spine, this.neck, this.ahead.set(0, 0, 1).transformDirection(this.worker.root.matrixWorld), this.playing === 'walk' ? 0.12 : 0.05);
       // On its feet, down where the little worker's feet would be.
       this.root.position.y = FEET;
     }
@@ -180,7 +204,7 @@ export class AnimalSkin {
       if (this.cup.visible) this.cup.scale.setScalar(1 / Math.max(1e-4, this.cup.parent!.getWorldScale(this.tmp).x));
     }
     const floor = this.worker.root.getWorldPosition(this.tmp).y;
-    const top = sat ? (ANIMAL_HEIGHT * SITTING - floor) / scale : FEET + ANIMAL_HEIGHT / scale;
+    const top = sat ? (this.height * SITTING - floor) / scale : FEET + this.height / scale;
     const tags = this.worker.root.children.filter((c): c is THREE.Sprite => (c as THREE.Sprite).isSprite && c.visible);
     const lift = Math.max(0, top + TAG_GAP / scale - Math.min(...tags.map((c) => c.position.y)));
     if (tags.length && lift > 0) for (const c of tags) c.position.y += lift;

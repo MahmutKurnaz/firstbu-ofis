@@ -20,7 +20,7 @@ export function installEmotes(ctx: Ctx, deps: EmotesDeps) {
     if (!emoteLimit.take(now)) {
       if (now - emoteWarnedAt > 3000) {
         emoteWarnedAt = now;
-        toast('Easy there, one emote at a time', 'warn');
+        toast('Yavaş ol, bir seferde tek emoji', 'warn');
       }
       return;
     }

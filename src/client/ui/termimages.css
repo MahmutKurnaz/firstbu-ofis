@@ -1,0 +1,15 @@
+/* The Images tab of a terminal: a grid of what's in the worker's folder, and one picture big. */
+.modal.term .term-images { position: absolute; inset: 0; display: flex; flex-direction: column; background: var(--paper); }
+.ti-bar { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-bottom: 2px solid var(--ink); }
+.ti-count { flex: 1; color: var(--muted); font-size: 13px; }
+.ti-grid { flex: 1; min-height: 0; overflow: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; padding: 12px; align-content: start; }
+.ti-card { display: flex; flex-direction: column; gap: 3px; padding: 6px; background: #fff; border: 2px solid var(--ink); border-radius: 10px; cursor: pointer; text-align: left; font: inherit; color: var(--ink); }
+.ti-card:hover { box-shadow: 0 3px 0 var(--ink); }
+.ti-card img { width: 100%; aspect-ratio: 1; object-fit: contain; background: repeating-conic-gradient(#eee 0 25%, #fff 0 50%) 0 0 / 14px 14px; border-radius: 6px; }
+.ti-cap { font-size: 12px; font-weight: 800; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ti-meta { font-size: 11px; color: var(--muted); }
+.ti-empty { grid-column: 1 / -1; color: var(--muted); }
+.ti-view { position: absolute; inset: 0; display: flex; flex-direction: column; background: var(--paper); }
+.ti-viewbar { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-bottom: 2px solid var(--ink); }
+.ti-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
+.ti-big { flex: 1; min-height: 0; max-width: 100%; object-fit: contain; padding: 10px; background: repeating-conic-gradient(#eee 0 25%, #fff 0 50%) 0 0 / 18px 18px; }

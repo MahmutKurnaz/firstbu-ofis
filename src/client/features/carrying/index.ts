@@ -56,17 +56,17 @@ export function installCarrying(ctx: Ctx, deps: CarryingDeps) {
     deps.dropBall();
     const carrying = ctx.carrying();
     if (carrying?.issue === it.number) return;
-    if (carrying) toast(`📌 #${carrying.issue} went back on the board`);
+    if (carrying) toast(`📌 #${carrying.issue} panoya geri döndü`);
     setCarrying({ issue: it.number, title: it.title });
     ctx.sound.paper();
-    toast(`✋ You took #${it.number} off the board: take it to an empty desk, a worker or the 📋 queue and press E`);
+    toast(`✋ #${it.number} kartını panodan aldın: boş bir masaya, bir çalışana ya da 📋 kuyruğa götür ve E’ye bas`);
   }
 
   /** Q, or E at the issues board: the card goes back where it came from. */
   function putBack() {
     const carrying = ctx.carrying();
     if (!carrying) return;
-    toast(`📌 #${carrying.issue} is back on the board`);
+    toast(`📌 #${carrying.issue} panoya geri döndü`);
     setCarrying(null);
     ctx.sound.paper();
   }
@@ -93,7 +93,7 @@ export function installCarrying(ctx: Ctx, deps: CarryingDeps) {
     }
     const prompt = issuePrompt({ number: card.issue, title: card.title });
     if (it.kind === 'queue') {
-      if (onQueue(card.issue)) toast(`#${card.issue} is already on the queue`, 'warn');
+      if (onQueue(card.issue)) toast(`#${card.issue} zaten kuyrukta`, 'warn');
       else {
         const { provider, model, effort } = officeChoice(store.project);
         ctx.net.send({ t: 'queue.add', prompt, title: `#${card.issue} ${card.title}`, issue: card.issue, provider, model, effort });
@@ -110,8 +110,8 @@ export function installCarrying(ctx: Ctx, deps: CarryingDeps) {
     // To the herald: someone's sent out for it, to the first free seat.
     if (it.kind === 'herald') {
       const deskId = deps.heraldSeat();
-      if (!deskId) toast('Every seat at the tables is taken', 'warn');
-      else if (hiringPaused()) toast('💸 Budget spent — hiring resumes tomorrow', 'warn');
+      if (!deskId) toast('Masalardaki bütün koltuklar dolu', 'warn');
+      else if (hiringPaused()) toast('💸 Bütçe bitti — işe alım yarın yeniden başlar', 'warn');
       else if (!deps.officeIsFull()) {
         const { provider, model, effort } = officeChoice(store.project);
         deps.heraldHires.set(deskId, { floor: store.floor, at: performance.now() });
@@ -122,7 +122,7 @@ export function installCarrying(ctx: Ctx, deps: CarryingDeps) {
     }
     if (it.kind !== 'desk' || !it.deskId) return false;
     const w = store.workerAtDesk(it.deskId);
-    const why = w ? cantTakeCard(w) : hiringPaused() ? '💸 Budget spent — hiring resumes tomorrow' : '';
+    const why = w ? cantTakeCard(w) : hiringPaused() ? '💸 Bütçe bitti — işe alım yarın yeniden başlar' : '';
     if (why) toast(why, 'warn');
     else if (w) {
       ctx.net.send({ t: 'worker.prompt', workerId: w.id, prompt, issue: card.issue });
@@ -148,45 +148,45 @@ export function installCarrying(ctx: Ctx, deps: CarryingDeps) {
 
   /** Why the worker at a desk can't be handed an issue card right now, or '' when it can. */
   function cantTakeCard(w: WorkerInfo): string {
-    if (w.kind === 'shell') return `${w.name} is a shell, not an agent`;
-    if (w.lost) return `${w.name}'s worktree was deleted — press E at its desk to fix it`;
-    if (isAsleep(w.status)) return `${w.name} is asleep — press R to resume first`;
-    if (w.status === 'needs_input') return `${w.name} is waiting on an answer — open the terminal first`;
+    if (w.kind === 'shell') return `${w.name} bir shell, ajan değil`;
+    if (w.lost) return `${w.name} için worktree silindi — düzeltmek için masasında E’ye bas`;
+    if (isAsleep(w.status)) return `${w.name} uyuyor — önce R ile devam ettir`;
+    if (w.status === 'needs_input') return `${w.name} bir cevap bekliyor — önce terminali aç`;
     return '';
   }
 
   /** With an issue card in your hands: what E does with it here, and how to put it back. */
   function carryHint(card: CarriedIssue, it: Interactable | null): Hint {
-    const parts = (...mid: (HTMLElement | string)[]) => [h('span.title', {}, `🗂️ #${card.issue} in hand`), ...mid, key('Q', 'Put it back')];
+    const parts = (...mid: (HTMLElement | string)[]) => [h('span.title', {}, `🗂️ #${card.issue} elinde`), ...mid, key('Q', 'Geri koy')];
     const aimedNote = deps.aimedNote();
-    if (it?.kind === 'issues') return aimedNote ? { k: String(aimedNote.number), parts: parts(key('E', `Swap it for #${aimedNote.number}`)) } : { k: '', parts: parts(key('E', 'Pin it back up')) };
-    if (it?.kind === 'ball') return { k: 'ball', parts: parts(aside('🏀 hands full')) };
+    if (it?.kind === 'issues') return aimedNote ? { k: String(aimedNote.number), parts: parts(key('E', `#${aimedNote.number} ile değiştir`)) } : { k: '', parts: parts(key('E', 'Tekrar tuttur')) };
+    if (it?.kind === 'ball') return { k: 'ball', parts: parts(aside('🏀 elin dolu')) };
     if (it?.kind === 'queue') {
       const on = onQueue(card.issue);
-      return { k: String(on), parts: parts(on ? aside('already on the queue') : key('E', 'Put it on the queue')) };
+      return { k: String(on), parts: parts(on ? aside('zaten kuyrukta') : key('E', 'Kuyruğa koy')) };
     }
     if (it?.kind === 'herald') {
       const paused = hiringPaused();
-      return { k: `herald|${paused}`, parts: parts(paused ? h('span.cost', {}, '💸 Budget spent — hiring resumes tomorrow') : key('E', 'Send someone out for it')) };
+      return { k: `herald|${paused}`, parts: parts(paused ? h('span.cost', {}, '💸 Bütçe bitti — işe alım yarın yeniden başlar') : key('E', 'Biri gitsin')) };
     }
     if (it?.kind === 'meeting' || (it?.kind === 'desk' && it.deskId && ctx.plan().byId.get(it.deskId)?.room && !store.workerAtDesk(it.deskId))) {
-      return { k: 'meeting', parts: parts(key('E', 'Call a meeting about it')) };
+      return { k: 'meeting', parts: parts(key('E', 'Bunun için toplantı çağır')) };
     }
     if (it?.kind === 'desk' && it.deskId) {
       const w = store.workerAtDesk(it.deskId);
       if (!w) {
         const paused = hiringPaused();
-        return { k: String(paused), parts: parts(paused ? h('span.cost', {}, '💸 Budget spent — hiring resumes tomorrow') : key('E', 'Hire a worker for it')) };
+        return { k: String(paused), parts: parts(paused ? h('span.cost', {}, '💸 Bütçe bitti — işe alım yarın yeniden başlar') : key('E', 'Bunun için çalışan işe al')) };
       }
       const why = cantTakeCard(w);
-      return { k: w.id + w.status + why, parts: parts(why ? aside(why) : key('E', `Hand it to ${w.name}`)) };
+      return { k: w.id + w.status + why, parts: parts(why ? aside(why) : key('E', `${w.name} çalışanına ver`)) };
     }
     // Anything else works as usual, card in hand.
     if (it) {
       const rest = ctx.interactions.hint(it);
       return { k: rest.k, parts: parts(...rest.parts) };
     }
-    return { k: '', parts: parts(aside('take it to an empty desk, a worker or the 📋 queue')) };
+    return { k: '', parts: parts(aside('boş bir masaya, bir çalışana ya da 📋 kuyruğa götür')) };
   }
 
   return { setCarrying, pickUp, dropCard, carryHint };

@@ -1,20 +1,28 @@
 import * as THREE from 'three';
 import type { FloorPalette } from '../../../shared/floors';
-import type { MapPlan } from '../../../shared/maps';
+import { BENCH_OUT, type MapPlan } from '../../../shared/maps';
 import type { CaddePropKind } from '../../../shared/maps/cadde-props';
 import { NavGrid, type Pt } from '../../../shared/nav';
 // The people first, as the castle's and the station's are: Person (and what it loads) before the
 // rest, so the materials the modules make as they load keep their order.
 import { buildArmchair, buildBarista } from './people';
 import type { Interactable } from '../types';
-import { mergeByMaterial } from '../toon';
+import { mergeByMaterial, mesh, toon } from '../toon';
+import { box } from '../station/kit';
 import type { World } from '../world';
 import { buildBoards } from '../station/boards';
 import { agentConsole, buildBenches, buildBriefing, placeSetting } from '../station/seats';
-import { dress, furnish, skyline } from './kaykit';
+import { dress, furnish } from './kaykit';
 import { caddeKit } from './kit';
 import { paintOffice, type OfficeView } from './offices';
+import { streetDust } from './dust';
+import { buildNpcs } from './npcs';
+import { forget, teamBoards } from './teamboard';
+import { skylineOwn } from './skyline';
 import { streetLife } from './passersby';
+import { meshy } from './meshy';
+import { buildDesks, furnishSuite } from './suite';
+import { TEAM_COLORS, themeOffice } from './interiors';
 import { PROPS } from './props';
 import { buildShell } from './shell';
 
@@ -35,6 +43,7 @@ export function buildCadde(plan: MapPlan): World {
   const c = plan.config!;
   const b = plan.bounds;
   const pal = { hull: '#f3efe8', panel: '#d9d2c5', metal: '#a7adb5', glow: '#ffb547', paving: '#cfc8bc', frame: '#2f343b', ...(c.palette ?? {}) };
+  const hadBoards = new Set(teamBoards);
   const kit = caddeKit(plan, pal) as ReturnType<typeof caddeKit> & { offices?: OfficeView[] };
   const group = kit.group;
 
@@ -43,11 +52,38 @@ export function buildCadde(plan: MapPlan): World {
   for (const p of c.props ?? []) PROPS[p.kind as CaddePropKind](kit, p, p.kind === 'office' ? offices++ : 0);
   // The CC0 drafts, which come in once they've loaded.
   const officeProps = (c.props ?? []).filter((p) => p.kind === 'office');
-  officeProps.forEach((p, i) => furnish(kit, p, i));
-  dress(kit, c.props ?? []);
-  skyline(kit, shell.near);
+  officeProps.forEach((p, i) => {
+    if (p.style === 'yonetim') return furnishSuite(kit, p);
+    furnish(kit, p, i);
+    themeOffice(kit, p, i, TEAM_COLORS[i] ?? '#8a94a6');
+  });
+  dress(kit, c.props ?? [], c.furnished === true);
+  skylineOwn(kit, shell.near);
   buildArmchair(kit);
-  buildBenches(kit);
+  // Its own long table and benches, a module of 2.5 m each along the table (a plain top and rails stand in until they've loaded), in the street's group.
+  buildBenches(kit, (t) => {
+    const holder = new THREE.Group();
+    holder.position.set(t.x, 0, t.z);
+    holder.rotation.y = t.rotY;
+    kit.group.add(holder);
+    const n = Math.max(1, Math.round(t.length / 2.5));
+    const along = t.length / n / 2.5;
+    const stand = [mesh(box(t.width, 0.08, t.length), toon('#c9a77a'), 0, 0.72, 0), ...t.sides.map((side) => mesh(box(0.44, 0.08, t.length - 0.2), toon('#8a4b2f'), side * (t.width / 2 + BENCH_OUT), 0.41, 0))];
+    holder.add(...stand);
+    for (let i = 0; i < n; i++) {
+      const z = -t.length / 2 + ((i + 0.5) * t.length) / n;
+      const top = meshy(holder, 'kafe-uzun-masa', { turn: Math.PI / 2, replaces: i === 0 ? stand : [] });
+      top.position.z = z;
+      top.scale.set(along, 1, t.width / 1.4);
+      for (const side of t.sides) {
+        const seat = meshy(holder, 'kafe-uzun-bank', { turn: Math.PI / 2 });
+        seat.position.set(side * (t.width / 2 + BENCH_OUT), 0, z);
+        seat.scale.set(along, 1, 1);
+      }
+    }
+    return true;
+  });
+  buildDesks(kit);
   const overflow = new Map<string, Interactable>();
   for (const def of plan.desks) kit.desks.set(def.id, placeSetting(kit, def, false).view);
   for (const def of plan.overflow) {
@@ -55,11 +91,22 @@ export function buildCadde(plan: MapPlan): World {
     kit.desks.set(def.id, view);
     overflow.set(def.id, it);
   }
-  for (const def of plan.stations) kit.desks.set(def.id, agentConsole(kit, def));
-  const briefing = buildBriefing(kit, '🤝 Toplantı');
-  const boardMeshes = buildBoards(kit);
+  for (const def of plan.stations) kit.desks.set(def.id, agentConsole(kit, def, (g, parts) => meshy(g, 'kursu', { turn: Math.PI, replaces: parts })));
+  // Its own table: a round walnut one, 2.2 m across and 76 cm high.
+  const briefing = buildBriefing(kit, '🤝 Toplantı', (t) => meshy(t, 'konsey-masasi', { replaces: [...t.children] }));
+  // Its own frames: a thin black bezel with brass corners, in place of the black box and its orange lines.
+  const boardMeshes = buildBoards(kit, (g, bd, frame) => {
+    const k = (bd.width + 0.1) / 3.3;
+    meshy(g, 'pano-cercevesi', { scale: k, y: -(2.1 * k) / 2, replaces: frame });
+  });
   const herald = buildBarista(kit);
+  // The boards this street put up (features/teamboards redraws them), to drop with it.
+  const mineBoards = [...teamBoards].filter((b) => !hadBoards.has(b));
   const life = streetLife(kit);
+  const npcs = buildNpcs(kit, herald?.person);
+  const dust = streetDust(kit);
+  /** How much daylight there is now (set by mood), for the dust. */
+  let dayNow = 1;
   group.add(mergeByMaterial(kit.still));
 
   // Walking about: in through the gateway and out again, round what's in the way.
@@ -128,9 +175,12 @@ export function buildCadde(plan: MapPlan): World {
       kit.gong?.update(dt);
       herald?.person.update(dt, t, false, false);
       life.update(t, dt);
+      npcs.update(dt);
+      dust.update(t, dayNow);
     },
     mood(lights, daylight) {
       // Out of doors: the sky's own light, warmer toward dusk; at night the lamps, the offices' ceilings and the city's windows come on.
+      dayNow = daylight;
       const dark = 1 - daylight;
       lights.sun.color.copy(day).lerp(dusk, Math.min(1, dark * 1.6));
       // Bright enough under the offices' roofs (which shade them from the sun) to see faces and furniture,
@@ -173,6 +223,9 @@ export function buildCadde(plan: MapPlan): World {
       }
       for (const v of views) v.accent.dispose();
       life.dispose();
+      npcs.dispose();
+      dust.dispose();
+      forget(mineBoards);
       for (const m of [kit.street.glass, kit.mats.glow, kit.mats.accent, kit.mats.lamp, kit.mats.warn, kit.mats.glass]) m.dispose();
     },
   };

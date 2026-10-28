@@ -1,8 +1,8 @@
 {
   "id": "my-cadde",
-  "name": "My street",
+  "name": "Benim caddem",
   "icon": "🏙️",
-  "description": "A copy of the cadde, to make your own.",
+  "description": "Cadde haritasının bir kopyası: kendi haritanı yapmak için.",
   "style": "cadde",
   "hall": {
     "width": 64,
@@ -23,6 +23,7 @@
     "z": -6.6,
     "rotY": 0,
     "dais": null,
+    "hips": 0.62,
     "label": "☕ Senin koltuğun"
   },
   "herald": {
@@ -62,9 +63,9 @@
     }
   },
   "council": {
-    "x": 0,
-    "z": 14.5,
-    "rotY": 3.1416
+    "x": 19,
+    "z": -33.2,
+    "rotY": 0
   },
   "boards": {
     "issues": {
@@ -117,17 +118,22 @@
     "frame": "#2f343b"
   },
   "tables": [
-    {"name":"Lider ofisi","x":0,"z":-31.8,"length":6,"seats":2,"rotY":1.5708},
-    {"name":"Keşif ofisi","x":-22.5,"z":-19,"length":6,"seats":2,"rotY":0},
-    {"name":"Tasarım stüdyosu","x":22.5,"z":-19,"length":7.5,"seats":3,"rotY":0},
-    {"name":"Mühendislik ofisi","x":-22.5,"z":0,"length":6,"seats":2,"rotY":0},
-    {"name":"Hata laboratuvarı","x":22.5,"z":0,"length":6,"seats":2,"rotY":0},
-    {"name":"Test laboratuvarı","x":-22.5,"z":19,"length":6,"seats":2,"rotY":0},
-    {"name":"Güvenlik merkezi","x":22.5,"z":19,"length":6,"seats":2,"rotY":0},
-    {"name":"Kafe masası","x":0,"z":5.6,"length":6,"seats":2,"rotY":1.5708}
+    {"name":"Aslan","x":-18.5,"z":-34.1,"length":2.4,"seats":1,"rotY":1.5708,"sides":"inner","flip":true,"look":"desk"},
+    {"name":"Asistan","x":-11.5,"z":-33.6,"length":1.4,"seats":1,"rotY":1.5708,"sides":"inner","flip":true,"look":"desk"},
+    {"name":"Susamuru","x":-7,"z":-33.8,"length":1.8,"seats":1,"rotY":1.5708,"sides":"inner","flip":true,"look":"desk"},
+    {"name":"Kaplan","x":-3,"z":-33.8,"length":1.8,"seats":1,"rotY":1.5708,"sides":"inner","flip":true,"look":"desk"},
+    {"name":"Tavşan","x":1,"z":-33.8,"length":1.8,"seats":1,"rotY":1.5708,"sides":"inner","flip":true,"look":"desk"},
+    {"name":"Geyik","x":5,"z":-33.8,"length":1.8,"seats":1,"rotY":1.5708,"sides":"inner","flip":true,"look":"desk"},
+    {"name":"Keşif ofisi","x":-22.5,"z":-19,"length":4,"width":2,"seats":2,"rotY":0,"look":"desk"},
+    {"name":"Tasarım stüdyosu","x":22.5,"z":-19,"length":6,"width":2,"seats":3,"rotY":0,"look":"desk"},
+    {"name":"Mühendislik ofisi","x":-22.5,"z":0,"length":2,"width":2,"seats":1,"rotY":0,"look":"desk"},
+    {"name":"Hata laboratuvarı","x":22.5,"z":0,"length":2,"width":2,"seats":1,"rotY":0,"look":"desk"},
+    {"name":"Test laboratuvarı","x":-22.5,"z":19,"length":2,"width":2,"seats":1,"rotY":0,"look":"desk"},
+    {"name":"Güvenlik merkezi","x":22.5,"z":19,"length":4,"width":2,"seats":2,"rotY":0,"look":"desk"},
+    {"name":"Kafe masası","x":0,"z":5.6,"length":7.5,"seats":3,"rotY":1.5708}
   ],
   "props": [
-    {"kind":"office","x":0,"z":-31,"width":16,"length":10,"rotY":0},
+    {"kind":"office","x":0,"z":-31,"width":60,"length":10,"rotY":0,"style":"yonetim"},
     {"kind":"office","x":-21,"z":-19,"width":14,"length":18,"rotY":1.5708},
     {"kind":"office","x":21,"z":-19,"width":14,"length":18,"rotY":-1.5708},
     {"kind":"office","x":-21,"z":0,"width":14,"length":18,"rotY":1.5708},
@@ -144,21 +150,21 @@
     {"kind":"tree","x":7.6,"z":26},
     {"kind":"tree","x":-7.6,"z":32},
     {"kind":"tree","x":7.6,"z":32},
-    {"kind":"lamp","x":-8.7,"z":-28,"rotY":1.5708,"light":true},
-    {"kind":"lamp","x":8.7,"z":-28,"rotY":-1.5708,"light":true},
-    {"kind":"lamp","x":-8.7,"z":-9.5,"rotY":1.5708,"light":false},
-    {"kind":"lamp","x":8.7,"z":-9.5,"rotY":-1.5708,"light":false},
-    {"kind":"lamp","x":-8.7,"z":9.5,"rotY":1.5708,"light":true},
-    {"kind":"lamp","x":8.7,"z":9.5,"rotY":-1.5708,"light":true},
-    {"kind":"lamp","x":-8.7,"z":29,"rotY":1.5708,"light":false},
-    {"kind":"lamp","x":8.7,"z":29,"rotY":-1.5708,"light":false},
+    {"kind":"lamp","x":-8.7,"z":-9.5,"rotY":1.5708,"light":true},
+    {"kind":"lamp","x":8.7,"z":-9.5,"rotY":-1.5708,"light":true},
+    {"kind":"lamp","x":-8.7,"z":9.5,"rotY":1.5708,"light":false},
+    {"kind":"lamp","x":8.7,"z":9.5,"rotY":-1.5708,"light":false},
+    {"kind":"lamp","x":-8.7,"z":29,"rotY":1.5708,"light":true},
+    {"kind":"lamp","x":8.7,"z":29,"rotY":-1.5708,"light":true},
     {"kind":"parasol","x":-4.6,"z":-1.2},
     {"kind":"parasol","x":4.6,"z":-1.2},
     {"kind":"parasol","x":-4.6,"z":9.6},
     {"kind":"parasol","x":4.6,"z":9.6},
-    {"kind":"counter","x":-4.2,"z":-9.4,"width":4.4,"rotY":0},
+    {"kind":"counter","x":-4.2,"z":-9.4,"width":4,"rotY":0},
     {"kind":"dispenser","x":4.2,"z":-9.6,"rotY":0},
     {"kind":"gong","x":6.6,"z":-6.4,"rotY":-1.5708},
+    {"kind":"parasol","x":-3.6,"z":14.5},
+    {"kind":"parasol","x":3.6,"z":14.5},
     {"kind":"bench","x":-7.8,"z":18.5,"rotY":1.5708},
     {"kind":"bench","x":7.8,"z":18.5,"rotY":1.5708},
     {"kind":"planter","x":-4.6,"z":30,"width":3.2},

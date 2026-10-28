@@ -45,9 +45,18 @@ export function speechSupport(): 'ok' | 'insecure' | 'none' {
   return globalThis.isSecureContext === false ? 'insecure' : 'ok';
 }
 
-/** The language to listen for: the browser's. */
+/**
+ * The language to listen for: Turkish, as the office's own is, unless the browser's is another Turkish
+ * or one the person picked by hand (localStorage `ao-speech-lang`, e.g. 'en-US').
+ */
 export function speechLang(): string {
-  return (typeof navigator !== 'undefined' && navigator.language) || 'en-US';
+  try {
+    const picked = typeof localStorage !== 'undefined' ? localStorage.getItem('ao-speech-lang') : null;
+    if (picked) return picked;
+  } catch {
+    // storage blocked: the default
+  }
+  return 'tr-TR';
 }
 
 /** Whether the on-device model for a language is installed, once the browser has said (it's asked once). */
@@ -112,16 +121,16 @@ export function speechProblem(code: string, lang: string): string | undefined {
     case 'aborted':
       return undefined;
     case 'not-allowed':
-      return 'Dictation needs the microphone: allow it for this page in the address bar, then try again.';
+      return 'Dikte için mikrofon gerekli: adres çubuğundan bu sayfaya izin ver, sonra tekrar dene.';
     case 'audio-capture':
-      return 'Dictation found no microphone to listen to.';
+      return 'Dikte için dinlenecek bir mikrofon bulunamadı.';
     case 'network':
     case 'service-not-allowed':
-      return "This browser's speech service didn't answer, so there's nothing to take dictation. Chrome, Edge and Safari have one; Brave and some others come without it.";
+      return 'Bu tarayıcının konuşma servisi yanıt vermedi, bu yüzden dikte alınamıyor. Chrome, Edge ve Safari\'de var; Brave ve bazı diğerlerinde yok.';
     case 'language-not-supported':
-      return `This browser can't take dictation in ${lang}.`;
+      return `Bu tarayıcı ${lang} dilinde dikte alamıyor.`;
     default:
-      return `Dictation stopped: ${code}.`;
+      return `Dikte durdu: ${code}.`;
   }
 }
 
@@ -155,7 +164,7 @@ export function listen(on: ListenHandlers, opts: { Ctor?: RecognizerCtor; lang?:
   const lang = opts.lang ?? speechLang();
   const now = opts.now ?? Date.now;
   if (!Ctor) {
-    on.end('This browser has no speech recognition built in. Chrome, Edge and Safari do.');
+    on.end('Bu tarayıcıda yerleşik konuşma tanıma yok. Chrome, Edge ve Safari\'de var.');
     return { stop() {}, abort() {} };
   }
   const rec = new Ctor();
@@ -187,7 +196,7 @@ export function listen(on: ListenHandlers, opts: { Ctor?: RecognizerCtor; lang?:
       rec.start();
       return true;
     } catch (err) {
-      problem ??= `Dictation couldn't start: ${(err as Error).message}`;
+      problem ??= `Dikte başlatılamadı: ${(err as Error).message}`;
       return false;
     }
   };

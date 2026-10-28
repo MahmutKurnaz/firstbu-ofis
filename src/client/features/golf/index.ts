@@ -110,15 +110,15 @@ export function installGolf(ctx: Ctx, deps: GolfDeps) {
       ctx.sound.golf('cheer');
     }
     if (!mine) {
-      if (f.holed) toast(`🏆 ${who} got a hole in one!`);
+      if (f.holed) toast(`🏆 ${who} tek vuruşta deliğe soktu!`);
       return;
     }
     const rec = golfRecord();
     if (f.holed) {
       rec.holes++;
-      toast(rec.holes === 1 ? '🏆 HOLE IN ONE!' : `🏆 HOLE IN ONE! That's ${rec.holes}`);
+      toast(rec.holes === 1 ? '🏆 TEK VURUŞTA DELİK!' : `🏆 TEK VURUŞTA DELİK! Bu ${rec.holes}.`);
     } else if (Number.isFinite(f.fromPin) && (rec.best === null || f.fromPin < rec.best)) {
-      if (rec.best !== null) toast(`⛳ ${pinText(f.fromPin)} from the pin — your best yet!`);
+      if (rec.best !== null) toast(`⛳ Bayrağa ${pinText(f.fromPin)} — şimdiye kadarki en iyin!`);
       rec.best = f.fromPin;
     } else return;
     saveGolfRecord(rec);
@@ -134,9 +134,9 @@ export function installGolf(ctx: Ctx, deps: GolfDeps) {
   function teeOff() {
     if (golf.active || ctx.trip() || ctx.activities.running('climber')) return;
     const other = teeTaken();
-    if (other) return toast(`🏌️ ${other} is on the tee — wait your turn`, 'warn');
+    if (other) return toast(`🏌️ ${other} vuruş yerinde — sıranı bekle`, 'warn');
     const carrying = ctx.carrying();
-    if (carrying) return toast(`✋ Your hands are full: put #${carrying.issue} down first (Q)`, 'warn');
+    if (carrying) return toast(`✋ Elin dolu: önce #${carrying.issue} kartını bırak (Q)`, 'warn');
     if (ctx.player.seat) deps.standUp();
     ctx.activities.stopAll('start');
     deps.stopWalking();
@@ -148,10 +148,10 @@ export function installGolf(ctx: Ctx, deps: GolfDeps) {
     reach: 3.5,
     hint: () => {
       const other = teeTaken();
-      if (other) return { k: `taken|${other}`, parts: [hintTitle('⛳ Golf tee'), aside(`🏌️ ${clip(other, 24)} is teeing off`)] };
+      if (other) return { k: `taken|${other}`, parts: [hintTitle('⛳ Golf başlangıcı'), aside(`🏌️ ${clip(other, 24)} vuruş yapıyor`)] };
       const { best, holes } = golfRecord();
-      const about = [holes ? `🏆 ${holes} hole${holes === 1 ? '' : 's'} in one` : '', best !== null ? `your best ${pinText(best)} from the pin` : `the pin's ${Math.round(PIN_DISTANCE)} m out`].filter(Boolean).join(' · ');
-      return { k: about, parts: [hintTitle('⛳ Golf tee'), aside(about), key('E', 'Tee off')] };
+      const about = [holes ? `🏆 ${holes} tek vuruşta delik` : '', best !== null ? `en iyin: bayrağa ${pinText(best)}` : `bayrak ${Math.round(PIN_DISTANCE)} m ileride`].filter(Boolean).join(' · ');
+      return { k: about, parts: [hintTitle('⛳ Golf başlangıcı'), aside(about), key('E', 'Vur')] };
     },
     use: onE(() => teeOff()),
   });
@@ -176,10 +176,10 @@ export function installGolf(ctx: Ctx, deps: GolfDeps) {
     const stage = golf.doing;
     ctx.hint.draw(el, `golf|${stage}`, () =>
       stage === 'watch'
-        ? [title('⛳ Fore!'), key('Space', 'Back to the tee'), key('E', 'Done')]
+        ? [title('⛳ Dikkat!'), key('Space', 'Başlangıca dön'), key('E', 'Bitti')]
         : stage === 'charge' || stage === 'swing'
-          ? [title('⛳ Let go to hit it'), aside('the fuller the meter, the further it goes')]
-          : [key('Space', 'Hold to swing'), key('A D', 'Aim'), key('W S', 'Loft'), key('E', 'Done')],
+          ? [title('⛳ Vurmak için bırak'), aside('gösterge ne kadar doluysa top o kadar uzağa gider')]
+          : [key('Space', 'Basılı tut, savur'), key('A D', 'Nişan'), key('W S', 'Yükseliş'), key('E', 'Bitti')],
     );
   }
 

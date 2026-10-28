@@ -141,7 +141,7 @@ export function ceilingPanels(color: string): (g: CanvasRenderingContext2D) => v
   };
 }
 
-const READOUTS = ['ORBIT 412 KM', 'O₂ 98.6%', 'HULL OK', 'PRESSURE 101 kPa', 'SOLAR 84 kW', 'CREW ABOARD', 'AIRLOCK SEALED', 'COMMS LINKED', 'THRUST STANDBY', 'GRAVITY 1.0 G'];
+const READOUTS = ['YÖRÜNGE 412 KM', 'O₂ %98,6', 'GÖVDE SAĞLAM', 'BASINÇ 101 kPa', 'GÜNEŞ 84 kW', 'MÜRETTEBAT İÇERDE', 'HAVA KİLİDİ KAPALI', 'İLETİŞİM BAĞLI', 'İTKİ HAZIRDA', 'YERÇEKİMİ 1,0 G'];
 
 /**
  * A display's telemetry, `w` by `h` pixels: a graph, a row of bars, a dial and a few read-outs, in

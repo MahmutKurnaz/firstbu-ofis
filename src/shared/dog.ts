@@ -31,13 +31,13 @@ export interface DogState {
 export const DOG_NAME_MAX = 24;
 
 /** A new floor's dog is called one of these until someone names it in ⚙️ Settings (none is a worker's name). */
-export const DOG_NAMES = ['Biscuit', 'Pancake', 'Peanut', 'Pepper', 'Cookie', 'Bagel', 'Ziggy', 'Pretzel', 'Maple', 'Scout'];
+export const DOG_NAMES = ['Bisküvi', 'Poğaça', 'Fıstık', 'Biber', 'Kurabiye', 'Simit', 'Zıpzıp', 'Çubuk', 'Akçaağaç', 'Gözcü'];
 
 /** A floor's dog is one of these, each its own model (dog-<breed>.glb) with the same rig and clips. */
 export const DOG_BREEDS = ['pup', 'corgi', 'dachshund', 'pug', 'shiba', 'pomeranian'] as const;
 export type DogBreed = (typeof DOG_BREEDS)[number];
 /** What ⚙️ Settings calls each breed. */
-export const DOG_BREED_NAMES: Record<DogBreed, string> = { pup: '🐶 Pup', corgi: '🦊 Corgi', dachshund: '🌭 Dachshund', pug: '🐾 Pug', shiba: '🍂 Shiba', pomeranian: '🧸 Pomeranian' };
+export const DOG_BREED_NAMES: Record<DogBreed, string> = { pup: '🐶 Yavru', corgi: '🦊 Korgi', dachshund: '🌭 Sosis köpek', pug: '🐾 Pug', shiba: '🍂 Şiba', pomeranian: '🧸 Pomeranya' };
 
 /**
  * The breeds a floor's dog is dealt from its id (see dogDefaults): the ones there were when floors first
@@ -62,7 +62,7 @@ export const DOG_COATS: [string, string, string][] = [
   ['#ffffff', '#ffffff', '#f3e9e2'], // white
 ];
 /** What ⚙️ Settings calls each coat, in DOG_COATS's order. */
-export const DOG_COAT_NAMES = ['Golden', 'Black and white', 'Chocolate', 'Cream', 'Grey', 'Red', 'White'];
+export const DOG_COAT_NAMES = ['Altın', 'Siyah beyaz', 'Çikolata', 'Krem', 'Gri', 'Kızıl', 'Beyaz'];
 
 /**
  * How much of its own colour each coat gives off, so a pale one stays pale in the office's warm light

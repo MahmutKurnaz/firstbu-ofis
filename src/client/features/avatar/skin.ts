@@ -1,6 +1,8 @@
 import * as THREE from 'three';
+import { straighten } from '../../world/character/animal-pose';
+import { polishCharacter, toPhysical } from '../../world/character/polish';
 import type { Model } from '../../world/models';
-import { AVATAR_HEIGHT, clipFor, clipOf, type Clip, type MoveState } from './logic';
+import { AVATAR_HEIGHT, FIDGET_EVERY, clipOf, gaitFor, type Clip } from './logic';
 
 /** How long one clip takes to blend into the next (s). */
 const BLEND = 0.2;
@@ -31,6 +33,14 @@ export class PlayerAvatar {
   private mixer: THREE.AnimationMixer;
   private actions = new Map<Clip, THREE.AnimationAction>();
   private playing: Clip | null = null;
+  private hips: THREE.Object3D | undefined;
+  private spine: THREE.Object3D | undefined;
+  private neck: THREE.Object3D | undefined;
+  private readonly ahead = new THREE.Vector3();
+  /** Seconds stood still, when the next wave is due, and until when the one being waved lasts. */
+  private still = 0;
+  private nextFidget = FIDGET_EVERY[0] + Math.random() * (FIDGET_EVERY[1] - FIDGET_EVERY[0]);
+  private waving = 0;
 
   constructor(model: Model) {
     const body = model.scene;
@@ -40,21 +50,25 @@ export class PlayerAvatar {
     const k = AVATAR_HEIGHT / (box.max.y - box.min.y || 1);
     body.scale.setScalar(k);
     body.position.y = -box.min.y * k;
-    body.traverse((o) => {
-      const m = o as THREE.Mesh;
-      if (!m.isMesh) return;
-      m.castShadow = m.receiveShadow = true;
-      // Skinned and big: never culled by a stale bounding box, and no toon outline round a photo-like face.
-      m.frustumCulled = false;
-      for (const mat of Array.isArray(m.material) ? m.material : [m.material]) mat.userData.outlineParameters = { visible: false };
-    });
+    toPhysical(body);
+    polishCharacter(body);
     this.root.add(body);
+    body.traverse((o) => {
+      if (!this.hips && /hips/i.test(o.name) && (o as THREE.Bone).isBone) this.hips = o;
+      if (o.name === 'Spine02' && (o as THREE.Bone).isBone) this.spine = o;
+      if (o.name === 'neck' && (o as THREE.Bone).isBone) this.neck = o;
+    });
     this.mixer = new THREE.AnimationMixer(body);
     for (const clip of model.clips) {
       const key = clipOf(clip.name);
       if (!key || this.actions.has(key)) continue;
       faceForward(clip);
       this.actions.set(key, this.mixer.clipAction(clip));
+    }
+    const wave = this.actions.get('wave');
+    if (wave) {
+      wave.setLoop(THREE.LoopOnce, 1);
+      wave.clampWhenFinished = true;
     }
     const jump = this.actions.get('jump');
     if (jump) {
@@ -63,8 +77,23 @@ export class PlayerAvatar {
     }
   }
 
-  update(dt: number, s: MoveState) {
-    const want = clipFor(s);
+  /** `speed` is how fast you're moving over the ground (m/s), `grounded` whether your feet are on it. */
+  /** `seated`: sitting on a seat, which `seatOn` then puts its hips on. */
+  update(dt: number, speed: number, grounded: boolean, seated = false) {
+    const gait = gaitFor(speed, grounded);
+    let { clip: want, rate } = seated ? { clip: 'sit' as Clip, rate: 1 } : gait;
+    // Stood still a while: a wave, now and then.
+    this.still = want === 'idle' ? this.still + dt : 0;
+    if (this.waving > 0) {
+      this.waving -= dt;
+      if (want === 'idle') want = 'wave';
+      else this.waving = 0;
+    } else if (want === 'idle' && this.actions.has('wave') && this.still >= this.nextFidget) {
+      this.waving = this.actions.get('wave')!.getClip().duration;
+      this.nextFidget = this.still + FIDGET_EVERY[0] + Math.random() * (FIDGET_EVERY[1] - FIDGET_EVERY[0]);
+      this.actions.get('wave')!.reset();
+      want = 'wave';
+    }
     const next = this.actions.has(want) ? want : this.actions.has('idle') ? 'idle' : null;
     if (next && next !== this.playing) {
       const to = this.actions.get(next)!;
@@ -73,7 +102,21 @@ export class PlayerAvatar {
       if (from) to.crossFadeFrom(from, BLEND, false);
       this.playing = next;
     }
+    if (this.playing) this.actions.get(this.playing)!.timeScale = rate;
     this.mixer.update(dt);
+    // The library's clips stand a little hunched, shoulders forward: back up straight (a stride may lean more).
+    if (this.spine && this.neck) {
+      this.root.updateMatrixWorld(true);
+      straighten(this.spine, this.neck, this.ahead.set(0, 0, 1).transformDirection(this.root.matrixWorld), this.playing === 'run' ? 0.22 : this.playing === 'walk' ? 0.1 : 0.04);
+    }
+  }
+
+  /** Moves it so its hips are at `at` (world): on the seat's cushion, whatever the clip's own chair was. Call after update, at its seat. */
+  seatOn(at: THREE.Vector3) {
+    if (!this.hips) return;
+    this.root.updateMatrixWorld(true);
+    const now = this.hips.getWorldPosition(new THREE.Vector3());
+    this.root.position.add(at).sub(now);
   }
 
   dispose() {

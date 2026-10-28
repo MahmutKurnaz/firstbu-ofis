@@ -30,16 +30,16 @@ export function openRepoPulls(workerId: string, actions: RepoPullsActions) {
   const title = h('h2');
   const note = h('p', { style: 'margin:0 0 12px;font-weight:700' });
   const list = h('ul.repo-pulls');
-  const close = h('button.btn', { type: 'button' }, 'Close');
-  const missing = h('button.btn.primary', { type: 'button' }, '🔀 Open the missing PRs');
-  const el = h('div.modal', { role: 'dialog', 'aria-label': 'Pull requests' }, h('header', {}, title), h('div.body', {}, note, list), h('footer', {}, h('span.grow'), close, missing));
+  const close = h('button.btn', { type: 'button' }, 'Kapat');
+  const missing = h('button.btn.primary', { type: 'button' }, '🔀 Eksik PR\'ları aç');
+  const el = h('div.modal', { role: 'dialog', 'aria-label': 'Pull request\'ler' }, h('header', {}, title), h('div.body', {}, note, list), h('footer', {}, h('span.grow'), close, missing));
 
   const render = () => {
     const w = store.workers.get(workerId);
     if (!w?.worktree) return modal.close();
     const repos = workerRepos(w);
-    title.textContent = `🔀 ${w.name}'s pull requests`;
-    note.textContent = `One change across ${repos.length} repositories, each on 🌿 ${w.worktree.branch}. Each repository it commits to gets a pull request of its own, and each one lists the others.`;
+    title.textContent = `🔀 ${w.name} çalışanının pull request'leri`;
+    note.textContent = `${repos.length} depoya yayılan tek bir değişiklik, hepsi 🌿 ${w.worktree.branch} üzerinde. Commit attığı her depo kendi pull request'ini alır ve her biri diğerlerini listeler.`;
     list.replaceChildren(
       ...repos.map((r) => {
         const floor = r.floor ? store.floors.find((f) => f.id === r.floor)?.name : store.currentFloor()?.name;
@@ -47,23 +47,23 @@ export function openRepoPulls(workerId: string, actions: RepoPullsActions) {
         return h(
           'li',
           {},
-          h('span.name', {}, `📁 ${r.name}`, h('small', {}, floor ? `${floor} floor${r.floor ? '' : ' · this one'}` : 'no longer in the building')),
+          h('span.name', {}, `📁 ${r.name}`, h('small', {}, floor ? `${floor} katı${r.floor ? '' : ' · bu kat'}` : 'artık binada değil')),
           pr
-            ? h('button.btn', { type: 'button', title: r.floor ? 'Open it on GitHub' : 'Open it', onclick: () => (r.floor ? window.open(pr.url, '_blank', 'noopener') : (modal.close(), actions.openPull(pr.number, pr.url))) }, `🔀 #${pr.number}${r.floor ? ' ↗' : ''}`)
-            : h('span.none', {}, 'No PR yet'),
-          h('button.btn', { type: 'button', title: `What ${w.name} changed in ${r.name}`, onclick: () => (modal.close(), actions.changes(r.floor)) }, '🌿 Changes'),
+            ? h('button.btn', { type: 'button', title: r.floor ? 'GitHub\'da aç' : 'Aç', onclick: () => (r.floor ? window.open(pr.url, '_blank', 'noopener') : (modal.close(), actions.openPull(pr.number, pr.url))) }, `🔀 #${pr.number}${r.floor ? ' ↗' : ''}`)
+            : h('span.none', {}, 'Henüz PR yok'),
+          h('button.btn', { type: 'button', title: `${w.name} çalışanının ${r.name} içinde değiştirdikleri`, onclick: () => (modal.close(), actions.changes(r.floor)) }, '🌿 Değişiklikler'),
         );
       }),
     );
     const busy = isBusy(w.status);
     missing.classList.toggle('hidden', repos.every((r) => r.pr));
     missing.disabled = !!w.prOpening || busy;
-    missing.textContent = w.prOpening ? '⏳ Opening…' : '🔀 Open the missing PRs';
-    missing.title = busy ? `${w.name} is still at it — wait until it's done` : 'Pushes the branch in each repository with commits and no pull request yet, and opens one there';
+    missing.textContent = w.prOpening ? '⏳ Açılıyor…' : '🔀 Eksik PR\'ları aç';
+    missing.title = busy ? `${w.name} hâlâ çalışıyor — bitmesini bekle` : 'Commit\'i olup henüz pull request\'i olmayan her depoda dalı gönderir ve orada bir PR açar';
   };
 
   const unsub = store.on('workers', () => render());
-  const modal = openModal(el, { doing: '🔀 looking over pull requests', onClose: () => unsub() });
+  const modal = openModal(el, { doing: '🔀 pull request\'lere bakıyor', onClose: () => unsub() });
   close.addEventListener('click', () => modal.close());
   missing.addEventListener('click', () => actions.openMissing());
   render();

@@ -24,30 +24,30 @@ async function post(body: Record<string, unknown>): Promise<{ ok: boolean; body:
 }
 
 async function peek() {
-  if (!token) return fail('This link is missing its invite code. Ask whoever sent it for the whole link.');
+  if (!token) return fail('Bu bağlantıda davet kodu eksik. Gönderenden bağlantının tamamını iste.');
   try {
     const r = await post({ peek: true });
-    if (!r.ok) return fail(r.body.error ?? 'This invite link does not work.');
+    if (!r.ok) return fail(r.body.error ?? 'Bu davet bağlantısı çalışmıyor.');
     const { name: invited, role, by, project } = r.body as { name?: string; role: string; by: string; project: string };
-    $('title').textContent = `Join the ${project} office`;
+    $('title').textContent = `${project} ofisine katıl`;
     const sub = $('sub');
-    sub.replaceChildren(`${by} invited you${role === 'admin' ? ' as an ' : '. '}`);
+    sub.replaceChildren(`${by} seni ${role === 'admin' ? '' : 'davet etti.'}`);
     if (role === 'admin') {
       const pill = document.createElement('span');
       pill.className = 'role';
-      pill.textContent = 'admin';
-      sub.append(pill, '.');
+      pill.textContent = 'yönetici';
+      sub.append(pill, ' olarak davet etti.');
     }
-    sub.append(' Make your own account to come in.');
+    sub.append(' İçeri girmek için kendi hesabını oluştur.');
     if (invited) {
       name.value = invited;
       name.readOnly = true;
-      name.title = 'The name you were invited under';
+      name.title = 'Davet edildiğin ad';
     }
     form.hidden = false;
     (invited ? password : name).focus();
   } catch {
-    fail('Server unreachable.');
+    fail('Sunucuya ulaşılamıyor.');
   }
 }
 
@@ -55,7 +55,7 @@ form.addEventListener('submit', async (e) => {
   e.preventDefault();
   error.textContent = '';
   if (password.value !== again.value) {
-    error.textContent = "Those passwords don't match";
+    error.textContent = 'Şifreler uyuşmuyor';
     again.select();
     return;
   }
@@ -63,7 +63,7 @@ form.addEventListener('submit', async (e) => {
   try {
     const r = await post({ name: name.value.trim(), password: password.value });
     if (!r.ok) {
-      error.textContent = r.body.error ?? 'Could not make your account';
+      error.textContent = r.body.error ?? 'Hesabın oluşturulamadı';
       return;
     }
     try {
@@ -73,7 +73,7 @@ form.addEventListener('submit', async (e) => {
     }
     location.replace('/');
   } catch {
-    error.textContent = 'Server unreachable';
+    error.textContent = 'Sunucuya ulaşılamıyor';
   } finally {
     submit.disabled = false;
   }

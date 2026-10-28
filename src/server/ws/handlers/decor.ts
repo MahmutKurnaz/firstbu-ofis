@@ -17,7 +17,7 @@ export const decorHandlers = {
     const d = floor.decor.add(msg.decor, who);
     if (typeof d === 'string') return ctx.warn(c, d);
     decorChanged(ctx, floor);
-    ctx.toastFloor(floor, `🖼️ ${who} hung ${d.title ? `“${d.title}”` : 'a picture'}`);
+    ctx.toastFloor(floor, `🖼️ ${who} bir resim astı: ${d.title ? `“${d.title}”` : 'adsız'}`);
   },
   'decor.update'(ctx, c, msg) {
     const floor = here(ctx, c);
@@ -33,6 +33,6 @@ export const decorHandlers = {
     const d = floor.decor.remove(str(msg.id, 32));
     if (!d) return;
     decorChanged(ctx, floor);
-    ctx.toastFloor(floor, `${who} took down ${d.title ? `“${d.title}”` : 'a picture'}`);
+    ctx.toastFloor(floor, `${who} bir resmi indirdi: ${d.title ? `“${d.title}”` : 'adsız'}`);
   },
 } satisfies HandlerMap<DecorClientMsg>;

@@ -78,11 +78,11 @@ function acpExited(ctx: WorkerContext, w: Worker, session: DshSession, term: Hea
     if (w.viewers.size) ctx.events.data(info.id, note, [...w.viewers.keys()]);
   }
   // It never got as far as a session: most often `dsh` is missing, or the profile will not boot.
-  if (error && !info.sessionId) ctx.events.toast(`Could not start ${ctx.command(info)}: ${truncate(error, 200)}`, 'error');
+  if (error && !info.sessionId) ctx.events.toast(`${ctx.command(info)} başlatılamadı: ${truncate(error, 200)}`, 'error');
   info.exitCode = code ?? -1;
   info.status = 'exited';
-  const hint = info.sessionId ? ' — press R to resume' : '';
-  const msg = `\r\n\x1b[2m[${info.name} exited with code ${code ?? -1}${hint}]\x1b[0m\r\n`;
+  const hint = info.sessionId ? ' — devam etmek için R’ye bas' : '';
+  const msg = `\r\n\x1b[2m[${info.name} ${code ?? -1} koduyla çıktı${hint}]\x1b[0m\r\n`;
   term.write(msg);
   if (w.viewers.size) ctx.events.data(info.id, msg, [...w.viewers.keys()]);
   w.screenDirty = true;

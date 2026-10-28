@@ -90,7 +90,7 @@ export function buildCoast(kit: ScenicKit): { boats: Boat[]; beam: THREE.Group }
       // Its counter toward the road.
       shack.rotation.y = Math.atan2(p.tz, -p.tx);
       b.add(shack);
-      const sign = textPlane('🍦 Snacks', { color: '#3d2b1f', bg: '#fefae0', size: 56 });
+      const sign = textPlane('🍦 Atıştırmalık', { color: '#3d2b1f', bg: '#fefae0', size: 56 });
       sign.scale.setScalar(1.1);
       sign.position.copy(new THREE.Vector3(0, 3.35, -1.95).applyAxisAngle(new THREE.Vector3(0, 1, 0), shack.rotation.y).add(shack.position));
       sign.rotation.y = shack.rotation.y + Math.PI;

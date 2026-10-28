@@ -22,7 +22,7 @@ export const changesHandlers = {
     const repo = repoOf(msg.repo);
     const floor = ctx.workerFloor(workerId);
     if (!floor) {
-      ctx.sendTo(c, { t: 'changes.diff', workerId, repo, path: file, diff: '', truncated: false, error: 'No such worker' });
+      ctx.sendTo(c, { t: 'changes.diff', workerId, repo, path: file, diff: '', truncated: false, error: 'Böyle bir çalışan yok' });
       return;
     }
     void floor.changes.diff(workerId, file, repo).then((r) => {

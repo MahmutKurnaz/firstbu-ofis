@@ -38,20 +38,20 @@ function highlight(text: string, needle: string): (string | HTMLElement)[] {
 export function openSearch(openTerminal: (workerId: string, find: TerminalFind) => void) {
   const input = h('input', {
     type: 'text',
-    placeholder: 'Search the chat and every terminal…',
+    placeholder: 'Sohbette ve her terminalde ara…',
     maxlength: SEARCH_MAX,
     autocomplete: 'off',
     spellcheck: 'false',
-    'aria-label': 'Search the chat and every terminal',
+    'aria-label': 'Sohbette ve her terminalde ara',
   });
   input.value = lastQuery;
   const status = h('p.note.search-status');
   const results = h('div.search-results');
-  const close = h('button.btn.close', { 'aria-label': 'Close' }, '✕');
+  const close = h('button.btn.close', { 'aria-label': 'Kapat' }, '✕');
   const el = h(
     'div.modal.search',
-    { role: 'dialog', 'aria-label': 'Search' },
-    h('header', {}, h('h2', {}, '🔎 Search'), close),
+    { role: 'dialog', 'aria-label': 'Ara' },
+    h('header', {}, h('h2', {}, '🔎 Ara'), close),
     h('div.body', {}, input, status, results),
   );
 
@@ -70,7 +70,7 @@ export function openSearch(openTerminal: (workerId: string, find: TerminalFind) 
       error = '';
       return render();
     }
-    status.textContent = 'Searching…';
+    status.textContent = 'Aranıyor…';
     try {
       const r = await search(q);
       if (mine !== seq) return;
@@ -97,7 +97,7 @@ export function openSearch(openTerminal: (workerId: string, find: TerminalFind) 
     );
 
   const termRow = (hit: TerminalHit, needle: string) => {
-    const li = h('li.search-hit.term', { tabindex: 0, role: 'button', title: 'Open the terminal at this line' }, h('code', {}, ...highlight(hit.text, needle)));
+    const li = h('li.search-hit.term', { tabindex: 0, role: 'button', title: 'Terminali bu satırda aç' }, h('code', {}, ...highlight(hit.text, needle)));
     li.addEventListener('click', () => jump(hit, needle));
     li.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
@@ -110,12 +110,12 @@ export function openSearch(openTerminal: (workerId: string, find: TerminalFind) 
 
   const render = () => {
     if (error) {
-      status.textContent = `Couldn't search: ${error}`;
+      status.textContent = `Aranamadı: ${error}`;
       results.replaceChildren();
       return;
     }
     if (!found) {
-      status.textContent = `Finds words in the office chat and in every worker's terminal, including what they showed before the office restarted.`;
+      status.textContent = `Ofis sohbetinde ve her çalışanın terminalinde kelime bulur; ofis yeniden başlamadan önce gösterdikleri dahil.`;
       results.replaceChildren();
       return;
     }
@@ -130,10 +130,10 @@ export function openSearch(openTerminal: (workerId: string, find: TerminalFind) 
     }
     const count = found.chat.length + [...byWorker.values()].reduce((n, l) => n + l.length, 0);
     status.textContent = !count
-      ? `Nothing in the chat or any terminal matches “${found.q.trim()}”.`
-      : `${count} ${count === 1 ? 'line' : 'lines'}, newest first${found.more ? ' (only the newest are shown; add words to narrow it down)' : ''}.`;
+      ? `Sohbette ya da hiçbir terminalde “${found.q.trim()}” ile eşleşen yok.`
+      : `${count} satır, en yeni önce${found.more ? ' (yalnızca en yeniler gösteriliyor; daraltmak için kelime ekle)' : ''}.`;
     const groups: HTMLElement[] = [];
-    if (found.chat.length) groups.push(h('section.search-group', {}, h('h4', {}, '💬 Chat'), h('ul', {}, ...found.chat.map((c) => chatRow(c, needle)))));
+    if (found.chat.length) groups.push(h('section.search-group', {}, h('h4', {}, '💬 Sohbet'), h('ul', {}, ...found.chat.map((c) => chatRow(c, needle)))));
     for (const [workerId, hits] of byWorker) {
       const w = store.workers.get(workerId)!;
       groups.push(
@@ -174,7 +174,7 @@ export function openSearch(openTerminal: (workerId: string, find: TerminalFind) 
     (next ?? (e.key === 'ArrowUp' ? input : at)).focus();
   });
 
-  const modal = openModal(el, { doing: '🔎 searching the office', onClose: () => clearTimeout(timer) });
+  const modal = openModal(el, { doing: '🔎 ofiste arıyor', onClose: () => clearTimeout(timer) });
   close.addEventListener('click', () => modal.close());
   render();
   void run();

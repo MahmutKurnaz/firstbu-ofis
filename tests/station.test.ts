@@ -130,15 +130,15 @@ test('a station of your own changes only what it gives, and says why when it can
   assert.deepEqual(mine.airlock!.out, [-1, 0]);
   assert.equal(mine.openings!.filter((o) => o.kind === 'viewport').length, 1, 'a list replaces the whole list');
   assert.deepEqual(mine.desks, planOf('station').desks);
-  assert.match(why['pillar.json'], /a "pillar", which isn’t a kind of prop a station-style map has \(rib, viewport/);
-  assert.match(why['clash.json'], /\(a viewport\) runs into the airlock in the east wall/);
-  assert.match(why['afloat.json'], /\(a viewport\) should be on a wall: it's 15\.0 m from the nearest/);
-  assert.match(why['wide.json'], /runs off the end of the north wall/);
-  assert.match(why['tall.json'], /reaches 7\.5 m up, and the hall's walls are 7\.6 m/);
-  assert.match(why['sealed.json'], /sendHome walks workers to the airlock, and the map has no airlock/);
-  assert.match(why['dug.json'], /a station-style map has no dungeon/);
-  assert.match(why['moat.json'], /only a station-style map has an airlock/);
-  assert.match(why['door.json'], /the airlock runs into the way in in the south wall/);
+  assert.match(why['pillar.json'], /bir "pillar", ama station stilindeki bir haritada böyle bir eşya yok \(rib, viewport/);
+  assert.match(why['clash.json'], /\(bir lumbuz\), doğu duvarındaki hava kilidine çarpıyor/);
+  assert.match(why['afloat.json'], /\(bir lumbuz\) bir duvarın üzerinde olmalı: en yakın duvara 15\.0 m uzakta/);
+  assert.match(why['wide.json'], /kuzey duvarının ucundan taşıyor/);
+  assert.match(why['tall.json'], /7\.5 m yüksekliğe çıkıyor, salonun duvarları 7\.6 m/);
+  assert.match(why['sealed.json'], /sendHome çalışanları hava kilidine yürütür ama haritada hava kilidi yok/);
+  assert.match(why['dug.json'], /istasyon stilindeki bir haritada zindan olmaz/);
+  assert.match(why['moat.json'], /hava kilidi yalnızca istasyon stilindeki haritalarda olur/);
+  assert.match(why['door.json'], /hava kilidi, güney duvarındaki girişe çarpıyor/);
   // With no script, a worker just walks out of the hatch, and nobody's kept.
   assert.equal(why['quiet.json'], '');
   assert.equal(planOf('quiet', checked).sendHome, undefined);

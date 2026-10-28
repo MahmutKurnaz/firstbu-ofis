@@ -28,7 +28,8 @@ const west = Math.PI / 2;
 
 /** The offices, in zone order: the lead's at the head of the street, then west and east down it, row by row. */
 const OFFICES: PropConfig[] = [
-  { kind: 'office', x: 0, z: -31, width: 16, length: 10, rotY: 0 },
+  // The head of the street is the executive suite (see SUITE in ./cadde-props.ts): 60 m across.
+  { kind: 'office', x: 0, z: -31, width: 60, length: 10, rotY: 0, style: 'yonetim' },
   ...ROWS.flatMap((z) => [
     { kind: 'office', x: -SIDE_X, z, width: SIDE_FRONT, length: SIDE_DEPTH, rotY: west },
     { kind: 'office', x: SIDE_X, z, width: SIDE_FRONT, length: SIDE_DEPTH, rotY: east },
@@ -37,7 +38,14 @@ const OFFICES: PropConfig[] = [
 
 /** A table in each office, across it toward the back; the design studio's (the fourth) seats three a side. */
 const TABLES: TableConfig[] = [
-  { name: 'Lider ofisi', x: 0, z: -31.8, length: 6, seats: 2, rotY: west },
+  // The suite's desks come first, so they're desk-1…6: the lead behind his desk in his room (the far side, looking out at the
+  // door), his assistant in hers beside it, and the four managers each in a room of their own (see SUITE in ./cadde-props.ts).
+  { name: 'Aslan', x: -18.5, z: -34.1, length: 2.4, seats: 1, rotY: west, sides: 'inner', flip: true, look: 'desk' },
+  { name: 'Asistan', x: -11.5, z: -33.6, length: 1.4, seats: 1, rotY: west, sides: 'inner', flip: true, look: 'desk' },
+  { name: 'Susamuru', x: -7, z: -33.8, length: 1.8, seats: 1, rotY: west, sides: 'inner', flip: true, look: 'desk' },
+  { name: 'Kaplan', x: -3, z: -33.8, length: 1.8, seats: 1, rotY: west, sides: 'inner', flip: true, look: 'desk' },
+  { name: 'Tavşan', x: 1, z: -33.8, length: 1.8, seats: 1, rotY: west, sides: 'inner', flip: true, look: 'desk' },
+  { name: 'Geyik', x: 5, z: -33.8, length: 1.8, seats: 1, rotY: west, sides: 'inner', flip: true, look: 'desk' },
   ...ROWS.flatMap((z, row) =>
     [-1, 1].map((side, i): TableConfig => {
       const big = row === 0 && i === 1;
@@ -46,18 +54,21 @@ const TABLES: TableConfig[] = [
         ['Mühendislik ofisi', 'Hata laboratuvarı'],
         ['Test laboratuvarı', 'Güvenlik merkezi'],
       ];
-      return { name: names[row][i], x: side * (SIDE_X + 1.5), z, length: big ? 7.5 : 6, seats: big ? 3 : 2, rotY: 0 };
+      // The suite takes six of the sixteen seats, so the teams of one (engineering's, the bug lab's and the test lab's remaining) get a short table of one a side.
+      const small = (row === 1) || (row === 2 && i === 0);
+      // Each seat has a desk of its own (the pair of rows face each other across the 2 m width), 2 m of table a seat.
+      return { name: names[row][i], x: side * (SIDE_X + 1.5), z, length: big ? 6 : small ? 2 : 4, width: 2, seats: big ? 3 : small ? 1 : 2, rotY: 0, look: 'desk' };
     }),
   ),
   // The café's long table, for when every office's seats are taken.
-  { name: 'Kafe masası', x: 0, z: 5.6, length: 6, seats: 2, rotY: west },
+  { name: 'Kafe masası', x: 0, z: 5.6, length: 7.5, seats: 3, rotY: west },
 ];
 
 const props: PropConfig[] = [
   ...OFFICES,
   // Trees and lamps down both sides of the street, clear of the doors and the boards.
   ...[-23, -12, 11, 26, 32].flatMap((z) => [-1, 1].map((side) => ({ kind: 'tree', x: side * 7.6, z }))),
-  ...[-28, -9.5, 9.5, 29].flatMap((z, i) => [-1, 1].map((side) => ({ kind: 'lamp', x: side * 8.7, z, rotY: side < 0 ? west : east, light: i % 2 === 0 }))),
+  ...[-9.5, 9.5, 29].flatMap((z, i) => [-1, 1].map((side) => ({ kind: 'lamp', x: side * 8.7, z, rotY: side < 0 ? west : east, light: i % 2 === 0 }))),
   // The café: tables under parasols, the counter and the coffee machine behind your seat, the gong.
   ...[
     [-4.6, -1.2],
@@ -65,9 +76,11 @@ const props: PropConfig[] = [
     [-4.6, 9.6],
     [4.6, 9.6],
   ].map(([x, z]) => ({ kind: 'parasol', x, z })),
-  { kind: 'counter', x: -4.2, z: -9.4, width: 4.4, rotY: 0 },
+  { kind: 'counter', x: -4.2, z: -9.4, width: 4, rotY: 0 },
   { kind: 'dispenser', x: 4.2, z: -9.6, rotY: 0 },
   { kind: 'gong', x: 6.6, z: -6.4, rotY: east },
+  // Where the meeting table stood: two more café tables.
+  ...[-3.6, 3.6].map((x) => ({ kind: 'parasol', x, z: 14.5 })),
   // Benches and planters toward the way in.
   ...[-1, 1].map((side) => ({ kind: 'bench', x: side * 7.8, z: 18.5, rotY: west })),
   ...[-1, 1].map((side) => ({ kind: 'planter', x: side * 4.6, z: 30, width: 3.2 })),
@@ -84,7 +97,7 @@ export const CADDE: MapConfig = {
   spawn: { x: -2.4, z: -2.6, rotY: Math.PI },
   door: { x: 0, z: L / 2 - 1.6 },
   // Your seat, at the head of the café, looking down the street.
-  throne: { x: 0, z: -6.6, rotY: 0, dais: null, label: '☕ Senin koltuğun' },
+  throne: { x: 0, z: -6.6, rotY: 0, dais: null, hips: 0.62, label: '☕ Senin koltuğun' },
   herald: { x: 2.4, z: -6.1, rotY: -0.35, name: 'Karşılayıcı', says: 'Yeni bir ajan için benimle konuş', ask: 'Yeni ajan ne yapsın?', button: 'İşe başlasın ☕' },
   lineup: { x: 0, z: -4.6, rotY: Math.PI, step: [0, 1.2], count: 6 },
   tables: TABLES,
@@ -93,8 +106,8 @@ export const CADDE: MapConfig = {
     queue: { x: -KIOSK_X, z: 4, rotY: -Math.PI / 2 },
     pulls: { x: KIOSK_X, z: -4, rotY: Math.PI / 2 },
   },
-  // The meeting table, out on the street south of the café.
-  council: { x: 0, z: 14.5, rotY: Math.PI },
+  // The meeting table, in the suite's meeting room (its screen on the wall behind it).
+  council: { x: 19, z: -33.2, rotY: 0 },
   boards: {
     issues: { x: -BOARD_X, y: 2.3, z: -4, rotY: west, width: 3.2, height: 2, label: '🐞 Konular' },
     queue: { x: -BOARD_X, y: 2.3, z: 4, rotY: west, width: 3.2, height: 2, label: '📋 İş sırası' },

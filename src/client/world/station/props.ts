@@ -1,3 +1,4 @@
+import { meshy } from '../cadde/meshy';
 import * as THREE from 'three';
 import type { PropConfig } from '../../../shared/maps';
 import { STATION_SIZE, type StationPropKind } from '../../../shared/maps/station-props';
@@ -161,7 +162,11 @@ function crate(kit: Kit, p: PropConfig) {
   };
   one(size * 0.92, 0, '#d0812f', 0, 0);
   one(size * 0.55, size * 0.92 * 0.8, '#5c7fa3', 0.5, 0.12);
-  kit.still.add(g);
+  // Its own cargo crates, a big one with a small one on it, in place of the stand-ins.
+  const stand = [...g.children];
+  meshy(g, 'kargo-sandik', { scale: (size * 0.92) / 1.2, replaces: stand });
+  meshy(g, 'kargo-sandik', { scale: (size * 0.55) / 1.2, y: size * 0.92 * 0.66, turn: 0.5 });
+  kit.group.add(g);
   collide(kit, p.x, p.z, size * s, size * s, p.rotY ?? 0, 99);
 }
 
@@ -181,14 +186,14 @@ function dispenser(kit: Kit, p: PropConfig): Interactable {
   g.add(mesh(new THREE.CylinderGeometry(0.03, 0.03, 0.12, 8), metal, 0, 1.03, d / 2 + 0.06, false));
   g.add(mesh(box(w - 0.3, 0.05, 0.24), metal, 0, 0.64, d / 2 + 0.1, false));
   g.add(mesh(new THREE.CylinderGeometry(0.06, 0.05, 0.14, 12), white, 0, 0.74, d / 2 + 0.1, false));
-  const sign = textPlane('☕ Hot drinks', { bg: '#0f1a26', color: '#cfeeff', border: '#3a5a78', size: 48 });
+  const sign = textPlane('☕ Sıcak içecekler', { bg: '#0f1a26', color: '#cfeeff', border: '#3a5a78', size: 48 });
   sign.scale.multiplyScalar(0.6);
   sign.position.set(0, 2.25, d / 2 - 0.1);
   g.add(sign);
   kit.group.add(g);
   const r = p.rotY ?? 0;
   collide(kit, p.x, p.z, w * s, d * s, r, 99);
-  const it: Interactable = { kind: 'coffee', label: '☕ Drinks dispenser', x: p.x + Math.sin(r) * 1.1, y: g.position.y, z: p.z + Math.cos(r) * 1.1, radius: 1.5 };
+  const it: Interactable = { kind: 'coffee', label: '☕ İçecek makinesi', x: p.x + Math.sin(r) * 1.1, y: g.position.y, z: p.z + Math.cos(r) * 1.1, radius: 1.5 };
   g.userData.interact = it;
   return it;
 }

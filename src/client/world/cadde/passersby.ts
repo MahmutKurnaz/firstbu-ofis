@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import { Person } from '../character';
+import { NpcSkin } from '../character/npc';
+import { loadModel, type ModelName } from '../models';
 import { lit } from '../station/kit';
 import { mesh } from '../toon';
 import type { CaddeKit } from './kit';
@@ -27,10 +29,11 @@ export function strollAt(lane: number, t: number): { x: number; z: number; headi
   return { x: a[0] + (b[0] - a[0]) * k, z: a[1] + (b[1] - a[1]) * k, heading: Math.atan2(to[0] - from[0], to[1] - from[1]) };
 }
 
-const WALKERS = [
-  { color: '#e76f51', look: { skin: 1, hair: 4, style: 3 }, lane: 0, offset: 0 },
-  { color: '#457b9d', look: { skin: 3, hair: 1, style: 1 }, lane: 1, offset: 6 },
-  { color: '#2a9d8f', look: { skin: 2, hair: 2, style: 5 }, lane: 2, offset: 3 },
+/** Who strolls where: the guide up one side, the courier hurrying down the other (his feet at twice the stroll), the florist across the south. */
+const WALKERS: { color: string; look: { skin: number; hair: number; style: number }; lane: number; offset: number; npc: ModelName; height: number; speed: number }[] = [
+  { color: '#e76f51', look: { skin: 1, hair: 4, style: 3 }, lane: 0, offset: 0, npc: 'npc-rehber', height: 1.9, speed: 1 },
+  { color: '#457b9d', look: { skin: 3, hair: 1, style: 1 }, lane: 1, offset: 6, npc: 'npc-kurye', height: 1.8, speed: 2.2 },
+  { color: '#2a9d8f', look: { skin: 2, hair: 2, style: 5 }, lane: 2, offset: 3, npc: 'npc-cicekci', height: 1.2, speed: 0.8 },
 ];
 
 /** Puts up the passers-by and the steam; returns what moves them each frame, and what frees the steam. */
@@ -38,7 +41,14 @@ export function streetLife(kit: CaddeKit): { update(t: number, dt: number): void
   const people = WALKERS.map((w) => {
     const p = new Person('', w.color, w.look);
     kit.group.add(p.root);
-    return { p, ...w };
+    // The little person stands in until its character arrives (and for good if it won't load).
+    const entry = { p, skin: null as NpcSkin | null, ...w };
+    loadModel(w.npc)
+      .then((m) => {
+        entry.skin = new NpcSkin(p.root, m, w.height, true);
+      })
+      .catch(() => console.warn(`cadde: ${w.npc} didn't load`));
+    return entry;
   });
   // Steam off the cups on the counter: puffs that rise, swell and fade, over and over.
   const counter = kit.plan.config?.props?.find((q) => q.kind === 'counter');
@@ -60,10 +70,11 @@ export function streetLife(kit: CaddeKit): { update(t: number, dt: number): void
   }
   const update = (t: number, dt: number) => {
     for (const w of people) {
-      const s = strollAt(w.lane, t + w.offset);
+      const s = strollAt(w.lane, (t + w.offset) * w.speed);
       w.p.root.position.set(s.x, 0, s.z);
       w.p.root.rotation.y = s.heading;
       w.p.update(dt, t, true, false);
+      w.skin?.update(dt, true, w.speed * (STROLL / 1.4));
     }
     for (const f of puffs) {
       const k = (t * 0.35 + f.phase) % 1;

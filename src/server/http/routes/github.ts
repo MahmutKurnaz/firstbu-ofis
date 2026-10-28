@@ -13,8 +13,8 @@ export const githubRoutes = {
       // What the issue and PR windows show beyond the board cards (see github.ts).
       const n = Number(url.searchParams.get('number'));
       // The repo's labels (for the label picker) are the one thing not about a single issue or PR.
-      if (p !== '/api/gh/labels' && (!Number.isSafeInteger(n) || n <= 0)) return send(res, 400, { error: 'Bad number' });
-      if (!floor) return send(res, 404, { error: 'No such floor' });
+      if (p !== '/api/gh/labels' && (!Number.isSafeInteger(n) || n <= 0)) return send(res, 400, { error: 'Geçersiz numara' });
+      if (!floor) return send(res, 404, { error: 'Böyle bir kat yok' });
       const github = floor.github;
       try {
         // "You" on comments is your own GitHub login once you've signed in to it.
@@ -31,7 +31,7 @@ export const githubRoutes = {
       } catch (err) {
         return send(res, 502, { error: (err as Error).message });
       }
-      return send(res, 404, { error: 'Not found' });
+      return send(res, 404, { error: 'Bulunamadı' });
     },
   },
 } satisfies Record<string, Route>;

@@ -1,3 +1,4 @@
+import { meshy } from '../../world/cadde/meshy';
 import * as THREE from 'three';
 import { AXE_LANE } from '../../../shared/bargames';
 import { DANCE_FLOOR, DJ_BOOTH, ELEVATOR, ELEVATOR_FRONT, FIRE_PIT, FLOOR, ROOF_BAR, ROOF_TABLES, SEATING_BY_ID, STAGE, WALL_HEIGHT, WALL_T } from '../../../shared/layout';
@@ -293,7 +294,7 @@ export function buildRooftop(night: NightParts, floors: number): Rooftop {
 
   // The elevator, in its housing: a back wall and a roof over the shaft (as tall as a floor), with a light on top.
   const elevator = buildElevator();
-  elevator.setSign('🍸 Rooftop bar');
+  elevator.setSign('🍸 Çatı barı');
   group.add(elevator.group);
   colliders.push(...elevator.colliders);
   interactables.push(elevator.interactable);
@@ -569,7 +570,7 @@ export function buildRooftop(night: NightParts, floors: number): Rooftop {
       g.shadowColor = '#ff4fd8';
       g.shadowBlur = blur;
       g.fillStyle = color;
-      g.fillText('🍸 SKY BAR', 384, 100);
+      g.fillText('🍸 GÖKYÜZÜ BARI', 384, 100);
     }
   });
   const neonMat = new THREE.MeshBasicMaterial({ map: neon, transparent: true, depthWrite: false });
@@ -578,9 +579,9 @@ export function buildRooftop(night: NightParts, floors: number): Rooftop {
   group.add(sign);
 
   // The bartender, behind the bar, facing the counter.
-  const bartender = new Worker('Bartender', '#e76f51');
+  const bartender = new Worker('Barmen', '#e76f51');
   bartender.setStatus('idle', false);
-  bartender.setTask({ name: '🍸 Bartender', summary: "What'll it be? E at the bar" });
+  bartender.setTask({ name: '🍸 Barmen', summary: 'Ne içersin? Bar için E' });
   const tendX = bx + ROOF_BAR.depth / 2 + 0.7;
   bartender.root.position.set(tendX, 0, bz);
   bartender.root.rotation.y = -Math.PI / 2;
@@ -702,9 +703,8 @@ export function buildRooftop(night: NightParts, floors: number): Rooftop {
     const g = new THREE.Group();
     g.add(mesh(new THREE.BoxGeometry(0.72, 0.28, 1.9), frame, 0, 0.14, 0.15));
     g.add(mesh(new THREE.BoxGeometry(0.66, 0.08, 1.3), toon('#f4a261'), 0, 0.32, 0.45));
-    const backrest = mesh(new THREE.BoxGeometry(0.66, 0.08, 0.8), toon('#f4a261'), 0, 0.55, -0.5);
-    backrest.rotation.x = 0.75;
-    g.add(backrest);
+    // Its own sun lounger (teak and cream, 2 m long), in place of the stand-in; the head end toward -z.
+    meshy(g, 'sezlong', { turn: Math.PI, replaces: [...g.children] });
     g.position.set(s.x, 0, s.z);
     seatable(g, s.id, 1.1, interactables);
     group.add(g);
@@ -825,7 +825,7 @@ export function buildRooftop(night: NightParts, floors: number): Rooftop {
       }
       g.globalAlpha = 0.85;
     }
-    const words = f.part === 'drop' ? 'AGENT OFFICE' : f.part === 'build' ? 'GET READY' : 'DJ MERGE CONFLICT';
+    const words = f.part === 'drop' ? 'AGENT OFFICE' : f.part === 'build' ? 'HAZIR OL' : 'DJ MERGE CONFLICT';
     fitFont(g, words, 60, W - 40);
     g.textAlign = 'center';
     g.textBaseline = 'middle';

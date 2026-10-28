@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import type { PropConfig } from '../../../shared/maps';
-import { CADDE_SIZE, type CaddePropKind } from '../../../shared/maps/cadde-props';
+import { CADDE_SIZE, treeLook, type CaddePropKind } from '../../../shared/maps/cadde-props';
 import { loadModel, type ModelName } from '../models';
 import { tree as streetTree } from '../outside';
 import { PROPS as STATION_PROPS } from '../station/props';
@@ -8,6 +8,7 @@ import { box, collide, placed } from '../station/kit';
 import type { Interactable } from '../types';
 import { mesh, roundedBox, textPlane, toon } from '../toon';
 import { MAX_LAMPS, glow, lightOnly, type CaddeKit } from './kit';
+import { MESHY_KEYS, meshy, type MeshyKey } from './meshy';
 import { buildOffice } from './offices';
 
 // The props a street-style map places (see shared/maps/cadde-props.ts): its offices (./offices.ts),
@@ -24,10 +25,13 @@ function tree(kit: CaddeKit, p: PropConfig) {
   const g = at(p);
   g.add(mesh(new THREE.CylinderGeometry(CADDE_SIZE.tree * s, CADDE_SIZE.tree * s, 0.12, 20), kit.street.curb, 0, 0.06, 0));
   g.add(mesh(new THREE.CylinderGeometry(CADDE_SIZE.tree * s - 0.1, CADDE_SIZE.tree * s - 0.1, 0.13, 20), kit.street.soil, 0, 0.07, 0, false));
+  const look = treeLook(p);
   const t = streetTree(0.72 * s);
-  t.rotation.y = (p.x * 7 + p.z * 3) % 6.28;
+  t.rotation.y = look.turn;
   g.add(t);
-  kit.still.add(g);
+  // Its own tree, in its own round bed, in their place (a 4 m street tree, its bed 2.2 m across: blender/furniture.json).
+  meshy(g, look.key, { scale: s, turn: look.turn, replaces: [...g.children] });
+  kit.group.add(g);
   kit.colliders.push({ minX: p.x - 0.3, maxX: p.x + 0.3, minZ: p.z - 0.3, maxZ: p.z + 0.3, top: 99 });
 }
 
@@ -43,11 +47,13 @@ function lamp(kit: CaddeKit, p: PropConfig) {
   g.add(mesh(new THREE.SphereGeometry(0.17, 12, 8), glow(kit, '#ffd89a', 0.05, 1.2), 0, H - 0.27, 0.9, false));
   const halo = mesh(new THREE.SphereGeometry(0.38, 12, 8), lightOnly(kit, '#ffcf8a'), 0, H - 0.3, 0.9, false);
   g.add(halo);
+  // Its own lamp, its arm out over the street where the globe was; the light stays at the globe.
+  meshy(g, 'lamba', { scale: 1, turn: Math.PI / 2, replaces: g.children.filter((c) => c !== halo) });
   kit.group.add(g);
   kit.colliders.push({ minX: p.x - 0.18, maxX: p.x + 0.18, minZ: p.z - 0.18, maxZ: p.z + 0.18, top: 99 });
   if (p.light && kit.night.lamps.length < MAX_LAMPS) {
     const light = new THREE.PointLight('#ffcf8a', 0, 14, 1.6);
-    light.position.set(0, H - 0.5, 0.9);
+    light.position.set(0, H - 0.5, 0.55);
     g.add(light);
     kit.night.lamps.push(light);
   }
@@ -63,7 +69,8 @@ function planter(kit: CaddeKit, p: PropConfig) {
   g.add(mesh(box(w - 0.12, 0.05, d - 0.12), kit.street.soil, 0, 0.53, 0, false));
   const n = Math.max(2, Math.round(w / 0.7));
   for (let i = 0; i < n; i++) g.add(mesh(new THREE.SphereGeometry(0.34, 10, 8), toon(i % 2 ? '#4f9d58' : '#3f8a4a'), -w / 2 + (i + 0.5) * (w / n), 0.78, 0));
-  kit.still.add(g);
+  meshy(g, 'saksi', { scale: w / 3, replaces: [...g.children] });
+  kit.group.add(g);
   collide(kit, p.x, p.z, w, d, p.rotY ?? 0, 0.55);
 }
 
@@ -79,7 +86,9 @@ function bench(kit: CaddeKit, p: PropConfig) {
     g.add(mesh(box(0.06, 0.45, d - 0.1), kit.street.frame, sx * (w / 2 - 0.15), 0.22, 0));
     g.add(mesh(box(0.06, 0.5, 0.06), kit.street.frame, sx * (w / 2 - 0.15), 0.65, -0.31));
   }
-  kit.still.add(g);
+  // Its own bench: the seat faces +z, like the one it replaces (its back at -z).
+  meshy(g, 'bank', { scale: w / 1.8, replaces: [...g.children] });
+  kit.group.add(g);
   collide(kit, p.x, p.z, w * s, d * s, p.rotY ?? 0, 0.45);
 }
 
@@ -99,7 +108,15 @@ function parasol(kit: CaddeKit, p: PropConfig) {
     const a = (i / 3) * Math.PI * 2 + 0.4;
     g.add(mesh(new THREE.CylinderGeometry(0.2, 0.17, 0.45, 12), kit.street.wood, Math.sin(a) * 0.85, 0.225, Math.cos(a) * 0.85));
   }
-  kit.still.add(g);
+  // Its own set: a marble bistro table, three oak stools round it, a striped parasol over them.
+  const stand = [...g.children];
+  meshy(g, 'kafe-masasi-yuvarlak', { replaces: stand });
+  for (let i = 0; i < 3; i++) {
+    const a = (i / 3) * Math.PI * 2 + 0.4;
+    meshy(g, 'kafe-tabure', {}).position.set(Math.sin(a) * 0.62, 0, Math.cos(a) * 0.62);
+  }
+  meshy(g, 'semsiye', {});
+  kit.group.add(g);
   kit.colliders.push({ minX: p.x - 0.55 * s, maxX: p.x + 0.55 * s, minZ: p.z - 0.55 * s, maxZ: p.z + 0.55 * s, top: 0.76 });
 }
 
@@ -118,6 +135,8 @@ function counter(kit: CaddeKit, p: PropConfig): Interactable {
   menu.position.set(0, 2.2, -d / 2 - 0.05);
   g.add(menu);
   for (const sx of [-1, 1]) g.add(mesh(box(0.06, 2.3, 0.06), kit.street.frame, sx * (w / 2 - 0.2), 1.15, -d / 2 - 0.08));
+  // Its own counter, with its espresso machine, cups and menu board, in place of all that.
+  meshy(g, 'kahve-tezgahi', { scale: w / 4, replaces: [...g.children] });
   kit.group.add(g);
   const r = p.rotY ?? 0;
   collide(kit, p.x, p.z, w, d, r, 1.06);
@@ -132,6 +151,12 @@ function glb(kit: CaddeKit, p: PropConfig) {
   g.scale.setScalar(p.scale ?? 1);
   kit.group.add(g);
   collide(kit, p.x, p.z, (p.width ?? CADDE_SIZE.glb) * (p.scale ?? 1), (p.length ?? CADDE_SIZE.glb) * (p.scale ?? 1), p.rotY ?? 0, 99);
+  // One of the street's own pieces (the editor puts them down): `meshy-<key>`, at its real size times `scale`.
+  if (typeof p.model === 'string' && p.model.startsWith('meshy-')) {
+    const key = p.model.slice(6) as MeshyKey;
+    if ((MESHY_KEYS as readonly string[]).includes(key)) meshy(g, key, { scale: 1 });
+    return;
+  }
   const name = p.model as ModelName;
   void loadModel(name)
     .then((m) => {
@@ -155,6 +180,12 @@ export const PROPS: Record<CaddePropKind, (kit: CaddeKit, p: PropConfig, index: 
   counter: (kit, p) => kit.interactables.push(counter(kit, p)),
   glb,
   gong: STATION_PROPS.gong,
-  dispenser: STATION_PROPS.dispenser,
+  dispenser: (kit, p) => {
+    const before = new Set([...kit.group.children, ...kit.still.children]);
+    STATION_PROPS.dispenser(kit, p);
+    // Its own coffee machine in place of the dispenser's box (the cup from it is still the same E).
+    const made = [...kit.group.children, ...kit.still.children].filter((c) => !before.has(c));
+    for (const g of made) meshy(g, 'kiosk', { scale: 1, replaces: g.children.filter((c) => (c as THREE.Mesh).isMesh) });
+  },
   table: STATION_PROPS.table,
 };

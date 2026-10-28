@@ -304,7 +304,7 @@ export function buildBarGames(night: NightParts): BarGamesView {
   group.add(mesh(new THREE.ConeGeometry(0.22, 0.2, 16, 1, true), plain(INK, THREE.DoubleSide), t.x, L.height - 0.18, t.z + 0.6, false));
   statics.add(mesh(new THREE.SphereGeometry(0.07, 10, 8), lampMat, t.x, L.height - 0.25, t.z + 0.6, false));
   // Its sign, standing on top of the back wall.
-  const axeSign = textPlane('🪓 AXE THROWING', { bg: '#1d1d1d', color: '#ffd166', size: 64, border: '#ffd166' });
+  const axeSign = textPlane('🪓 BALTA ATMA', { bg: '#1d1d1d', color: '#ffd166', size: 64, border: '#ffd166' });
   axeSign.position.set(midX, L.height + 0.42, back + backT + 0.02);
   group.add(axeSign);
 
@@ -342,7 +342,7 @@ export function buildBarGames(night: NightParts): BarGamesView {
   const matLen = D.oche + 0.5;
   statics.add(mesh(new THREE.PlaneGeometry(matLen, 0.7).rotateX(-Math.PI / 2), toon('#3a3d4f'), wallX + matLen / 2, 0.006, D.z, false));
   statics.add(mesh(new THREE.BoxGeometry(0.05, 0.035, 0.66), toon('#c0a062'), oche, 0.0175, D.z, false));
-  const dartSign = textPlane('🎯 DARTS', { bg: '#1d1d1d', color: '#8ecae6', size: 64, border: '#8ecae6' });
+  const dartSign = textPlane('🎯 DART', { bg: '#1d1d1d', color: '#8ecae6', size: 64, border: '#8ecae6' });
   dartSign.position.set(wallX + 0.02, L.height + 0.3, D.z);
   dartSign.rotation.y = Math.PI / 2;
   group.add(dartSign);
@@ -372,8 +372,8 @@ export function buildBarGames(night: NightParts): BarGamesView {
   axeChalk.g.rotation.y = Math.PI / 2;
   group.add(axeChalk.g);
   const boards: Record<BarGame, { tex: THREE.CanvasTexture; title: string }> = {
-    darts: { tex: dartChalk.tex, title: '🎯 Darts' },
-    axe: { tex: axeChalk.tex, title: '🪓 Axes' },
+    darts: { tex: dartChalk.tex, title: '🎯 Dart' },
+    axe: { tex: axeChalk.tex, title: '🪓 Balta' },
   };
 
   const drawChalk = (game: BarGame, round: { name: string; color: string; scores: Score[] } | null) => {
@@ -394,8 +394,8 @@ export function buildBarGames(night: NightParts): BarGamesView {
     if (!round) {
       g.font = font(40);
       g.globalAlpha = 0.75;
-      g.fillText('Step up and', W / 2, H / 2 - 10);
-      g.fillText('press E!', W / 2, H / 2 + 42);
+      g.fillText('Gel ve', W / 2, H / 2 - 10);
+      g.fillText('E’ye bas!', W / 2, H / 2 + 42);
       g.globalAlpha = 1;
       tex.needsUpdate = true;
       return;
@@ -423,7 +423,7 @@ export function buildBarGames(night: NightParts): BarGamesView {
     const total = round.scores.reduce((a, s) => a + s.points, 0);
     g.fillRect(40, H - 78, W - 80, 3);
     g.font = font(44);
-    g.fillText('Total', 60, H - 40);
+    g.fillText('Toplam', 60, H - 40);
     g.textAlign = 'right';
     g.fillText(String(total), W - 60, H - 40);
     tex.needsUpdate = true;

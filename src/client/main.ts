@@ -35,6 +35,8 @@ import { installBoards } from './features/boards';
 import { installBookshelf } from './features/bookshelf';
 import { installCabinet } from './features/cabinet';
 import { installAvatar } from './features/avatar';
+import { installMapEdit } from './features/mapedit';
+import { installTeamBoards } from './features/teamboards';
 import { installCharacters } from './features/characters';
 import { installGhosts } from './features/ghosts';
 import { installOrdu } from './features/ordu';
@@ -152,6 +154,8 @@ installOrdu(ctx, { openTerminal: (id) => parts.waiting.openWorkerTerminal(id) })
 installGhosts(ctx);
 installCharacters(ctx, { workerViews: parts.views.workerViews });
 installAvatar(ctx);
+installMapEdit(ctx);
+installTeamBoards(ctx);
 parts.needsYou = installNeedsYou(ctx, parts);
 installPalette(ctx, parts);
 parts.meeting = installMeeting(ctx, parts);
@@ -227,8 +231,8 @@ void whoami().then(() => {
       });
     });
     loading.until([
-      { say: 'Knocking on the door', done: welcomed },
-      { say: 'Fetching the dog', done: parts.dog.firstReady },
+      { say: 'Kapı çalınıyor', done: welcomed },
+      { say: 'Köpek getiriliyor', done: parts.dog.firstReady },
     ]);
   } else {
     // Pick a character first (people from before there was a choice keep their name and color).

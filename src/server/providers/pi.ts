@@ -27,7 +27,7 @@ export const pi: ProviderAdapter<StatusState, PiSetup> = {
     // --session-id picks up the desk's own conversation, even one Pi hadn't written to disk yet.
     return { args: piArgs(args, { extension: setup.extension, sessionDir, sessionId: resumeSessionId, model: info.model, effort: info.effort, prompt }), rotateToken: true };
   },
-  bootHint: 'Open the terminal: complete Pi login or project setup',
+  bootHint: 'Terminali aç: Pi girişini ya da proje kurulumunu tamamla',
   hook: {
     strictJson: true,
     handle(h, _event, payload) {

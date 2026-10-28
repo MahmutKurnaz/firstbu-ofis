@@ -12,13 +12,19 @@ import { builtFloors } from './floors';
 import type { Parts } from './parts';
 import { streetOf } from './worlds';
 
-export type MapsParts = Pick<Parts, 'stage' | 'worlds' | 'place' | 'travel' | 'arrival' | 'views' | 'walking' | 'peers' | 'telescope' | 'smoking' | 'hoops' | 'arcade' | 'cabinet' | 'dog' | 'jukebox' | 'boards'>;
+export type MapsParts = Pick<
+  Parts,
+  'stage' | 'worlds' | 'place' | 'travel' | 'arrival' | 'views' | 'walking' | 'peers' | 'telescope' | 'smoking' | 'hoops' | 'arcade' | 'cabinet' | 'dog' | 'jukebox' | 'boards' | 'seating'
+>;
 
 /** Registers the floor's paint (store 'floors'), the map (store 'map') and the floors' waiting count (the 'floors' message). */
 export function installMaps(ctx: Ctx, core: CoreState, parts: MapsParts) {
   const { player, sound, sky, me, hands } = ctx;
   const { holiday } = parts.stage;
   const { inOffice, plan } = parts.worlds;
+  /** The street and the street as the editor (features/mapedit) has put it: a rebuild between them leaves you standing where you are. */
+  const EDITED = new Set(['cadde', 'duzen']);
+  let lastMap = plan().id;
 
   /** Which of the floor palettes the walls are painted in now. */
   let painted = -1;
@@ -39,6 +45,8 @@ export function installMaps(ctx: Ctx, core: CoreState, parts: MapsParts) {
     const { worlds, views, boards, travel } = parts;
     const next = worlds.worldFor(store.plan());
     if (next.world === worlds.world()) return;
+    const stay = lastMap === plan().id || (EDITED.has(lastMap) && EDITED.has(plan().id));
+    lastMap = plan().id;
     // Everyone gets up from the old map's seats; they sit down in the new one's below.
     for (const [id, v] of views.workerViews) {
       worlds.court()?.release(id);
@@ -90,7 +98,13 @@ export function installMaps(ctx: Ctx, core: CoreState, parts: MapsParts) {
     boards.renderPullsBoard();
     boards.renderServicesBoard();
     boards.renderQueueBoard();
-    if (store.floor && !core.upTop && !core.trip) {
+    if (stay && !inOffice()) {
+      // The same street, edited: nobody is moved, sat down or stood up. Sitting on the throne, you're on it where it is now.
+      if (parts.place.onThrone()) {
+        parts.seating.standUp();
+        parts.place.sitOnThrone();
+      }
+    } else if (store.floor && !core.upTop && !core.trip) {
       parts.place.placeInCar();
       // Back in the office, in its elevator: the doors open onto it.
       travel.lift()?.setOpen(true);
@@ -108,7 +122,7 @@ export function installMaps(ctx: Ctx, core: CoreState, parts: MapsParts) {
     const f = builtFloors()[0];
     if (!f) return;
     parts.travel.leaveRoofFor(f.id);
-    toast(`The building's ${plan().icon} ${plan().name} now, with no rooftop bar: down you go`);
+    toast(`Bina artık ${plan().icon} ${plan().name}, çatı barı yok: aşağı iniyorsun`);
   }
 
   ctx.messages.on('floors', () => noticeWaiting());
@@ -123,14 +137,14 @@ export function installMaps(ctx: Ctx, core: CoreState, parts: MapsParts) {
       if (f.id === store.floor) continue;
       elsewhere += f.waiting;
       if (before !== undefined && f.waiting > before) {
-        toast(`🙋 A worker on the ${f.name} floor is waiting on someone — take the elevator up`, 'warn');
+        toast(`🙋 ${f.name} katındaki bir çalışan birini bekliyor — asansörle çık`, 'warn');
         sound.ding('needs_input');
       }
     }
     const badge = $('floors-waiting');
     badge.textContent = elsewhere ? String(elsewhere) : '';
     badge.classList.toggle('hidden', !elsewhere);
-    $('project').title = elsewhere ? `${elsewhere} worker${elsewhere === 1 ? '' : 's'} on other floors waiting on someone — click to go there` : 'Floors: go to another project';
+    $('project').title = elsewhere ? `Diğer katlarda ${elsewhere} çalışan birini bekliyor — gitmek için tıkla` : 'Katlar: başka bir projeye git';
   }
 
   return { paintFloor, applyMap, offTheRoof, noticeWaiting };

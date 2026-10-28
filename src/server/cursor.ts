@@ -234,7 +234,7 @@ export function withoutCursorLaunchArgs(args: string[]): string[] {
 
 /** What a Cursor worker's desk says when its screen shows it can't be used yet. */
 export function cursorBlocked(text: string): string | undefined {
-  return /Press any key to log in/i.test(text) ? "Cursor isn't signed in on this machine — open the terminal and log in" : undefined;
+  return /Press any key to log in/i.test(text) ? 'Cursor bu makinede giriş yapmamış — terminali açıp giriş yap' : undefined;
 }
 
 /**

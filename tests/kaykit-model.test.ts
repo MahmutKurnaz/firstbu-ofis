@@ -70,7 +70,7 @@ test('every piece world/cadde/kaykit.ts asks for is in its pack', () => {
   const letters = /building_\$\{'([A-Z]+)'\[/.exec(src)?.[1];
   assert.ok(letters, 'the skyline picks buildings by letter');
   for (const c of letters) asked.push(['kaykit-city', `building_${c}`]);
-  assert.ok(asked.length >= 15, `found ${asked.length} requests`);
+  assert.ok(asked.length >= 8, `found ${asked.length} requests`);
   for (const [pack, part] of asked) {
     assert.ok(PACKS[pack], `${pack} is a pack`);
     assert.ok(PACKS[pack].includes(part), `${pack} has ${part}`);

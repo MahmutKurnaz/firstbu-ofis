@@ -204,7 +204,7 @@ THREE.Material.prototype.onBeforeCompile = function (shader) {
 
 // ---- The sky ------------------------------------------------------------------------------------
 
-const LABEL: Record<Weather, string> = { clear: 'Clear', cloudy: 'Cloudy', rain: 'Rain', storm: 'Thunderstorm', snow: 'Snow', fog: 'Fog' };
+const LABEL: Record<Weather, string> = { clear: 'Açık', cloudy: 'Bulutlu', rain: 'Yağmurlu', storm: 'Fırtınalı', snow: 'Karlı', fog: 'Sisli' };
 const ICON: Record<Weather, string> = { clear: '☀️', cloudy: '☁️', rain: '🌧️', storm: '⛈️', snow: '🌨️', fog: '🌫️' };
 
 /** "🌙 Clear · 9:41 PM outside · Berlin, Germany, 11 °C", for Settings: the time of day in the sky (see skyTime). */
@@ -214,7 +214,7 @@ export function describeSky(s: SkyState, now = Date.now()): string {
   const icon = s.weather === 'clear' && night ? '🌙' : ICON[s.weather];
   const time = new Date(sky + s.utcOffset * 60_000).toLocaleTimeString([], { timeZone: 'UTC', hour: 'numeric', minute: '2-digit' });
   const where = s.city ? ` · ${s.city}${s.temp !== undefined ? `, ${s.temp} °C` : ''}` : '';
-  return `${icon} ${LABEL[s.weather]} · ${time} outside${where}`;
+  return `${icon} ${LABEL[s.weather]} · ${time} dışarıda${where}`;
 }
 
 const lerp = THREE.MathUtils.lerp;
@@ -700,6 +700,7 @@ export class Sky {
     const ambI = lerp(0.12, 0.5, day);
     const { sun, hemi, ambient } = this.lights;
     hemi.intensity = hemiI + flash * 3;
+    this.scene.environmentIntensity = 0.45 * Math.min(1, hemiI / 1.5); // the physical materials' sky light dims with the rest
     hemi.color.copy(C.hemiSkyNight).lerp(C.hemiSky, day).lerp(SPOOKY.hemiSky, sp * 0.5);
     hemi.groundColor.copy(C.hemiGroundNight).lerp(C.hemiGround, day).lerp(SPOOKY.hemiGround, sp * 0.5);
     ambient.intensity = ambI + flash;

@@ -13,27 +13,27 @@ import type { PropConfig } from './types.js';
 
 export const CADDE_PROP_KINDS = {
   /** A glass office, `width` across its front and `length` deep, `height` tall, its door facing `rotY`. */
-  office: "A team's glass office, its door in the middle of its front",
+  office: 'Bir ekibin cam ofisi, kapısı cephesinin ortasında',
   /** A street tree in a round bed. */
-  tree: 'A street tree',
+  tree: 'Bir sokak ağacı',
   /** A street lamp; `light` ones light the street for real at night. */
-  lamp: 'A street lamp',
+  lamp: 'Bir sokak lambası',
   /** A long planter, `width` long. */
-  planter: 'A planter of shrubs',
+  planter: 'Çalılık bir saksılık',
   /** A park bench along `rotY`. */
-  bench: 'A park bench',
+  bench: 'Bir park bankı',
   /** A café table under a parasol. */
-  parasol: 'A café table under a parasol',
+  parasol: 'Şemsiyenin altında bir kafe masası',
   /** The café's counter, `width` long: E for a coffee, like the office's machine. */
-  counter: 'The café counter (the coffee)',
+  counter: 'Kafe tezgâhı (kahve)',
   /** A model from the office's own .glb files, `model` by name, `width` by `length` of ground. */
-  glb: 'A model from a .glb file',
+  glb: 'Bir .glb dosyasından model',
   /** The gong a merged pull request rings (one per map). */
-  gong: 'The merge gong',
+  gong: 'Merge gongu',
   /** A coffee machine on a stand: E for a cup. */
-  dispenser: 'A coffee machine',
+  dispenser: 'Bir kahve makinesi',
   /** A table with nothing to sit at, `width` by `length`. */
-  table: 'A table without seats',
+  table: 'Oturağı olmayan bir masa',
 } as const;
 export type CaddePropKind = keyof typeof CADDE_PROP_KINDS;
 
@@ -49,6 +49,47 @@ export const CADDE_SIZE = {
   dispenser: { width: 1.3, depth: 0.7 },
   glb: 1.5,
 } as const;
+/**
+ * Which model a street tree is and how it's turned (inside its own `rotY`): the prop's own once it has a `model` (the editor
+ * gives one to a tree it moves, so it stays what it was), else worked out from where it stands, which is how a map's trees vary.
+ */
+export function treeLook(p: { x: number; z: number; model?: unknown }): { key: 'agac-ince' | 'agac-genis'; turn: number } {
+  if (p.model === 'meshy-agac-ince' || p.model === 'meshy-agac-genis') return { key: p.model.slice(6) as 'agac-ince' | 'agac-genis', turn: 0 };
+  const h = p.x * 7 + p.z * 3;
+  return { key: Math.floor(Math.abs(h)) % 3 === 0 ? 'agac-ince' : 'agac-genis', turn: h % 6.28 };
+}
+/**
+ * The street's own furniture as props, where its builder puts it when a map isn't `furnished`: a bush either side of each
+ * office's door, a hydrant and a bin by the benches toward the way in, the café's fridge and its menu stand by its counter.
+ * The editor puts them in the map's props when it first saves it, so they can be moved like the rest.
+ */
+export function streetFurniture(props: readonly PropConfig[]): PropConfig[] {
+  const glb = (model: string, x: number, z: number, size: number, rotY?: number): PropConfig => ({ kind: 'glb', model: `meshy-${model}`, x: Math.round(x * 1000) / 1000, z: Math.round(z * 1000) / 1000, width: size, length: size, ...(rotY ? { rotY: Math.round(rotY * 1e4) / 1e4 } : {}) });
+  const out: PropConfig[] = [];
+  for (const p of props.filter((q) => q.kind === 'office')) {
+    const o = officeBox(p);
+    for (const side of [-1, 1]) {
+      const [x, z] = officePoint(p, side * (o.width / 2 - 0.8), o.length / 2 + 1.1);
+      out.push(glb('cali', x, z, 0.9));
+    }
+  }
+  for (const side of [-1, 1]) {
+    out.push(glb('hidrant', side * 8.6, 22, 0.5));
+    out.push(glb('cop-kutusu', side * 8.4, 16.6, 0.5));
+  }
+  const c = props.find((q) => q.kind === 'counter');
+  if (c) {
+    const r = c.rotY ?? 0;
+    const by = (across: number, out2: number): [number, number] => [c.x + Math.cos(r) * across + Math.sin(r) * out2, c.z - Math.sin(r) * across + Math.cos(r) * out2];
+    const w = (c.width ?? 4) * (c.scale ?? 1);
+    const fridge = by(-w / 2 + 0.2, -1.2);
+    out.push(glb('buzdolabi', fridge[0], fridge[1], 0.8, r));
+    const menu = by(w / 2 + 0.2, 1.8);
+    out.push(glb('menu-sehpasi', menu[0], menu[1], 0.6, r + 0.5));
+  }
+  return out;
+}
+
 /** How wide the doorway in an office's front is, and how thick its walls are. */
 export const OFFICE_DOOR = 2.4;
 export const OFFICE_WALL = 0.2;
@@ -79,6 +120,79 @@ export function officePoint(p: PropConfig, side: number, out: number): [number, 
   return [p.x + Math.sin(r) * out + Math.cos(r) * side, p.z + Math.cos(r) * out - Math.sin(r) * side];
 }
 
+/** A room of the executive suite: across its office from `from` to `to`, its door at `door` (null: open to the lobby), and which team's color it wears (an index into the template's offices, or -1). */
+export interface SuiteRoom {
+  id: string;
+  label: string;
+  from: number;
+  to: number;
+  door: number | null;
+  team: number;
+}
+
+/**
+ * The executive suite (an `office` with style `yonetim`, 60 m across and 10 deep: see shared/maps/cadde.ts): a row of rooms
+ * along its back, each sized to who sits in it (the lead's the biggest, then yours, the managers' a single's each, the
+ * assistant's a pair's, a meeting room for ten), glass between them in brass frames, and a lobby along its front. In
+ * the office's own frame (u across, v from its middle toward its door): the rooms are v `back`..`front`, the lobby `front`..5.
+ */
+export const SUITE = {
+  width: 60,
+  length: 10,
+  thick: 0.12,
+  back: -4.8,
+  front: 0.6,
+  /** How wide a doorway in a partition is. */
+  gate: 1.4,
+  rooms: [
+    { id: 'you', label: '⭐ Mahmut’un odası', from: -29.8, to: -23, door: -26.4, team: -1 },
+    { id: 'lead', label: '🦁 Aslan Lider', from: -23, to: -14, door: -18.5, team: 0 },
+    { id: 'asst', label: '🐼 Asistan', from: -14, to: -9, door: -11.5, team: 0 },
+    { id: 'fe', label: '🦦 Frontend müdürü', from: -9, to: -5, door: -7, team: 2 },
+    { id: 'be', label: '🐯 Backend müdürü', from: -5, to: -1, door: -3, team: 3 },
+    { id: 'bug', label: '🐰 Hata avı müdürü', from: -1, to: 3, door: 1, team: 4 },
+    { id: 'verify', label: '🦌 Doğrulama müdürü', from: 3, to: 7, door: 5, team: 5 },
+    { id: 'coffee', label: '☕ Kahve köşesi', from: 7, to: 13, door: null, team: -1 },
+    { id: 'meeting', label: '🤝 Toplantı odası', from: 13, to: 25, door: 19, team: -1 },
+    { id: 'archive', label: '🗄️ Arşiv', from: 25, to: 29.8, door: 27.4, team: 1 },
+  ] as SuiteRoom[],
+  /** The assistant's room opens into the lead's too: a doorway in the wall between them, from v to v. */
+  between: { u: -14, from: -3.2, to: -1.8 },
+};
+
+/** The partitions along the lobby (v = `front`): what's left of each room's front either side of its door. */
+function frontsOf(rooms: SuiteRoom[]): [number, number][] {
+  return rooms.flatMap((r): [number, number][] => (r.door === null ? [] : [[r.from, r.door - SUITE.gate / 2], [r.door + SUITE.gate / 2, r.to]]));
+}
+
+/** The walls between the rooms, from the back one to the lobby's: across (u) and from-to (v), the lead's with its doorway to the assistant's. */
+function dividersOf(rooms: SuiteRoom[]): { u: number; from: number; to: number }[] {
+  return rooms.slice(1).flatMap((r) =>
+    r.from === SUITE.between.u
+      ? [
+          { u: r.from, from: SUITE.back, to: SUITE.between.from },
+          { u: r.from, from: SUITE.between.to, to: SUITE.front },
+        ]
+      : [{ u: r.from, from: SUITE.back, to: SUITE.front }],
+  );
+}
+
+export const SUITE_FRONTS = frontsOf(SUITE.rooms);
+export const SUITE_DIVIDERS = dividersOf(SUITE.rooms);
+
+/** The suite's partitions as ground, in the office's own frame turned into the world's. */
+function suiteWalls(p: PropConfig): Rect[] {
+  const o = officeBox(p);
+  const at = (side: number, out: number, w: number, d: number) => {
+    const [x, z] = officePoint(p, side, out);
+    return boxFootprint(x, z, w, d, o.rotY);
+  };
+  return [
+    ...SUITE_FRONTS.map(([a, b]) => at((a + b) / 2, SUITE.front, b - a, SUITE.thick)),
+    ...SUITE_DIVIDERS.map((d) => at(d.u, (d.from + d.to) / 2, SUITE.thick, d.to - d.from)),
+  ];
+}
+
 /** An office's walls, as the ground they take: the back, the two sides, and the front either side of the door. */
 export function officeWalls(p: PropConfig): Rect[] {
   const o = officeBox(p);
@@ -95,6 +209,7 @@ export function officeWalls(p: PropConfig): Rect[] {
     piece(hw - t / 2, 0, t, o.length),
     piece(-hw + leaf / 2, hl - t / 2, leaf, t),
     piece(hw - leaf / 2, hl - t / 2, leaf, t),
+    ...(p.style === 'yonetim' ? suiteWalls(p) : []),
   ];
 }
 

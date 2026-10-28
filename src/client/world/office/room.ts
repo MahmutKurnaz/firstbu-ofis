@@ -1,3 +1,4 @@
+import { meshy } from '../cadde/meshy';
 import * as THREE from 'three';
 import { BOARDS, LOFT, MACHINE_MONITOR, PLANTS, SEATING_BY_ID, STAIRS, STREET_Y, TV, WALL_HEIGHT, plantByWing } from '../../../shared/layout';
 import { wallFacing } from '../../../shared/decor';
@@ -130,6 +131,11 @@ export const lounge: Fixture = (site) => {
   site.colliders.push({ minX: 10, maxX: 11, minZ: -2.2, maxZ: 2.2, top: 0.47 });
   seatable(couch, 'couch', 2.6, site.interactables);
 
+  // A brass floor lamp by the couch.
+  const lamp = new THREE.Group();
+  lamp.position.set(10.4, 0, -3.1);
+  site.group.add(lamp);
+  meshy(lamp, 'ayakli-lamba', {});
   const table = coffeeTable();
   table.position.set(13, 0, 0);
   site.group.add(table);

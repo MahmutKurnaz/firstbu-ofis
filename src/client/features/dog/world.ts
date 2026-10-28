@@ -256,17 +256,17 @@ export class Dog {
     const s = this.state;
     if (!s) return '';
     const moving = performance.now() < this.arriveAt;
-    const w = s.workerId ? (workerName(s.workerId) ?? 'a worker') : 'a worker';
-    if (s.following) return `following ${personName(s.following) ?? 'someone'}`;
+    const w = s.workerId ? (workerName(s.workerId) ?? 'bir çalışan') : 'bir çalışan';
+    if (s.following) return `${personName(s.following) ?? 'birini'} takip ediyor`;
     switch (s.act) {
       case 'bark':
-        return moving ? `running to ${w}, who needs input` : `barking at ${w}: needs input`;
+        return moving ? `${w} için koşuyor, yardım bekliyor` : `${w} için havlıyor: yardım bekliyor`;
       case 'nap':
-        return moving ? 'off for a nap' : `napping under ${w}'s desk`;
+        return moving ? 'şekerlemeye gidiyor' : `${w} masasının altında uyuyor`;
       case 'wag':
-        return s.petBy ? `wagging at ${s.petBy}` : 'wagging';
+        return s.petBy ? `${s.petBy} için kuyruk sallıyor` : 'kuyruk sallıyor';
       case 'lie':
-        return moving ? 'trotting to the lounge' : 'lounging';
+        return moving ? 'dinlenme alanına koşuyor' : 'tembellik ediyor';
       case 'sniff':
         return moving ? 'trotting about' : 'sniffing around';
       case 'sit':
@@ -305,7 +305,7 @@ export class Dog {
       if (!this.hushed(s.workerId)) {
         this.sounds.bark(at.x, at.z, this.barks === 0 ? 3 : 2);
         this.woofT = 0;
-        this.say('woof', this.barks === 0 ? 'Woof! Woof! Woof!' : 'Woof! Woof!', 1.4);
+        this.say('woof', this.barks === 0 ? 'Hav! Hav! Hav!' : 'Hav! Hav!', 1.4);
       }
       this.barks++;
       this.nextBark = this.arriveAt + this.barks * BARK_EVERY_S * 1000;

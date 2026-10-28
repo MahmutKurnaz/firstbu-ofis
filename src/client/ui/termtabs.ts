@@ -26,20 +26,23 @@ export interface TermTabsOptions {
   keypad: HTMLElement | null;
   /** Back on the terminal's tab. */
   focusTerm(): void;
+  /** The Images tab (see termimages.ts), beside the terminal's own: its page, and what shows and hides it. */
+  images?: { el: HTMLElement; show(): void; hide(): void };
 }
 
 /** The tab bar (above the terminal) and where the pages show (beside it). */
 export function termTabs(workerId: string, opts: TermTabsOptions): { bar: HTMLElement; pages: HTMLElement } {
-  const tabsBar = h('div.term-tabs', { role: 'tablist', 'aria-label': 'Tabs' });
-  const tabName = h('input', { type: 'text', placeholder: 'Tab name (e.g. ChatGPT)', 'aria-label': 'Tab name', maxlength: '40', autocomplete: 'off' }) as HTMLInputElement;
-  const tabUrl = h('input', { type: 'url', placeholder: 'https://…', 'aria-label': 'Web page address', autocomplete: 'off' }) as HTMLInputElement;
-  const cancelBtn = h('button.btn', { type: 'button' }, 'Cancel');
-  const form = h('form.term-tab-form.hidden', {}, tabName, tabUrl, h('button.btn.primary', { type: 'submit' }, 'Add'), cancelBtn);
-  const addBtn = h('button.term-tab-add', { type: 'button', title: 'Pin a web page open beside this terminal (a linked chat, docs, anything with an address)' }, '+ Web page');
+  const tabsBar = h('div.term-tabs', { role: 'tablist', 'aria-label': 'Sekmeler' });
+  const tabName = h('input', { type: 'text', placeholder: 'Sekme adı (örn. ChatGPT)', 'aria-label': 'Sekme adı', maxlength: '40', autocomplete: 'off' }) as HTMLInputElement;
+  const tabUrl = h('input', { type: 'url', placeholder: 'https://…', 'aria-label': 'Web sayfası adresi', autocomplete: 'off' }) as HTMLInputElement;
+  const cancelBtn = h('button.btn', { type: 'button' }, 'Vazgeç');
+  const form = h('form.term-tab-form.hidden', {}, tabName, tabUrl, h('button.btn.primary', { type: 'submit' }, 'Ekle'), cancelBtn);
+  const addBtn = h('button.term-tab-add', { type: 'button', title: 'Bir web sayfasını bu terminalin yanına sabitle (bağlı bir sohbet, doküman, adresi olan her şey)' }, '+ Web sayfası');
   // Plenty of sites won't show inside another page (chatgpt.com doesn't): this opens the one showing in a tab of its own.
-  const openOut = h('a.term-tab-out.hidden', { target: '_blank', rel: 'noopener noreferrer', title: "Open this page in a browser tab of its own (for a site that won't show here)" }, '↗ New tab') as HTMLAnchorElement;
+  const openOut = h('a.term-tab-out.hidden', { target: '_blank', rel: 'noopener noreferrer', title: 'Bu sayfayı kendi tarayıcı sekmesinde aç (burada görünmeyen siteler için)' }, '↗ Yeni sekme') as HTMLAnchorElement;
   const bar = h('div.term-tabbar', {}, tabsBar, openOut, addBtn, form);
   const pages = h('div.term-webhost.hidden');
+  if (opts.images) pages.append(opts.images.el);
 
   const tabs = tabsByWorker.get(workerId) ?? [];
   tabsByWorker.set(workerId, tabs);
@@ -48,8 +51,12 @@ export function termTabs(workerId: string, opts: TermTabsOptions): { bar: HTMLEl
 
   const render = () => {
     const mainTab = h('div.term-tab', { class: active === 'main' ? 'on' : '' }, h('button.term-tab-label', { type: 'button', role: 'tab', 'aria-selected': String(active === 'main'), onclick: () => show('main') }, '💻 Terminal'));
+    const imagesTab = opts.images
+      ? h('div.term-tab', { class: active === 'images' ? 'on' : '' }, h('button.term-tab-label', { type: 'button', role: 'tab', 'aria-selected': String(active === 'images'), onclick: () => show('images') }, '🖼️ Görseller'))
+      : null;
     tabsBar.replaceChildren(
       mainTab,
+      ...(imagesTab ? [imagesTab] : []),
       ...tabs.map((t) =>
         h(
           'div.term-tab',
@@ -59,7 +66,7 @@ export function termTabs(workerId: string, opts: TermTabsOptions): { bar: HTMLEl
             'button.term-tab-close',
             {
               type: 'button',
-              'aria-label': `Close ${t.title} tab`,
+              'aria-label': `${t.title} sekmesini kapat`,
               onclick: (e: Event) => {
                 e.stopPropagation();
                 close(t.id);
@@ -81,6 +88,8 @@ export function termTabs(workerId: string, opts: TermTabsOptions): { bar: HTMLEl
     pages.classList.toggle('hidden', onMain);
     opts.keypad?.classList.toggle('hidden', !onMain);
     for (const [tid, frame] of frames) frame.classList.toggle('hidden', tid !== id);
+    if (id === 'images') opts.images?.show();
+    else opts.images?.hide();
     render();
     if (onMain) opts.focusTerm();
   };
@@ -117,12 +126,12 @@ export function termTabs(workerId: string, opts: TermTabsOptions): { bar: HTMLEl
     try {
       parsed = new URL(tabUrl.value.trim());
     } catch {
-      toast('That doesn’t look like a web address', 'warn');
+      toast('Bu bir web adresine benzemiyor', 'warn');
       return;
     }
-    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return toast('Only http:// and https:// addresses can open in a tab', 'warn');
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return toast('Sekmede yalnızca http:// ve https:// adresleri açılabilir', 'warn');
     // The office itself would run in the frame signed in as you, with nothing between it and this page.
-    if (parsed.origin === location.origin) return toast("The office's own pages can't open in a tab", 'warn');
+    if (parsed.origin === location.origin) return toast('Ofisin kendi sayfaları sekmede açılamaz', 'warn');
     const tab: WebTab = { id: `web-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`, title: tabName.value.trim() || parsed.hostname.replace(/^www\./, ''), url: parsed.toString() };
     tabs.push(tab);
     frameFor(tab);

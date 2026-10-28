@@ -93,15 +93,15 @@ export class PlanLimitsReader {
       this.modelWeeks = [];
       return { plan, windows: [], at: Date.now() };
     }
-    const windows = [toWindow('5h session', rl.five_hour), toWindow('Week', rl.seven_day)];
+    const windows = [toWindow('5 saatlik oturum', rl.five_hour), toWindow('Hafta', rl.seven_day)];
     if (Array.isArray(rl.model_scoped)) {
       this.modelWeeks = rl.model_scoped
         .filter((m: any) => typeof m?.display_name === 'string' && m.display_name.trim())
-        .map((m: any) => toWindow(`${m.display_name.trim().slice(0, LABEL_MAX)} week`, m))
+        .map((m: any) => toWindow(`${m.display_name.trim().slice(0, LABEL_MAX)} haftası`, m))
         .filter((w: PlanWindow | null): w is PlanWindow => w !== null);
     } else if (rl.seven_day_opus || rl.seven_day_sonnet) {
       // Claude Code before per-model buckets
-      this.modelWeeks = [toWindow('Opus week', rl.seven_day_opus), toWindow('Sonnet week', rl.seven_day_sonnet)].filter((w): w is PlanWindow => w !== null);
+      this.modelWeeks = [toWindow('Opus haftası', rl.seven_day_opus), toWindow('Sonnet haftası', rl.seven_day_sonnet)].filter((w): w is PlanWindow => w !== null);
     }
     return { plan, windows: [...windows.filter((w): w is PlanWindow => w !== null), ...this.modelWeeks], at: Date.now() };
   }

@@ -6,12 +6,12 @@ import { h, openModal, toast } from '../../ui/dom';
 
 /** The jukebox: what's on, the tunes to pick from, skip and stop, and a box for a stream. */
 export function openJukebox(net: Net, openVolume: () => void) {
-  const close = h('button.btn.close', { 'aria-label': 'Close' }, '✕');
+  const close = h('button.btn.close', { 'aria-label': 'Kapat' }, '✕');
   const now = h('div.jb-now');
   const list = h('ul.svc-list');
-  const url = h('input', { type: 'text', placeholder: 'https://… internet radio, or a link to an .mp3', 'aria-label': 'Stream or audio file link', spellcheck: 'false', autocomplete: 'off' }) as HTMLInputElement;
-  const playUrl = h('button.btn.primary', { type: 'button' }, '📻 Play');
-  const volume = h('button.btn', { type: 'button' }, '🔈 Your volume');
+  const url = h('input', { type: 'text', placeholder: 'https://… internet radyosu ya da bir .mp3 bağlantısı', 'aria-label': 'Yayın ya da ses dosyası bağlantısı', spellcheck: 'false', autocomplete: 'off' }) as HTMLInputElement;
+  const playUrl = h('button.btn.primary', { type: 'button' }, '📻 Çal');
+  const volume = h('button.btn', { type: 'button' }, '🔈 Ses seviyen');
   const el = h(
     'div.modal.jukebox',
     { role: 'dialog', 'aria-label': 'Jukebox' },
@@ -20,13 +20,13 @@ export function openJukebox(net: Net, openVolume: () => void) {
       'div.body',
       {},
       now,
-      h('label', { style: 'margin-top:16px' }, 'Put on a tune'),
+      h('label', { style: 'margin-top:16px' }, 'Bir şarkı aç'),
       list,
-      h('label', { style: 'margin-top:16px' }, 'Or play a stream'),
+      h('label', { style: 'margin-top:16px' }, 'Ya da bir yayın çal'),
       h('div.webhook', {}, url, playUrl),
-      h('p.setting-note', {}, 'Internet radio or an audio file. It plays from the jukebox, for everyone on this floor.'),
+      h('p.setting-note', {}, 'İnternet radyosu ya da bir ses dosyası. Jukebox’tan çalar, bu kattaki herkes duyar.'),
     ),
-    h('footer', {}, h('span.grow', {}, 'Everyone on this floor hears the same song, louder the closer they are to the lounge.'), volume),
+    h('footer', {}, h('span.grow', {}, 'Bu kattaki herkes aynı şarkıyı duyar; dinlenme alanına yaklaştıkça ses yükselir.'), volume),
   );
 
   const button = (label: string, title: string, send: () => void, primary = false) => h(primary ? 'button.btn.primary' : 'button.btn', { type: 'button', title, onclick: send }, label);
@@ -39,18 +39,18 @@ export function openJukebox(net: Net, openVolume: () => void) {
       h(
         'div.svc-main',
         {},
-        h('div.svc-title', {}, j.on ? trackTitle(j) : 'The jukebox is off'),
-        h('div.svc-meta', {}, j.on ? [stream ? 'a stream' : tuneById(j.track)?.mood, j.by && `put on by ${j.by}`].filter(Boolean).join(' · ') : j.by ? `${j.by} turned it off` : 'Pick a tune to put it on'),
+        h('div.svc-title', {}, j.on ? trackTitle(j) : 'Jukebox kapalı'),
+        h('div.svc-meta', {}, j.on ? [stream ? 'bir yayın' : tuneById(j.track)?.mood, j.by && `açan: ${j.by}`].filter(Boolean).join(' · ') : j.by ? `${j.by} kapattı` : 'Açmak için bir şarkı seç'),
       ),
-      j.on ? button('⏭️ Skip', 'On to the next tune', () => net.send({ t: 'jukebox.skip' })) : button('▶️ Play', `Put ${trackTitle(j)} back on`, () => net.send({ t: 'jukebox.play' }), true),
-      j.on ? button('⏹️ Stop', 'Turn the jukebox off', () => net.send({ t: 'jukebox.stop' })) : '',
+      j.on ? button('⏭️ Atla', 'Sıradaki şarkıya geç', () => net.send({ t: 'jukebox.skip' })) : button('▶️ Çal', `${trackTitle(j)} tekrar açılsın`, () => net.send({ t: 'jukebox.play' }), true),
+      j.on ? button('⏹️ Durdur', 'Jukebox’ı kapat', () => net.send({ t: 'jukebox.stop' })) : '',
     );
     list.replaceChildren(
       ...JUKEBOX_TUNES.map((t) => {
         const playing = j.on && j.track === t.id;
         const li = h(
           'li',
-          { class: playing ? 'on' : '', tabindex: 0, role: 'button', 'aria-pressed': String(playing), title: playing ? 'Playing now' : `Put on ${t.title}` },
+          { class: playing ? 'on' : '', tabindex: 0, role: 'button', 'aria-pressed': String(playing), title: playing ? 'Şu an çalıyor' : `Aç: ${t.title}` },
           h('span.jb-icon', {}, playing ? '🔊' : '🎵'),
           h('div.svc-main', {}, h('div.svc-title', {}, t.title), h('div.svc-meta', {}, t.mood)),
         );
@@ -83,7 +83,7 @@ export function openJukebox(net: Net, openVolume: () => void) {
     if (e.key === 'Enter') play();
   });
 
-  const modal = openModal(el, { doing: '🎵 at the jukebox', onClose: store.on('jukebox', render) });
+  const modal = openModal(el, { doing: '🎵 jukebox başında', onClose: store.on('jukebox', render) });
   close.addEventListener('click', () => modal.close());
   volume.addEventListener('click', () => {
     modal.close();

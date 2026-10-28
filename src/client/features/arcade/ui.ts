@@ -97,13 +97,13 @@ export class Arcade {
     const game = this.game;
     // A finished game stays up on the monitor until the next player sits down to a fresh one.
     if (game.state === 'won' || game.state === 'lost') game.reset();
-    const board = h('canvas', { 'aria-label': 'Minesweeper board' });
-    const stop = h('button.btn', { type: 'button' }, '✕ Stop playing');
+    const board = h('canvas', { 'aria-label': 'Mayın tarlası tahtası' });
+    const stop = h('button.btn', { type: 'button' }, '✕ Oyunu bırak');
     const box = h(
       'div.arcade',
-      { role: 'dialog', 'aria-label': 'Minesweeper' },
+      { role: 'dialog', 'aria-label': 'Mayın tarlası' },
       h('div.arcade-screen', {}, board),
-      h('div.arcade-bar', {}, h('span', {}, '💣 Minesweeper'), h('span.tip', {}, 'Click to dig · right-click to flag'), stop),
+      h('div.arcade-bar', {}, h('span', {}, '💣 Mayın Tarlası'), h('span.tip', {}, 'Kazmak için tıkla · bayrak için sağ tık'), stop),
     );
 
     // Where the mouse is, in the game's 960×540.
@@ -172,7 +172,7 @@ export class Arcade {
     window.addEventListener('resize', fit);
     this.modal = openModal(box, {
       backdropCloses: false,
-      doing: '💣 playing Minesweeper',
+      doing: '💣 Mayın Tarlası oynuyor',
       onClose: () => {
         window.removeEventListener('resize', fit);
         clearInterval(clock);

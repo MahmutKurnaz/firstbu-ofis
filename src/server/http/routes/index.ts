@@ -9,6 +9,7 @@ import { githubRoutes } from './github.js';
 import { pageRoutes } from './pages.js';
 import { searchRoutes } from './search.js';
 import { serviceRoutes } from './services.js';
+import { termImageRoutes } from './termimages.js';
 
 export const routes: readonly Route[] = [
   // Anyone.
@@ -31,6 +32,8 @@ export const routes: readonly Route[] = [
   fileRoutes.image,
   fileRoutes.whiteboardFile,
   fileRoutes.termDrop,
+  termImageRoutes.list,
+  termImageRoutes.one,
   fileRoutes.changedFile,
   fileRoutes.docs,
   searchRoutes.search,

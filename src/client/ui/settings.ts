@@ -14,31 +14,31 @@ import { outsideSetting } from './settings-sky';
 import { choiceRow } from './settings-rows';
 
 const VIEWS: [ViewMode, string, string][] = [
-  ['first', '👀 First person', 'See through your own eyes. Click the office to look around with the mouse and click things to use them. Esc frees the mouse.'],
-  ['third', '🎥 Third person', 'Follow your character from behind. Drag to orbit the camera, scroll to zoom, and click things to use them.'],
+  ['first', '👀 Birinci şahıs', 'Kendi gözlerinden gör. Etrafa bakmak için ofise tıkla, kullanmak için nesnelere tıkla. Esc fareyi serbest bırakır.'],
+  ['third', '🎥 Üçüncü şahıs', 'Karakterini arkadan takip et. Kamerayı çevirmek için sürükle, yakınlaştırmak için kaydır, kullanmak için nesnelere tıkla.'],
 ];
 
-const THEME_LABEL: Record<ThemePick, string> = { auto: '📅 By the calendar', halloween: '🎃 Halloween', christmas: '🎄 Christmas', off: 'Off' };
+const THEME_LABEL: Record<ThemePick, string> = { auto: '📅 Takvime göre', halloween: '🎃 Cadılar Bayramı', christmas: '🎄 Yılbaşı', off: 'Kapalı' };
 
-const WEBHOOK_NAME: Record<WebhookKind, string> = { slack: 'Slack', discord: 'Discord', other: 'a webhook' };
+const WEBHOOK_NAME: Record<WebhookKind, string> = { slack: 'Slack', discord: 'Discord', other: 'bir webhook' };
 
 /** The categories down the side of ⚙️ Settings. */
 export type SettingsPane = 'you' | 'sound' | 'notify' | 'building' | 'workers';
 
 const PANES: { id: SettingsPane; icon: string; label: string; blurb: string }[] = [
-  { id: 'you', icon: '🧍', label: 'You', blurb: 'How you look, how you see the office, and how you’re signed in.' },
-  { id: 'sound', icon: '🔊', label: 'Sound & voice', blurb: 'How loud the office is for you, and how voice chat works.' },
-  { id: 'notify', icon: '🔔', label: 'Notifications', blurb: 'Hear about a worker that needs someone, or finished, while you’re somewhere else.' },
-  { id: 'building', icon: '🏢', label: 'Building', blurb: 'The map, the decorations, the sky, the dog, and where new floors are cloned.' },
-  { id: 'workers', icon: '🤖', label: 'Workers', blurb: 'What workers start on, how many run at once, when they go home and what the office tells them.' },
+  { id: 'you', icon: '🧍', label: 'Sen', blurb: 'Nasıl göründüğün, ofisi nasıl gördüğün ve nasıl giriş yaptığın.' },
+  { id: 'sound', icon: '🔊', label: 'Ses ve konuşma', blurb: 'Ofisin sana ne kadar gürültülü geldiği ve sesli sohbetin nasıl çalıştığı.' },
+  { id: 'notify', icon: '🔔', label: 'Bildirimler', blurb: 'Başka yerdeyken, birine ihtiyacı olan ya da işi biten bir çalışandan haberdar ol.' },
+  { id: 'building', icon: '🏢', label: 'Bina', blurb: 'Harita, süsler, gökyüzü, köpek ve yeni katların nereye klonlandığı.' },
+  { id: 'workers', icon: '🤖', label: 'Çalışanlar', blurb: 'Çalışanların neyle başladığı, aynı anda kaç tanesinin çalıştığı, ne zaman eve gittikleri ve ofisin onlara ne söylediği.' },
 ];
 
 /** Who a setting is for, shown by its name: some are yours alone, some the whole office's. */
 type Scope = 'you' | 'floor' | 'office';
 const SCOPE: Record<Scope, [label: string, title: string]> = {
-  you: ['Just you', 'Only for you, kept in this browser'],
-  floor: ['This floor', 'The same for everyone on this floor'],
-  office: ['Everyone', 'The same for everyone in the building'],
+  you: ['Sadece sen', 'Sadece senin için, bu tarayıcıda saklanır'],
+  floor: ['Bu kat', 'Bu kattaki herkes için aynı'],
+  office: ['Herkes', 'Binadaki herkes için aynı'],
 };
 
 /** One setting: its name and who it's for, then whatever sets it. */
@@ -50,7 +50,7 @@ let lastPane: SettingsPane = 'you';
 
 /** `outside` describes the sky over the office (see describeSky), once the server has said. `first` opens on that category instead of the last one. */
 export function openSettings(net: Net, settings: Settings, onChange: (s: Settings) => void, onCharacter: () => void, sound: Pick<OfficeSound, 'ding' | 'needsYou'>, notifier: DesktopNotifier, onSignOut: () => void, outside?: { now: string; live: boolean }, first?: SettingsPane) {
-  const seg = h('div.seg', { role: 'radiogroup', 'aria-label': 'Camera view' });
+  const seg = h('div.seg', { role: 'radiogroup', 'aria-label': 'Kamera görünümü' });
   const note = h('p.setting-note');
   const paint = () => {
     seg.replaceChildren(
@@ -87,8 +87,8 @@ export function openSettings(net: Net, settings: Settings, onChange: (s: Setting
       const v = Math.round(settings[level] * 100);
       slider.value = String(v);
       slider.style.setProperty('--fill', `${v}%`);
-      pct.textContent = settings[muted] ? 'Muted' : `${v}%`;
-      mute.textContent = settings[muted] ? '🔊 Unmute' : '🔇 Mute';
+      pct.textContent = settings[muted] ? 'Sessiz' : `${v}%`;
+      mute.textContent = settings[muted] ? '🔊 Sesi aç' : '🔇 Sustur';
       mute.setAttribute('aria-pressed', String(settings[muted]));
       mute.classList.toggle('danger', settings[muted]);
       row.classList.toggle('muted', settings[muted]);
@@ -108,7 +108,7 @@ export function openSettings(net: Net, settings: Settings, onChange: (s: Setting
     });
     return row;
   };
-  const soundRow = volumeRow('Office sounds volume', 'volume', 'muted', () => sound.ding('done'));
+  const soundRow = volumeRow('Ofis sesleri seviyesi', 'volume', 'muted', () => sound.ding('done'));
 
   /** Changes some of your own settings, and has the office take them up. */
   const change = (some: Partial<Settings>) => {
@@ -116,19 +116,19 @@ export function openSettings(net: Net, settings: Settings, onChange: (s: Setting
     onChange(settings);
   };
   // Voice chat: an open mic, or muted until you hold V.
-  const talkRow = choiceRow('Voice chat', [[false, '🎙️ Open mic'], [true, '✋ Push to talk']], () => settings.pushToTalk, (pushToTalk) => change({ pushToTalk }));
-  const musicRow = volumeRow('Jukebox volume', 'music', 'musicMuted');
+  const talkRow = choiceRow('Sesli sohbet', [[false, '🎙️ Açık mikrofon'], [true, '✋ Bas-konuş']], () => settings.pushToTalk, (pushToTalk) => change({ pushToTalk }));
+  const musicRow = volumeRow('Müzik kutusu seviyesi', 'music', 'musicMuted');
 
   // The swish of the book's pages at the bookshelf, on or off.
-  const pagesRow = choiceRow('Page turns at the bookshelf', [[true, '📖 On'], [false, 'Off']], () => settings.pageTurns, (pageTurns) => change({ pageTurns }));
+  const pagesRow = choiceRow('Kitaplıkta sayfa çevirme sesi', [[true, '📖 Açık'], [false, 'Kapalı']], () => settings.pageTurns, (pageTurns) => change({ pageTurns }));
   // The alarm when a worker stops to ask you something; picking one plays it.
-  const alarmRow = choiceRow<NeedsYouSound>('When a worker needs you', [['once', '🔔 Ring once'], ['remind', '🔁 Keep reminding me'], ['off', '🔕 Off']], () => settings.needsYouSound, (needsYouSound) => {
+  const alarmRow = choiceRow<NeedsYouSound>('Bir çalışan sana ihtiyaç duyunca', [['once', '🔔 Bir kez çal'], ['remind', '🔁 Hatırlatıp dur'], ['off', '🔕 Kapalı']], () => settings.needsYouSound, (needsYouSound) => {
     change({ needsYouSound });
     if (needsYouSound !== 'off') sound.needsYou();
   });
 
   // The building's holiday theme, for everyone.
-  const themeRow = h('div.seg', { role: 'radiogroup', 'aria-label': 'Holiday theme' });
+  const themeRow = h('div.seg', { role: 'radiogroup', 'aria-label': 'Bayram teması' });
   const themeNote = h('p.setting-note');
   const paintTheme = () => {
     const { pick, active, by, at } = store.theme;
@@ -151,19 +151,19 @@ export function openSettings(net: Net, settings: Settings, onChange: (s: Setting
     );
     const now =
       active === 'halloween'
-        ? 'Halloween: the workers are zombies, your hands are an undead warlock’s, the dog’s in costume, the sky’s gone creepy and there are jack-o’-lanterns everywhere.'
+        ? 'Cadılar Bayramı: çalışanlar zombi, ellerin ölümsüz bir büyücünün elleri, köpek kostümlü, gökyüzü ürkütücü ve her yerde balkabağı fenerleri var.'
         : active === 'christmas'
-          ? 'Christmas: the workers are elves, your hands are in mittens, the dog’s Rudolph, and it’s snowing outside.'
-          : 'No decorations up right now.';
-    const how = pick === 'auto' ? ' By the calendar it’s Halloween through October and Christmas through December.' : '';
-    themeNote.textContent = `${now}${how} It’s the same for everyone in the building${by ? `, set by ${by}${at ? ` ${timeAgo(at)}` : ''}` : ''}.`;
+          ? 'Yılbaşı: çalışanlar elf, ellerinde eldiven var, köpek Rudolph ve dışarıda kar yağıyor.'
+          : 'Şu an süs yok.';
+    const how = pick === 'auto' ? ' Takvime göre Ekim boyunca Cadılar Bayramı, Aralık boyunca Yılbaşı.' : '';
+    themeNote.textContent = `${now}${how} Binadaki herkes için aynı${by ? `, ayarlayan: ${by}${at ? ` ${timeAgo(at)}` : ''}` : ''}.`;
   };
   paintTheme();
 
   // The building's map, for everyone: the office, the castle, the space station, or one of your own. Opening Settings
   // has the office read its folder of maps again, so one you just added or fixed shows up.
   net.send({ t: 'map.set' });
-  const mapRow = h('div.seg', { role: 'radiogroup', 'aria-label': 'Map' });
+  const mapRow = h('div.seg', { role: 'radiogroup', 'aria-label': 'Harita' });
   const mapNote = h('p.setting-note');
   const mapBad = h('p.setting-note.bad', { style: 'white-space: pre-line' });
   const paintMap = () => {
@@ -179,7 +179,7 @@ export function openSettings(net: Net, settings: Settings, onChange: (s: Setting
             'aria-checked': String(pick === m.id),
             class: pick === m.id ? 'on' : '',
             disabled: !!m.error,
-            title: m.error ? `${m.id} won't load: ${m.error}` : m.description,
+            title: m.error ? `${m.id} yüklenmiyor: ${m.error}` : m.description,
             onclick: () => {
               if (!m.error && store.map.pick !== m.id) net.send({ t: 'map.set', map: m.id });
             },
@@ -189,9 +189,9 @@ export function openSettings(net: Net, settings: Settings, onChange: (s: Setting
       ),
     );
     const now = choices.find((m) => m.id === pick) ?? choices[0];
-    mapNote.textContent = `${now.description} It’s the same on every floor, for everyone in the building${by ? `, picked by ${by}${at ? ` ${timeAgo(at)}` : ''}` : ''}. Maps of your own go in the office’s .agent-office/maps/ folder as JSON (see docs/maps.md).`;
+    mapNote.textContent = `${now.description} Her katta, binadaki herkes için aynı${by ? `, seçen: ${by}${at ? ` ${timeAgo(at)}` : ''}` : ''}. Kendi haritaların ofisin .agent-office/maps/ klasörüne JSON olarak girer (bkz. docs/maps.md).`;
     const broken = choices.filter((m) => m.error);
-    mapBad.textContent = broken.map((m) => `⚠️ ${m.id} won't load: ${m.error}`).join('\n');
+    mapBad.textContent = broken.map((m) => `⚠️ ${m.id} yüklenmiyor: ${m.error}`).join('\n');
     mapBad.hidden = !broken.length;
   };
   paintMap();
@@ -218,13 +218,13 @@ export function openSettings(net: Net, settings: Settings, onChange: (s: Setting
               paintNotify();
             },
           },
-          '🔔 Turn on notifications',
+          '🔔 Bildirimleri aç',
         ),
       );
     } else if (perm === 'granted') {
       for (const [value, label] of [
-        [true, '🔔 On'],
-        [false, '🔕 Off'],
+        [true, '🔔 Açık'],
+        [false, '🔕 Kapalı'],
       ] as const) {
         notifyRow.append(
           h(
@@ -244,34 +244,34 @@ export function openSettings(net: Net, settings: Settings, onChange: (s: Setting
           ),
         );
       }
-      if (on) notifyRow.append(h('button.btn', { type: 'button', onclick: () => notifier.sample() }, 'Show me one'));
+      if (on) notifyRow.append(h('button.btn', { type: 'button', onclick: () => notifier.sample() }, 'Bir örnek göster'));
     }
     notifyNote.textContent =
       perm === 'unsupported'
-        ? 'This browser can’t show notifications from the office here. They need https or localhost (an SSH tunnel counts).'
+        ? 'Bu tarayıcı burada ofisten bildirim gösteremiyor. https ya da localhost gerekir (SSH tüneli de sayılır).'
         : perm === 'denied'
-          ? 'Your browser blocks notifications from the office. Allow them in the site settings (the icon left of the address), then open this again.'
-          : 'When a worker needs you or finishes while you’re in another tab or app, you get a notification. Click it to go straight to that worker: you’re put at its desk with its terminal open. The tab title counts the workers waiting on someone either way.';
+          ? 'Tarayıcın ofisten gelen bildirimleri engelliyor. Site ayarlarından izin ver (adresin solundaki simge), sonra bunu yeniden aç.'
+          : 'Başka bir sekmede ya da uygulamadayken bir çalışan sana ihtiyaç duyarsa ya da işini bitirirse bildirim gelir. Tıklayınca doğrudan o çalışana gidersin: masasında, terminali açık olarak belirirsin. Sekme başlığı, birini bekleyen çalışanları her durumda sayar.';
   };
   paintNotify();
 
   // The office's Slack / Discord webhook, shared by everyone.
   const hookStatus = h('p.setting-note');
-  const hookInput = h('input', { type: 'text', placeholder: 'https://hooks.slack.com/services/…', 'aria-label': 'Slack or Discord webhook URL', spellcheck: 'false', autocomplete: 'off' }) as HTMLInputElement;
-  const hookSave = h('button.btn.primary', { type: 'button' }, 'Save');
-  const hookTest = h('button.btn', { type: 'button' }, 'Send a test');
-  const hookRemove = h('button.btn.danger', { type: 'button' }, 'Remove');
+  const hookInput = h('input', { type: 'text', placeholder: 'https://hooks.slack.com/services/…', 'aria-label': 'Slack ya da Discord webhook URL’si', spellcheck: 'false', autocomplete: 'off' }) as HTMLInputElement;
+  const hookSave = h('button.btn.primary', { type: 'button' }, 'Kaydet');
+  const hookTest = h('button.btn', { type: 'button' }, 'Test gönder');
+  const hookRemove = h('button.btn.danger', { type: 'button' }, 'Kaldır');
   const hookActions = h('div.seg', { style: 'margin-top:8px' }, hookTest, hookRemove);
   const paintHook = () => {
     const { webhook, error, lastSentAt } = store.notify;
     hookActions.classList.toggle('hidden', !webhook);
-    hookSave.textContent = webhook ? 'Replace' : 'Save';
+    hookSave.textContent = webhook ? 'Değiştir' : 'Kaydet';
     hookStatus.classList.toggle('bad', !!error);
     hookStatus.textContent = !webhook
-      ? 'Paste an incoming webhook from Slack or Discord, and the office posts to that channel when a worker needs input or finishes and nobody has its terminal open. It’s for everyone in the office.'
+      ? 'Slack ya da Discord’dan bir gelen webhook yapıştır; bir çalışan yanıt beklediğinde ya da işini bitirdiğinde ve kimsenin terminali açık olmadığında ofis o kanala mesaj atar. Ofisteki herkes için geçerli.'
       : error
-        ? `⚠️ Posting to ${WEBHOOK_NAME[webhook.kind]} (${webhook.hint}) failed: ${error}`
-        : `📣 Posting to ${WEBHOOK_NAME[webhook.kind]} (${webhook.hint}), set by ${webhook.by} ${timeAgo(webhook.at)}${lastSentAt ? ` · last message ${timeAgo(lastSentAt)}` : ''}.`;
+        ? `⚠️ ${WEBHOOK_NAME[webhook.kind]} (${webhook.hint}) adresine gönderilemedi: ${error}`
+        : `📣 ${WEBHOOK_NAME[webhook.kind]} (${webhook.hint}) adresine gönderiliyor, ayarlayan: ${webhook.by} ${timeAgo(webhook.at)}${lastSentAt ? ` · son mesaj ${timeAgo(lastSentAt)}` : ''}.`;
   };
   paintHook();
   const saveHook = () => {
@@ -292,7 +292,7 @@ export function openSettings(net: Net, settings: Settings, onChange: (s: Setting
   let agentTouched = false;
   agent.element.addEventListener('change', () => (agentTouched = true));
   agent.element.addEventListener('input', () => (agentTouched = true));
-  const agentSave = h('button.btn.primary', { type: 'button' }, 'Save');
+  const agentSave = h('button.btn.primary', { type: 'button' }, 'Kaydet');
   const agentBack = h('button.btn', { type: 'button' });
   const agentActions = h('div.seg', { style: 'margin-top:8px' }, agentSave, agentBack);
   const agentNow = h('p.outside-now');
@@ -306,12 +306,12 @@ export function openSettings(net: Net, settings: Settings, onChange: (s: Setting
     agentNow.classList.toggle('hidden', admin);
     agentNow.textContent = choiceLabel(now);
     agentBack.classList.toggle('hidden', !picked);
-    agentBack.textContent = `Back to ${store.project?.agentCmd.split(' ')[0].split(/[\\/]/).pop() ?? 'the --agent'}`;
+    agentBack.textContent = `${store.project?.agentCmd.split(' ')[0].split(/[\\/]/).pop() ?? '--agent'} ayarına dön`;
     if (!agentTouched) agent.set(now);
     agentNote.textContent =
-      'Every worker starts on this: hired at a desk, handed an issue or a pull request from the boards, taken off the queue, the board agents and meetings. Where you start one, ✏️ Edit picks another just for it.' +
-      (picked ? ` Set by ${picked.by} ${timeAgo(picked.at)}.` : ' It’s the agent the office was started with, on its own default model.') +
-      (admin ? '' : ' Admins can change it.');
+      'Her çalışan bununla başlar: masada işe alınanlar, panolardan issue ya da PR verilenler, kuyruktan alınanlar, pano ajanları ve toplantılar. Birini başlattığın yerde ✏️ Düzenle sadece onun için başka birini seçer.' +
+      (picked ? ` Ayarlayan: ${picked.by} ${timeAgo(picked.at)}.` : ' Ofisin başlatıldığı ajan, kendi varsayılan modeliyle.') +
+      (admin ? '' : ' Yöneticiler değiştirebilir.');
   };
   paintAgent();
   agentSave.addEventListener('click', () => {
@@ -329,17 +329,17 @@ export function openSettings(net: Net, settings: Settings, onChange: (s: Setting
   const promptsNote = h('p.setting-note');
   const paintPrompts = () => {
     const n = rewrittenPrompts();
-    promptsOpen.textContent = store.me.admin ? '📝 Edit the prompts…' : '📝 Read the prompts…';
+    promptsOpen.textContent = store.me.admin ? '📝 Prompt’ları düzenle…' : '📝 Prompt’lara bak…';
     promptsNote.textContent =
-      'What 🤖 Hand to a worker, 🔍 Review and the boards’ other buttons tell a worker, the note the queue adds to a task, the board agents’ briefs, the meeting room’s parts and the sign writer’s instructions. ' +
-      (n ? `${n} of them rewritten.` : 'All as the office wrote them.') +
-      (store.me.admin ? '' : ' Admins can rewrite them.');
+      '🤖 Çalışana ver, 🔍 İncele ve panoların diğer düğmelerinin çalışana söyledikleri, kuyruğun göreve eklediği not, pano ajanlarının brifingleri, toplantı odasının bölümleri ve tabela yazarının talimatları. ' +
+      (n ? `${n} tanesi yeniden yazılmış.` : 'Hepsi ofisin yazdığı gibi.') +
+      (store.me.admin ? '' : ' Yöneticiler yeniden yazabilir.');
   };
   paintPrompts();
 
   // The most workers the office runs at once, across every floor. Admins set it.
-  const limitInput = h('input', { type: 'text', inputmode: 'numeric', 'aria-label': 'Most workers at once', spellcheck: 'false', autocomplete: 'off' }) as HTMLInputElement;
-  const limitSave = h('button.btn.primary', { type: 'button' }, 'Set limit');
+  const limitInput = h('input', { type: 'text', inputmode: 'numeric', 'aria-label': 'Aynı anda en fazla çalışan', spellcheck: 'false', autocomplete: 'off' }) as HTMLInputElement;
+  const limitSave = h('button.btn.primary', { type: 'button' }, 'Sınırı ayarla');
   const limitClear = h('button.btn', { type: 'button' });
   const limitRow = h('div.webhook', {}, limitInput, limitSave, limitClear);
   const limitNote = h('p.setting-note');
@@ -347,16 +347,16 @@ export function openSettings(net: Net, settings: Settings, onChange: (s: Setting
     const m = store.machine;
     const admin = store.me.admin;
     limitRow.classList.toggle('hidden', !admin);
-    limitInput.placeholder = m.ceiling ? `1 to ${m.ceiling}` : 'e.g. 6';
-    limitClear.textContent = m.ceiling ? `Back to ${m.ceiling}` : 'No limit';
+    limitInput.placeholder = m.ceiling ? `1 – ${m.ceiling}` : 'örn. 6';
+    limitClear.textContent = m.ceiling ? `${m.ceiling} değerine dön` : 'Sınır yok';
     limitClear.classList.toggle('hidden', !m.set);
     const now =
       m.limit === undefined
-        ? `No limit: the office hires a worker for every free seat. ${m.workers} ${m.workers === 1 ? 'is' : 'are'} here now, across every floor.`
-        : `At most ${m.limit} worker${m.limit === 1 ? '' : 's'} at once, across every floor (${m.workers} now), shells and board agents too. Hiring past that is refused.`;
-    const from = m.set ? ` Set by ${m.set.by} ${timeAgo(m.set.at)}.` : '';
-    const cap = m.ceiling ? ` The office was started with --max-workers ${m.ceiling}, so it can't go any higher.` : '';
-    limitNote.textContent = now + from + cap + (admin ? '' : ' Admins can change it.');
+        ? `Sınır yok: ofis her boş koltuk için bir çalışan işe alır. Şu an bütün katlarda ${m.workers} çalışan var.`
+        : `Bütün katlarda aynı anda en fazla ${m.limit} çalışan (şu an ${m.workers}), shell’ler ve pano ajanları dahil. Bunun ötesinde işe alım reddedilir.`;
+    const from = m.set ? ` Ayarlayan: ${m.set.by} ${timeAgo(m.set.at)}.` : '';
+    const cap = m.ceiling ? ` Ofis --max-workers ${m.ceiling} ile başlatıldı, bu yüzden daha yükseğe çıkamaz.` : '';
+    limitNote.textContent = now + from + cap + (admin ? '' : ' Yöneticiler değiştirebilir.');
   };
   paintLimit();
   const saveLimit = () => {
@@ -372,14 +372,14 @@ export function openSettings(net: Net, settings: Settings, onChange: (s: Setting
   limitClear.addEventListener('click', () => net.send({ t: 'machine.limit', limit: null }));
 
   // Whether a worker whose pull request merged goes home by itself, for everyone.
-  const leaveRow = h('div.seg', { role: 'radiogroup', 'aria-label': 'Workers whose pull request merged' });
+  const leaveRow = h('div.seg', { role: 'radiogroup', 'aria-label': 'PR’ı birleşen çalışanlar' });
   const leaveNote = h('p.setting-note');
   const paintLeave = () => {
     const { on, by, at } = store.leaveOnMerge;
     leaveRow.replaceChildren(
       ...([
-        [true, '🏠 Go home by themselves'],
-        [false, '🪑 Stay until sent home'],
+        [true, '🏠 Kendiliğinden eve gitsin'],
+        [false, '🪑 Eve gönderilene kadar kalsın'],
       ] as const).map(([value, label]) =>
         h(
           'button.btn',
@@ -397,16 +397,16 @@ export function openSettings(net: Net, settings: Settings, onChange: (s: Setting
       ),
     );
     const now = on
-      ? 'Once a worker’s pull request merges, it goes home as soon as it isn’t working or waiting on you and nobody has its terminal open, and its worktree and branch are deleted. A worktree with uncommitted changes, or commits that aren’t on GitHub, is kept.'
-      : 'A worker whose pull request merged stays at its desk, outlined in purple, until someone sends it home. Turned on, the ones already merged go too.';
-    leaveNote.textContent = `${now} It’s the same for everyone in the building${by ? `, set by ${by}${at ? ` ${timeAgo(at)}` : ''}` : ''}.`;
+      ? 'Bir çalışanın PR’ı birleşince, çalışmayı ya da seni beklemeyi bırakır bırakmaz ve kimsenin terminali açık değilse eve gider; worktree’si ve dalı silinir. Commit edilmemiş değişiklikleri olan ya da GitHub’da olmayan commit’leri bulunan worktree korunur.'
+      : 'PR’ı birleşen çalışan, biri onu eve gönderene kadar masasında mor çerçeveyle kalır. Açarsan zaten birleşmiş olanlar da gider.';
+    leaveNote.textContent = `${now} Binadaki herkes için aynı${by ? `, ayarlayan: ${by}${at ? ` ${timeAgo(at)}` : ''}` : ''}.`;
   };
   paintLeave();
 
   // Where the elevator clones new projects on the office's machine. Admins move it.
-  const dirInput = h('input', { type: 'text', placeholder: '~/Workspace', 'aria-label': 'Workspace folder', spellcheck: 'false', autocomplete: 'off' }) as HTMLInputElement;
-  const dirSave = h('button.btn.primary', { type: 'button' }, 'Save');
-  const dirDefault = h('button.btn', { type: 'button' }, 'Use the default');
+  const dirInput = h('input', { type: 'text', placeholder: '~/Workspace', 'aria-label': 'Çalışma klasörü', spellcheck: 'false', autocomplete: 'off' }) as HTMLInputElement;
+  const dirSave = h('button.btn.primary', { type: 'button' }, 'Kaydet');
+  const dirDefault = h('button.btn', { type: 'button' }, 'Varsayılanı kullan');
   const dirRow = h('div.webhook', {}, dirInput, dirSave);
   const dirActions = h('div.seg', { style: 'margin-top:8px' }, dirDefault);
   const dirNote = h('p.setting-note');
@@ -417,9 +417,9 @@ export function openSettings(net: Net, settings: Settings, onChange: (s: Setting
     dirRow.classList.toggle('hidden', !admin);
     dirActions.classList.toggle('hidden', !admin || !custom);
     dirNote.textContent =
-      `New projects from the elevator are cloned into ${dir}/<owner>/<repo> on the office’s machine.` +
-      (custom && by && at ? ` Set by ${by} ${timeAgo(at)}.` : '') +
-      (admin ? ' A checkout of the same repository that’s already there is used as it is. Floors you already have stay where they are.' : ' An admin can move it.');
+      `Asansörden gelen yeni projeler ofisin makinesinde ${dir}/<owner>/<repo> içine klonlanır.` +
+      (custom && by && at ? ` Ayarlayan: ${by} ${timeAgo(at)}.` : '') +
+      (admin ? ' Orada zaten bulunan aynı deponun klasörü olduğu gibi kullanılır. Mevcut katlar olduğu yerde kalır.' : ' Bir yönetici taşıyabilir.');
   };
   paintDir();
   const saveDir = () => {
@@ -434,48 +434,48 @@ export function openSettings(net: Net, settings: Settings, onChange: (s: Setting
   dirDefault.addEventListener('click', () => net.send({ t: 'floor.projectsDir', dir: '' }));
 
   // The dog on this floor: its name, breed and coat, for everyone here (see settings-dog.ts).
-  const { section: dogSection, paint: paintDog } = dogSetting(net, (body) => setting('Office dog', 'floor', ...body));
+  const { section: dogSection, paint: paintDog } = dogSetting(net, (body) => setting('Ofis köpeği', 'floor', ...body));
 
   // What the sky's doing, and which clock it keeps (see settings-sky.ts).
-  const sky = outside && outsideSetting(net, outside, (body) => setting('Outside', 'office', ...body));
+  const sky = outside && outsideSetting(net, outside, (body) => setting('Dışarısı', 'office', ...body));
   const account = store.me.account;
-  const signOut = h('button.btn', { type: 'button' }, '🚪 Sign out');
+  const signOut = h('button.btn', { type: 'button' }, '🚪 Çıkış yap');
   signOut.addEventListener('click', onSignOut);
-  const character = h('button.btn', { type: 'button' }, account ? '🧍 Change your look' : '🧍 Change your look & name');
+  const character = h('button.btn', { type: 'button' }, account ? '🧍 Görünümünü değiştir' : '🧍 Görünümünü ve adını değiştir');
   const panes: Record<SettingsPane, Node[]> = {
     you: [
-      setting('Your character', null, character),
-      setting('Camera view', 'you', seg, note),
-      setting('Signed in', null, h('div.volume', {}, signOut), h('p.setting-note', {}, account ? `As ${account.name}, with your own account (${account.role}).` : 'With the shared office password.')),
+      setting('Karakterin', null, character),
+      setting('Kamera görünümü', 'you', seg, note),
+      setting('Giriş', null, h('div.volume', {}, signOut), h('p.setting-note', {}, account ? `${account.name} olarak, kendi hesabınla (${account.role}).` : 'Ortak ofis parolasıyla.')),
     ],
     sound: [
-      setting('Office sounds', 'you', soundRow, h('p.setting-note', {}, 'Workers typing, footsteps, the coffee machine, birds and rain outside, the dog, the ding when a worker is done and the alarm when one needs you. Voice chat isn’t affected.')),
-      setting('When a worker needs you', 'you', alarmRow, h('p.setting-note', {}, 'An alarm the moment a worker stops to ask you something or wants a permission. Keep reminding me rings it again, softly, every 30 seconds until someone opens that worker’s terminal. It’s as loud as the office sounds are.')),
-      setting('Page turns at the bookshelf', 'you', pagesRow, h('p.setting-note', {}, 'A soft swish each time the book in your hands turns a page, as you open a doc or scroll through one. The 🔈 at the top of the bookshelf turns it off too.')),
-      setting('Jukebox', 'you', musicRow, h('p.setting-note', {}, 'The jukebox in the lounge. Everyone on the floor hears the same song, louder the closer they are to it; this is how loud it is for you alone.')),
-      setting('Voice chat', 'you', talkRow, h('p.setting-note', {}, 'Either way, V joins voice, holding V talks and you’re muted once you let go, and M mutes or unmutes. With push to talk you join muted. Leave voice from the ☰ menu.')),
+      setting('Ofis sesleri', 'you', soundRow, h('p.setting-note', {}, 'Yazan çalışanlar, ayak sesleri, kahve makinesi, dışarıdaki kuşlar ve yağmur, köpek, bir çalışan bitirince çalan zil ve birine ihtiyacı olunca çalan alarm. Sesli sohbet etkilenmez.')),
+      setting('Bir çalışan sana ihtiyaç duyunca', 'you', alarmRow, h('p.setting-note', {}, 'Bir çalışan sana bir şey sormak için durduğu ya da izin istediği anda bir alarm çalar. Hatırlatıp dur, biri o çalışanın terminalini açana kadar her 30 saniyede bir alarmı yumuşakça tekrar çalar. Ofis sesleri kadar yüksektir.')),
+      setting('Kitaplıkta sayfa çevirme sesi', 'you', pagesRow, h('p.setting-note', {}, 'Bir doküman açarken ya da içinde gezinirken, elindeki kitap her sayfa çevirdiğinde hafif bir hışırtı duyulur. Kitaplığın üstündeki 🔈 de bunu kapatır.')),
+      setting('Müzik kutusu', 'you', musicRow, h('p.setting-note', {}, 'Salondaki müzik kutusu. Kattaki herkes aynı şarkıyı duyar, yaklaştıkça daha yüksek; bu, sadece senin için ne kadar yüksek olduğunu ayarlar.')),
+      setting('Voice chat', 'you', talkRow, h('p.setting-note', {}, 'Hangisi olursa olsun, V sesli sohbete katılır, V’ye basılı tutunca konuşursun, bırakınca susarsın; M sesi kapatır ya da açar. Bas-konuşta sessiz katılırsın. Sesli sohbetten ☰ menüsünden çıkarsın.')),
     ],
     notify: [
-      setting('Desktop notifications', 'you', notifyRow, notifyNote),
-      setting('Team notifications (Slack / Discord)', 'office', h('div.webhook', {}, hookInput, hookSave), hookActions, hookStatus),
+      setting('Masaüstü bildirimleri', 'you', notifyRow, notifyNote),
+      setting('Ekip bildirimleri (Slack / Discord)', 'office', h('div.webhook', {}, hookInput, hookSave), hookActions, hookStatus),
     ],
     building: [
-      setting('Map', 'office', mapRow, mapNote, mapBad),
-      setting('Holiday theme', 'office', themeRow, themeNote),
+      setting('Harita', 'office', mapRow, mapNote, mapBad),
+      setting('Bayram teması', 'office', themeRow, themeNote),
       ...(sky ? [sky.section] : []),
       dogSection,
-      setting('Workspace folder', 'office', dirRow, dirActions, dirNote),
+      setting('Çalışma klasörü', 'office', dirRow, dirActions, dirNote),
     ],
     workers: [
-      setting('Default worker', 'office', agentNow, agent.element, agentActions, agentNote),
-      setting('Worker limit', 'office', limitRow, limitNote),
-      setting('Workers whose pull request merged', 'office', leaveRow, leaveNote),
-      setting('Prompts', 'office', promptsOpen, promptsNote),
+      setting('Varsayılan çalışan', 'office', agentNow, agent.element, agentActions, agentNote),
+      setting('Çalışan sınırı', 'office', limitRow, limitNote),
+      setting('PR’ı birleşen çalışanlar', 'office', leaveRow, leaveNote),
+      setting('Prompt’lar', 'office', promptsOpen, promptsNote),
     ],
   };
 
   // The categories down the side, the one picked on the right.
-  const nav = h('nav.settings-nav', { role: 'tablist', 'aria-orientation': 'vertical', 'aria-label': 'Settings' });
+  const nav = h('nav.settings-nav', { role: 'tablist', 'aria-orientation': 'vertical', 'aria-label': 'Ayarlar' });
   const tabs = new Map<SettingsPane, HTMLButtonElement>();
   const bodies = new Map<SettingsPane, HTMLElement>();
   for (const p of PANES) {
@@ -506,8 +506,8 @@ export function openSettings(net: Net, settings: Settings, onChange: (s: Setting
     tabs.get(next)!.focus();
   });
 
-  const close = h('button.btn.close', { 'aria-label': 'Close' }, '✕');
-  const el = h('div.modal.settings', { role: 'dialog', 'aria-label': 'Settings' }, h('header', {}, h('h2', {}, '⚙️ Settings'), close), h('div.settings-body', {}, nav, ...bodies.values()));
+  const close = h('button.btn.close', { 'aria-label': 'Kapat' }, '✕');
+  const el = h('div.modal.settings', { role: 'dialog', 'aria-label': 'Ayarlar' }, h('header', {}, h('h2', {}, '⚙️ Ayarlar'), close), h('div.settings-body', {}, nav, ...bodies.values()));
   const offNotify = store.on('notify', paintHook);
   const offDog = store.on('dog', paintDog);
   const offTheme = store.on('theme', paintTheme);
@@ -517,7 +517,7 @@ export function openSettings(net: Net, settings: Settings, onChange: (s: Setting
   const offDir = [store.on('projectsDir', paintDir), store.on('me', paintDir)];
   const offPrompts = [store.on('prompts', paintAgent), store.on('prompts', paintPrompts), store.on('me', paintAgent), store.on('me', paintPrompts)];
   const modal = openModal(el, {
-    doing: '⚙️ in settings',
+    doing: '⚙️ ayarlarda',
     onClose: () => {
       offNotify();
       offDog();

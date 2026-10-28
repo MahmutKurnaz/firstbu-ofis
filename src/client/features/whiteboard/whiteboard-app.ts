@@ -78,7 +78,7 @@ function upload(f: BinaryFileData): Promise<boolean> {
         return true;
       }
       const { error } = (await res.json().catch(() => ({}))) as { error?: string };
-      toast(error ?? "Couldn't put that picture on the whiteboard", 'warn');
+      toast(error ?? "O resim beyaz tahtaya konamadı", 'warn');
       return false;
     })
     .catch(() => {
@@ -210,7 +210,7 @@ export function mountWhiteboard(host: HTMLElement, send: (msg: ClientMsg) => voi
       const n = JSON.stringify(el).length;
       // The office would refuse it (or drop the connection over it), so it stays on your screen only.
       if (n > WB_MAX_ELEMENT_BYTES) {
-        if (!tooBig.has(el.id)) toast("That's too big for the whiteboard, so only you can see it. Try it in smaller pieces.", 'warn');
+        if (!tooBig.has(el.id)) toast("Beyaz tahta için fazla büyük, bu yüzden yalnızca sen görüyorsun. Daha küçük parçalarla dene.", 'warn');
         tooBig.add(el.id);
         continue;
       }
@@ -305,7 +305,7 @@ export function mountWhiteboard(host: HTMLElement, send: (msg: ClientMsg) => voi
         e(WelcomeScreen.Hints.MenuHint),
         e(WelcomeScreen.Hints.ToolbarHint),
         e(WelcomeScreen.Hints.HelpHint),
-        e(WelcomeScreen.Center, null, e(WelcomeScreen.Center.Heading, null, 'Draw together: everyone on this floor sees it live, and it stays up on the board')),
+        e(WelcomeScreen.Center, null, e(WelcomeScreen.Center.Heading, null, 'Birlikte çiz: bu kattaki herkes canlı görür, tahtada kalır')),
       ),
     ),
   );

@@ -4,6 +4,7 @@
  */
 import * as THREE from 'three';
 import { OutlineEffect } from 'three/examples/jsm/effects/OutlineEffect.js';
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { store } from '../state';
 import { Holiday } from '../world/holiday';
 import { buildOffice } from '../world/office';
@@ -63,6 +64,11 @@ export function createScene(canvas: HTMLCanvasElement, renderer: THREE.WebGLRend
   scene.background = new THREE.Color('#bfe3ff');
   scene.fog = new THREE.Fog('#bfe3ff', 40, 90);
   const camera = new THREE.PerspectiveCamera(FOV, 1, 0.1, FAR);
+  // A soft room's worth of light all round, which only the physical materials (your character, the street's own furniture) take: they pick up the sky's tint and a little shine, as in a photo. The sky dims it with the lights at night (world/sky.ts).
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+  pmrem.dispose();
+  scene.environmentIntensity = 0.45;
 
   const hemi = new THREE.HemisphereLight('#fff5e6', '#c9a27a', 1.5);
   const ambient = new THREE.AmbientLight('#ffffff', 0.5);

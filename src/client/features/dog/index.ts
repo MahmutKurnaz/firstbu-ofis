@@ -35,7 +35,7 @@ export function installDog(ctx: Ctx): Dog {
         (id) => store.workers.get(id)?.name,
         (id) => (id === store.you ? 'you' : store.peers.get(id)?.name),
       );
-      return { k: `${dog.name}|${doing}`, parts: [hintTitle(`🐶 ${dog.name}`), doing ? aside(doing) : '', key('E', 'Pet')] };
+      return { k: `${dog.name}|${doing}`, parts: [hintTitle(`🐶 ${dog.name}`), doing ? aside(doing) : '', key('E', 'Sev')] };
     },
     use: onE(() => ctx.net.send({ t: 'dog.pet' })),
   });

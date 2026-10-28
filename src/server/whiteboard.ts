@@ -60,13 +60,13 @@ export class Whiteboard {
       if (!newer(el, had)) continue;
       const size = JSON.stringify(el).length;
       if (size > WB_MAX_ELEMENT_BYTES) {
-        error = 'That drawing is too big for the whiteboard. Try it in smaller pieces.';
+        error = 'Bu çizim beyaz tahta için çok büyük. Daha küçük parçalar hâlinde dene.';
         continue;
       }
       if (!had && this.elements.size >= WB_MAX_ELEMENTS) this.forgetDeleted(1);
       if (this.bytes - (this.sizes.get(el.id) ?? 0) + size > WB_MAX_BYTES) this.forgetDeleted(Infinity);
       if ((!had && this.elements.size >= WB_MAX_ELEMENTS) || this.bytes - (this.sizes.get(el.id) ?? 0) + size > WB_MAX_BYTES) {
-        error = 'The whiteboard is full. Clear some of it to draw more.';
+        error = 'Beyaz tahta dolu. Daha fazla çizmek için biraz sil.';
         continue;
       }
       this.put(el, size);
@@ -94,12 +94,12 @@ export class Whiteboard {
     if (this.files.has(f.id)) return undefined;
     const json = JSON.stringify(f);
     if (this.fileBytes + json.length > WB_MAX_FILES_BYTES) this.forgetUnusedFiles();
-    if (this.fileBytes + json.length > WB_MAX_FILES_BYTES) return 'The whiteboard has too many pictures on it. Delete some first.';
+    if (this.fileBytes + json.length > WB_MAX_FILES_BYTES) return 'Beyaz tahtada çok fazla resim var. Önce bazılarını sil.';
     try {
       mkdirSync(this.filesDir, { recursive: true, mode: 0o700 });
       writeFileSync(path.join(this.filesDir, `${f.id}.json`), json, { mode: 0o600 });
     } catch {
-      return "Couldn't save the picture on the office's machine";
+      return 'Resim ofis makinesine kaydedilemedi';
     }
     this.files.set(f.id, json.length);
     this.fileBytes += json.length;

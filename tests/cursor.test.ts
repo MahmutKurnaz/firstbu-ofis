@@ -75,7 +75,7 @@ test('Cursor model ids are checked before they reach the command line', () => {
 });
 
 test('reads the login screen off the terminal', () => {
-  assert.match(cursorBlocked('  v2026.09.08-6caf4ff\n  Press any key to log in...') ?? '', /signed in/);
+  assert.match(cursorBlocked('  v2026.09.08-6caf4ff\n  Press any key to log in...') ?? '', /giriş yapmamış/);
   assert.equal(cursorBlocked('→ Add a follow-up'), undefined);
 });
 

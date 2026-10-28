@@ -88,11 +88,11 @@ const until = async (fn: () => boolean) => {
 
 test("git's progress reads as a step, how far and how fast", () => {
   const out = "Cloning into '/x/acme/game'...\nremote: Enumerating objects: 2742, done.\nremote: Counting objects: 100% (5/5), done.\nReceiving objects:  12% (330/2742), 40.12 MiB | 1.52 MiB/s\rReceiving objects:  64% (1755/2742), 231.40 MiB | 1.50 MiB/s\r";
-  assert.deepEqual(parseProgress(out), { step: 'Downloading', percent: 64, detail: '231.40 MiB · 1.50 MiB/s' });
-  assert.deepEqual(parseProgress(`${out}Receiving objects: 100% (2742/2742), 362.00 MiB | 1.50 MiB/s, done.\nResolving deltas:  30% (3/10)\r`), { step: 'Unpacking', percent: 30 });
-  assert.deepEqual(parseProgress('remote: Compressing objects:  50% (1/2)\r'), { step: 'GitHub is packing it up', percent: 50 });
-  assert.deepEqual(parseProgress('Updating files:  99% (990/1000)\r'), { step: 'Checking out files', percent: 99 });
-  assert.deepEqual(parseProgress("Cloning into '/x'...\n"), { step: 'Connecting to GitHub' });
+  assert.deepEqual(parseProgress(out), { step: 'İndiriliyor', percent: 64, detail: '231.40 MiB · 1.50 MiB/s' });
+  assert.deepEqual(parseProgress(`${out}Receiving objects: 100% (2742/2742), 362.00 MiB | 1.50 MiB/s, done.\nResolving deltas:  30% (3/10)\r`), { step: 'Paket açılıyor', percent: 30 });
+  assert.deepEqual(parseProgress('remote: Compressing objects:  50% (1/2)\r'), { step: 'GitHub paketliyor', percent: 50 });
+  assert.deepEqual(parseProgress('Updating files:  99% (990/1000)\r'), { step: 'Dosyalar çıkarılıyor', percent: 99 });
+  assert.deepEqual(parseProgress("Cloning into '/x'...\n"), { step: 'GitHub’a bağlanılıyor' });
   assert.equal(parseProgress(''), undefined);
 });
 
@@ -112,7 +112,7 @@ test('a clone shows how far along it is, then becomes a floor', async (t) => {
   building.watchClones(() => seen.push(building.cloneProgress(id)));
   const r = await building.add('acme/game', 'Sam', (def) => (id = def.id));
   assert.equal(typeof r, 'object', String(r));
-  assert.deepEqual(seen.at(-1), { step: 'Downloading', percent: 42, detail: '1.00 MiB · 512.00 KiB/s' });
+  assert.deepEqual(seen.at(-1), { step: 'İndiriliyor', percent: 42, detail: '1.00 MiB · 512.00 KiB/s' });
   assert.ok(existsSync(path.join(projects, 'acme', 'game', 'index.html')));
   assert.deepEqual(building.list().map((d) => d.repo), ['acme/game']);
   assert.deepEqual(building.pending(), []);
@@ -126,14 +126,14 @@ test("a clone that goes quiet is stopped as stalled, and one that can't sign in 
   const building = new Building(dataDir, projects, fast);
   const r = building.add('acme/game', 'Sam', () => {});
   const pid = await running();
-  assert.match(String(await r), /stalled/);
+  assert.match(String(await r), /takıldı/);
   await until(() => !alive(pid));
   assert.ok(!alive(pid), 'the clone was stopped');
   assert.deepEqual(building.pending(), []);
 
   delete process.env.FAKE_GH_HANG;
   process.env.FAKE_GH_FAIL = 'Host key verification failed.';
-  assert.match(String(await building.add('acme/game', 'Sam', () => {})), /^Couldn't clone acme\/game: ssh .*host key/);
+  assert.match(String(await building.add('acme/game', 'Sam', () => {})), /^acme\/game klonlanamadı: .*ssh .*host anahtar/);
   assert.deepEqual(building.list(), []);
 });
 
@@ -144,13 +144,13 @@ test('a clone can be stopped by an admin or whoever added it', async (t) => {
   let id = '';
   const r = building.add('acme/game', 'Sam', (def) => (id = def.id), 'sam-account');
   const pid = await running();
-  assert.match(String(building.cancel(id, 'Ann stopped the clone', (owner) => owner === 'ann-account')), /Only admins/);
+  assert.match(String(building.cancel(id, 'Ann stopped the clone', (owner) => owner === 'ann-account')), /yalnızca yöneticiler/);
   assert.equal(building.cancel(id, 'Sam stopped the clone', (owner) => owner === 'sam-account'), undefined);
   assert.equal(await r, 'Sam stopped the clone');
   await until(() => !alive(pid));
   assert.ok(!alive(pid));
   assert.deepEqual(building.list(), []);
-  assert.equal(building.cancel(id, 'again', () => true), 'No such floor');
+  assert.equal(building.cancel(id, 'again', () => true), 'Böyle bir kat yok');
 });
 
 test('a restart mid-clone picks the clone back up, and it becomes its floor', async (t) => {
@@ -193,6 +193,6 @@ test("a clone that was cut off isn't taken for a checkout", async (t) => {
   execFileSync('git', ['init', '-q', dest]);
   execFileSync('git', ['-C', dest, 'remote', 'add', 'origin', 'https://github.com/acme/game.git']);
   const building = new Building(dataDir, projects, fast);
-  assert.match(String(await building.add('acme/game', 'Sam', () => {})), /didn't finish/);
+  assert.match(String(await building.add('acme/game', 'Sam', () => {})), /yarım kalmış/);
   assert.deepEqual(building.list(), []);
 });

@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { CAM_PRESETS, DEFAULT_PRESET, nextPreset, presetIndex, clipFor, clipOf } from '../src/client/features/avatar/logic.js';
+import { CAM_PRESETS, DEFAULT_PRESET, nextPreset, presetIndex, gaitFor, clipOf, STILL, WALK_UP_TO, WALK_PACE, RUN_PACE } from '../src/client/features/avatar/logic.js';
 
-test('there are 5 camera presets with unique ids', () => {
-  assert.equal(CAM_PRESETS.length, 5);
+test('there are 6 camera presets with unique ids', () => {
+  assert.equal(CAM_PRESETS.length, 6);
   const ids = CAM_PRESETS.map((p) => p.id);
   assert.equal(new Set(ids).size, ids.length);
 });
@@ -20,11 +20,12 @@ test('third-person presets have positive distance and pitch', () => {
   }
 });
 
-test('only the "on" preset looks back from the front (yaw π)', () => {
+test('only the "on" and "portre" presets look back from the front (yaw π)', () => {
   const on = CAM_PRESETS.find((p) => p.id === 'on');
   assert.ok(on);
   assert.equal(on.yaw, Math.PI);
-  for (const p of CAM_PRESETS.filter((c) => c.id !== 'on')) assert.equal(p.yaw, 0, p.id);
+  for (const p of CAM_PRESETS.filter((c) => c.id !== 'on' && c.id !== 'portre')) assert.equal(p.yaw, 0, p.id);
+  assert.equal(CAM_PRESETS.find((c) => c.id === 'portre')!.yaw, Math.PI);
 });
 
 test('DEFAULT_PRESET is a valid index', () => {
@@ -55,17 +56,74 @@ test('presetIndex falls back to the default for anything else', () => {
   }
 });
 
-test('clipFor: airborne is a jump, even while moving or running', () => {
-  assert.equal(clipFor({ moving: false, running: false, grounded: false }), 'jump');
-  assert.equal(clipFor({ moving: true, running: false, grounded: false }), 'jump');
-  assert.equal(clipFor({ moving: true, running: true, grounded: false }), 'jump');
+test('gaitFor: airborne is a jump at rate 1, whatever the speed', () => {
+  for (const v of [0, 0.1, 1, 2.4, 6, 100, -3, NaN, Infinity]) {
+    assert.deepEqual(gaitFor(v, false), { clip: 'jump', rate: 1 }, String(v));
+  }
 });
 
-test('clipFor: on the ground it is idle, walk or run', () => {
-  assert.equal(clipFor({ moving: false, running: false, grounded: true }), 'idle');
-  assert.equal(clipFor({ moving: true, running: false, grounded: true }), 'walk');
-  assert.equal(clipFor({ moving: true, running: true, grounded: true }), 'run');
-  assert.equal(clipFor({ moving: false, running: true, grounded: true }), 'idle');
+test('gaitFor: standing still (<= STILL, 0, negative, NaN) is idle at rate 1', () => {
+  for (const v of [STILL, STILL - 0.01, 0, -0, -1, -50, NaN]) {
+    assert.deepEqual(gaitFor(v, true), { clip: 'idle', rate: 1 }, String(v));
+  }
+});
+
+test('gaitFor: just over STILL starts the walk', () => {
+  assert.equal(gaitFor(STILL + 0.01, true).clip, 'walk');
+});
+
+test('gaitFor: between STILL and WALK_UP_TO it walks, rate = speed / WALK_PACE', () => {
+  for (const v of [0.5, 1, WALK_PACE, 2, WALK_UP_TO]) {
+    const g = gaitFor(v, true);
+    assert.equal(g.clip, 'walk', String(v));
+    assert.ok(Math.abs(g.rate - v / WALK_PACE) < 1e-12, String(v));
+  }
+  assert.equal(gaitFor(WALK_PACE, true).rate, 1);
+});
+
+test('gaitFor: faster than WALK_UP_TO it runs, rate = speed / RUN_PACE', () => {
+  for (const v of [WALK_UP_TO + 0.01, 3, 4.6, RUN_PACE, 7]) {
+    const g = gaitFor(v, true);
+    assert.equal(g.clip, 'run', String(v));
+    assert.ok(Math.abs(g.rate - Math.min(1.5, Math.max(0.4, v / RUN_PACE))) < 1e-12, String(v));
+  }
+  assert.equal(gaitFor(RUN_PACE, true).rate, 1);
+  assert.ok(Math.abs(gaitFor(4.8, true).rate - 0.8) < 1e-12);
+});
+
+test('gaitFor: the run rate is clamped to [0.4, 1.5], and the feet match the floor right from where the run starts', () => {
+  const low = gaitFor(WALK_UP_TO + 0.01, true); // 2.41 / 6 = 0.40
+  assert.equal(low.clip, 'run');
+  assert.ok(Math.abs(low.rate - (WALK_UP_TO + 0.01) / RUN_PACE) < 1e-12);
+  assert.equal(gaitFor(1, true).clip, 'walk');
+  assert.equal(gaitFor(9, true).rate, 1.5); // exactly the ceiling
+  assert.equal(gaitFor(50, true).rate, 1.5);
+  assert.equal(gaitFor(1e9, true).rate, 1.5);
+  assert.equal(gaitFor(Infinity, true).rate, 1.5);
+  assert.ok(Math.abs(gaitFor(3.3, true).rate - 0.55) < 1e-12);
+});
+
+test('gaitFor: rates stay positive, finite and the walk is never played much faster than ~1.7x', () => {
+  for (let v = -2; v <= 30; v += 0.01) {
+    const g = gaitFor(v, true);
+    assert.ok(Number.isFinite(g.rate) && g.rate > 0, String(v));
+    if (g.clip === 'walk') assert.ok(g.rate <= 1.72, `${v} walk rate ${g.rate}`);
+    if (g.clip === 'run') assert.ok(g.rate >= 0.4 && g.rate <= 1.5, `${v} run rate ${g.rate}`);
+  }
+  assert.ok(gaitFor(WALK_UP_TO, true).rate <= 1.72);
+});
+
+test('gaitFor: the clip changes only at the WALK_UP_TO boundary (inclusive walk) and STILL', () => {
+  assert.equal(gaitFor(WALK_UP_TO, true).clip, 'walk');
+  assert.equal(gaitFor(WALK_UP_TO + 1e-9, true).clip, 'run');
+  let changes = 0;
+  let prev = gaitFor(0, true).clip;
+  for (let v = 0; v <= 12; v += 0.001) {
+    const c = gaitFor(v, true).clip;
+    if (c !== prev) changes++;
+    prev = c;
+  }
+  assert.equal(changes, 2); // idle -> walk -> run, no flicker
 });
 
 test('clipOf maps model clip names, ignoring case', () => {
@@ -77,8 +135,8 @@ test('clipOf maps model clip names, ignoring case', () => {
 });
 
 test('clipOf returns undefined for clips it does not drive', () => {
-  assert.equal(clipOf('wave'), undefined);
-  assert.equal(clipOf('sit'), undefined);
+  assert.equal(clipOf('wave'), 'wave');
+  assert.equal(clipOf('sit'), 'sit');
   assert.equal(clipOf(''), undefined);
 });
 

@@ -50,13 +50,16 @@ const wallSpan = (b: Bounds, wall: WallSide): [number, number] => (wall === 'nor
 /** How far along its wall (x, z) is. */
 const along = (wall: WallSide, x: number, z: number) => (wall === 'north' || wall === 'south' ? x : z);
 
+/** A wall's name in the messages. */
+const WALL_TR = { north: 'kuzey', south: 'güney', east: 'doğu', west: 'batı' } as const;
+
 /** Checks a map's airlock, and works out where its door, its chamber and its outer hatch are. */
 export function planAirlock(input: unknown, hall: Bounds): AirlockPlan {
-  if (!isObj(input)) throw new MapError('airlock should be { x, z }: just inside its inner door');
+  if (!isObj(input)) throw new MapError('airlock { x, z } olmalı: iç kapısının hemen içi');
   const a = input as unknown as AirlockConfig;
   const x = num(a.x, 'airlock.x');
   const z = num(a.z, 'airlock.z');
-  if (x < hall.minX || x > hall.maxX || z < hall.minZ || z > hall.maxZ) throw new MapError(`airlock (${x.toFixed(1)}, ${z.toFixed(1)}) is outside the hall`);
+  if (x < hall.minX || x > hall.maxX || z < hall.minZ || z > hall.maxZ) throw new MapError(`airlock (${x.toFixed(1)}, ${z.toFixed(1)}) salonun dışında`);
   const { wall } = nearestWall(hall, x, z);
   const out = wallOut(wall);
   const door = wallPoint(hall, wall, along(wall, x, z));
@@ -73,20 +76,20 @@ export function wallOpenings(c: MapConfig, hall: Bounds, height: number, airlock
   const out: WallOpening[] = [];
   const add = (o: WallOpening, what: string) => {
     const [lo, hi] = wallSpan(hall, o.wall);
-    if (o.u - o.width / 2 < lo + MARGIN || o.u + o.width / 2 > hi - MARGIN) throw new MapError(`${what} runs off the end of the ${o.wall} wall: move it along, or make it narrower`);
-    if (o.y + o.height > height - MARGIN) throw new MapError(`${what} reaches ${(o.y + o.height).toFixed(1)} m up, and the hall's walls are ${height} m: it needs ${MARGIN} m of wall over it`);
+    if (o.u - o.width / 2 < lo + MARGIN || o.u + o.width / 2 > hi - MARGIN) throw new MapError(`${what}, ${WALL_TR[o.wall]} duvarının ucundan taşıyor: kaydır ya da daralt`);
+    if (o.y + o.height > height - MARGIN) throw new MapError(`${what} ${(o.y + o.height).toFixed(1)} m yüksekliğe çıkıyor, salonun duvarları ${height} m: üstünde ${MARGIN} m duvar kalmalı`);
     const hit = out.find((p) => p.wall === o.wall && Math.abs(p.u - o.u) < (p.width + o.width) / 2 + MARGIN);
-    if (hit) throw new MapError(`${what} runs into ${hit.kind === 'door' ? 'the way in' : hit.kind === 'airlock' ? 'the airlock' : 'another viewport'} in the ${o.wall} wall`);
+    if (hit) throw new MapError(`${what}, ${WALL_TR[o.wall]} duvarındaki ${hit.kind === 'door' ? 'girişe' : hit.kind === 'airlock' ? 'hava kilidine' : 'başka bir lumbuza'} çarpıyor`);
     out.push(o);
   };
   const d = nearestWall(hall, c.door.x, c.door.z);
-  add({ wall: d.wall, kind: 'door', u: along(d.wall, c.door.x, c.door.z), y: 0, width: HATCH.width, height: HATCH.height }, 'the way in (door)');
-  if (airlock) add({ wall: airlock.wall, kind: 'airlock', u: along(airlock.wall, airlock.door[0], airlock.door[1]), y: 0, width: AIRLOCK.door, height: AIRLOCK.height }, 'the airlock');
+  add({ wall: d.wall, kind: 'door', u: along(d.wall, c.door.x, c.door.z), y: 0, width: HATCH.width, height: HATCH.height }, 'giriş (kapı)');
+  if (airlock) add({ wall: airlock.wall, kind: 'airlock', u: along(airlock.wall, airlock.door[0], airlock.door[1]), y: 0, width: AIRLOCK.door, height: AIRLOCK.height }, 'hava kilidi');
   (c.props ?? []).forEach((p, i) => {
     if (p.kind !== 'viewport') return;
     const { wall, gap } = nearestWall(hall, p.x, p.z);
-    if (gap > 1) throw new MapError(`props[${i}] (a viewport) should be on a wall: it's ${gap.toFixed(1)} m from the nearest`);
-    add({ wall, kind: 'viewport', u: along(wall, p.x, p.z), y: p.y ?? VIEWPORT.y, width: p.width ?? VIEWPORT.width, height: p.height ?? VIEWPORT.height }, `props[${i}] (a viewport)`);
+    if (gap > 1) throw new MapError(`props[${i}] (bir lumbuz) bir duvarın üzerinde olmalı: en yakın duvara ${gap.toFixed(1)} m uzakta`);
+    add({ wall, kind: 'viewport', u: along(wall, p.x, p.z), y: p.y ?? VIEWPORT.y, width: p.width ?? VIEWPORT.width, height: p.height ?? VIEWPORT.height }, `props[${i}] (bir lumbuz)`);
   });
   return out;
 }

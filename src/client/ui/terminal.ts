@@ -13,6 +13,7 @@ import { findLine } from '../../shared/search';
 import { DROP_MAX_BYTES, droppedPaths } from '../../shared/drops';
 import { engineLabel, providerUsageNote, providerUsageState, providerWaitingLabel, resolvedProvider } from './provider';
 import { naturalKey } from './termkeys';
+import { termImages } from './termimages';
 import { termTabs } from './termtabs';
 import { dictateField, dictation } from './dictate';
 
@@ -29,9 +30,9 @@ const TYPING_SHOWS_MS = 2500;
 
 /** "Sam is typing…", "Sam and Ada are typing…", "Sam and 2 others are typing…". */
 function typingLine(names: string[]): string {
-  if (names.length === 1) return `${names[0]} is typing…`;
-  if (names.length === 2) return `${names[0]} and ${names[1]} are typing…`;
-  return `${names[0]} and ${names.length - 1} others are typing…`;
+  if (names.length === 1) return `${names[0]} yazıyor…`;
+  if (names.length === 2) return `${names[0]} ve ${names[1]} yazıyor…`;
+  return `${names[0]} ve ${names.length - 1} kişi daha yazıyor…`;
 }
 
 /**
@@ -55,12 +56,12 @@ function initials(name: string): string {
 
 /** Sends a file dropped or pasted into a worker's terminal to the office; where the office keeps it. */
 async function uploadDrop(workerId: string, f: File): Promise<string> {
-  const name = f.name || 'That file';
-  if (f.size > DROP_MAX_BYTES) throw new Error(`${name} is too big to drop into a terminal (${DROP_MAX_BYTES / 1024 / 1024} MB at most)`);
+  const name = f.name || 'Bu dosya';
+  if (f.size > DROP_MAX_BYTES) throw new Error(`${name} terminale bırakmak için çok büyük (en fazla ${DROP_MAX_BYTES / 1024 / 1024} MB)`);
   const q = new URLSearchParams({ floor: store.floor ?? '', worker: workerId, name: f.name });
   const res = await fetch(`/api/term/drop?${q}`, { method: 'POST', headers: { 'content-type': f.type || 'application/octet-stream' }, body: f });
   const r = (await res.json().catch(() => ({}))) as { path?: string; error?: string };
-  if (!res.ok || !r.path) throw new Error(r.error ?? `${name} could not be dropped into the terminal`);
+  if (!res.ok || !r.path) throw new Error(r.error ?? `${name} terminale bırakılamadı`);
   return r.path;
 }
 
@@ -75,14 +76,14 @@ export interface TerminalOptions {
 
 /** The keypad's keys: what each types, or a function of the terminal for the ones that depend on its mode. */
 const KEYPAD: { label: string; title: string; keys: string | ((term: Terminal) => string) }[] = [
-  { label: '1', title: 'Pick 1 (yes, in a permission prompt)', keys: '1' },
-  { label: '2', title: 'Pick 2', keys: '2' },
-  { label: '3', title: 'Pick 3', keys: '3' },
-  { label: '↑', title: 'Up', keys: (t) => (t.modes.applicationCursorKeysMode ? '\x1bOA' : '\x1b[A') },
-  { label: '↓', title: 'Down', keys: (t) => (t.modes.applicationCursorKeysMode ? '\x1bOB' : '\x1b[B') },
+  { label: '1', title: '1\'i seç (izin isteminde evet)', keys: '1' },
+  { label: '2', title: '2\'yi seç', keys: '2' },
+  { label: '3', title: '3\'ü seç', keys: '3' },
+  { label: '↑', title: 'Yukarı', keys: (t) => (t.modes.applicationCursorKeysMode ? '\x1bOA' : '\x1b[A') },
+  { label: '↓', title: 'Aşağı', keys: (t) => (t.modes.applicationCursorKeysMode ? '\x1bOB' : '\x1b[B') },
   { label: '⏎', title: 'Enter', keys: '\r' },
   { label: '⇥', title: 'Tab', keys: '\t' },
-  { label: 'Esc', title: 'Esc: close a menu, or interrupt the agent', keys: '\x1b' },
+  { label: 'Esc', title: 'Esc: menüyü kapat ya da ajanı durdur', keys: '\x1b' },
   { label: '^C', title: 'Ctrl+C', keys: '\x03' },
 ];
 
@@ -114,27 +115,31 @@ export function openTerminal(net: Net, workerId: string, onChanges?: () => void,
   const viewers = h('div.viewers', {});
   const modelsBtn = h('button.btn', {
     type: 'button',
-    title: 'OpenCode models: Ctrl+X then M (use /models if custom bindings override it)',
-    'aria-label': 'OpenCode models',
-  }, '🧠 Models');
+    title: 'OpenCode modelleri: Ctrl+X, sonra M (özel tuş atamaları engelliyorsa /models kullan)',
+    'aria-label': 'OpenCode modelleri',
+  }, '🧠 Modeller');
   const typed = h('span.typed', {});
   // The Esc key leaves the terminal, so this is how Esc reaches the program: to close a menu like
   // Claude's /skills, or to interrupt it. Ctrl+[ does the same from the keyboard.
   const escBtn = h('button.btn', {
     type: 'button',
-    title: 'Send Esc to the terminal (Ctrl+[): closes a menu like /skills, or interrupts the agent. The Esc key on its own leaves the terminal',
-    'aria-label': 'Send Esc to the terminal',
+    title: 'Esc\'i terminale gönder (Ctrl+[): /skills gibi bir menüyü kapatır ya da ajanı durdurur. Esc tuşu tek başına terminalden çıkar',
+    'aria-label': 'Esc\'i terminale gönder',
   }, '⎋ Esc');
-  const changesBtn = h('button.btn', { type: 'button', title: 'What this worker changed: files, diff, commit, open a PR (C at the desk)' }, '🌿 Changes');
-  const hideBtn = h('button.btn.term-hide', { type: 'button', title: 'Hide this terminal; the worker keeps running at its desk', 'aria-label': 'Hide terminal' }, 'Hide');
-  const closeBtn = h('button.btn.close', { title: 'Hide terminal (Esc or Ctrl+]) · the worker keeps running; ⎋ Esc or Ctrl+[ sends Esc to the terminal', 'aria-label': 'Hide terminal' }, '✕');
-  const host = h('div.term-host', { 'data-drop': '📎 Drop screenshots or files here to put them in the terminal' });
-  const keys = h('div.term-keys', { role: 'group', 'aria-label': 'Keys' });
-  const say = h('input', { type: 'text', placeholder: 'Reply, or tell it what to do next…', 'aria-label': 'Prompt', enterkeyhint: 'send', autocomplete: 'off' }) as HTMLInputElement;
-  const sayBtn = h('button.btn.primary', { type: 'submit' }, 'Send');
+  // Picks pictures from this computer for the agent (dropping or pasting them works too).
+  const pickBtn = h('button.btn', { type: 'button', title: 'Bilgisayarından bir görsel seç: ajana gönderilir (terminale sürükleyip bırakabilir ya da ekran görüntüsünü yapıştırabilirsin)' }, '🖼️ Görsel');
+  const picker = h('input', { type: 'file', accept: 'image/*', multiple: '', hidden: '' }) as HTMLInputElement;
+  const changesBtn = h('button.btn', { type: 'button', title: 'Bu çalışanın değiştirdikleri: dosyalar, diff, commit, PR aç (masada C)' }, '🌿 Değişiklikler');
+  const hideBtn = h('button.btn.term-hide', { type: 'button', title: 'Bu terminali gizle; çalışan masasında çalışmaya devam eder', 'aria-label': 'Terminali gizle' }, 'Gizle');
+  const closeBtn = h('button.btn.close', { title: 'Terminali gizle (Esc ya da Ctrl+]) · çalışan çalışmaya devam eder; ⎋ Esc ya da Ctrl+[ terminale Esc gönderir', 'aria-label': 'Terminali gizle' }, '✕');
+  const host = h('div.term-host', { 'data-drop': '📎 Ekran görüntülerini ya da dosyaları terminale koymak için buraya bırak' });
+  const keys = h('div.term-keys', { role: 'group', 'aria-label': 'Tuşlar' });
+  const say = h('input', { type: 'text', placeholder: 'Yanıtla ya da sıradaki işi söyle…', 'aria-label': 'Prompt', enterkeyhint: 'send', autocomplete: 'off' }) as HTMLInputElement;
+  const sayBtn = h('button.btn.primary', { type: 'submit' }, 'Gönder');
   const sayForm = h('form.term-say', {}, dictateField(say), sayBtn);
   const keypad = opts.keypad ? h('div.term-keypad', {}, keys, sayForm) : null;
-  const tabs = termTabs(workerId, { host, keypad, focusTerm: () => term.focus() });
+  const images = termImages({ floor: store.floor ?? '', workerId, insert: (paths) => insertPaths(paths) });
+  const tabs = termTabs(workerId, { host, keypad, focusTerm: () => term.focus(), images });
   // What you say is typed in at the terminal's cursor, as a paste, for you to read over and send (see dictate.ts).
   const mic = dictation(
     {
@@ -145,11 +150,11 @@ export function openTerminal(net: Net, workerId: string, onChanges?: () => void,
         term.paste(`${text} `);
       },
     },
-    { label: 'Dictate' },
+    { label: 'Dikte' },
   );
   host.append(mic.live);
   // The keypad has an Esc of its own, and a 🎤 on its prompt box.
-  const el = h('div.modal.term', { role: 'dialog', 'aria-label': `${info.name} terminal` }, h('header', {}, dot, title, pill, cost, viewers, typed, modelsBtn, keypad ? null : mic.button, keypad ? null : escBtn, onChanges ? changesBtn : null, hideBtn, closeBtn), tabs.bar, host, tabs.pages, keypad);
+  const el = h('div.modal.term', { role: 'dialog', 'aria-label': `${info.name} terminali` }, h('header', {}, dot, title, pill, cost, viewers, typed, modelsBtn, keypad ? null : mic.button, keypad ? null : escBtn, pickBtn, picker, onChanges ? changesBtn : null, hideBtn, closeBtn), tabs.bar, host, tabs.pages, keypad);
 
   const term = new Terminal({
     fontFamily: 'ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace',
@@ -204,12 +209,12 @@ export function openTerminal(net: Net, workerId: string, onChanges?: () => void,
       ...people.map((v) =>
         h(
           'span.avatar',
-          { class: v.typing ? 'typing' : '', style: `background:${v.color}`, title: `${v.name}${v.you ? ' (you)' : ''}${v.typing ? ' · typing' : ''}` },
+          { class: v.typing ? 'typing' : '', style: `background:${v.color}`, title: `${v.name}${v.you ? ' (sen)' : ''}${v.typing ? ' · yazıyor' : ''}` },
           initials(v.name),
         ),
       ),
     );
-    viewers.title = people.length ? `In this terminal: ${people.map((v) => (v.you ? `${v.name} (you)` : v.name)).join(', ')}` : '';
+    viewers.title = people.length ? `Bu terminalde: ${people.map((v) => (v.you ? `${v.name} (sen)` : v.name)).join(', ')}` : '';
     const typists = people.filter((v) => v.typing && !v.you).map((v) => v.name);
     typed.classList.toggle('now', typists.length > 0);
     if (typists.length) {
@@ -217,7 +222,7 @@ export function openTerminal(net: Net, workerId: string, onChanges?: () => void,
       typed.title = '';
     } else {
       typed.textContent = w.lastInput ? `⌨️ ${w.lastInput.by}` : '';
-      typed.title = w.lastInput ? `${w.lastInput.by} typed here last, ${timeAgo(w.lastInput.at)}` : '';
+      typed.title = w.lastInput ? `En son ${w.lastInput.by} yazdı, ${timeAgo(w.lastInput.at)}` : '';
     }
   };
   /** Everyone in the terminal, one face per person however many windows they have it open in, you first. */
@@ -282,7 +287,7 @@ export function openTerminal(net: Net, workerId: string, onChanges?: () => void,
   const jumpTo = (f: TerminalFind) => {
     const buf = term.buffer.active;
     const row = findLine(buf, f.needle, f.fromEnd);
-    if (row === undefined) return toast('That line has scrolled out of the terminal since', 'warn');
+    if (row === undefined) return toast('O satır terminalden kayıp gitmiş', 'warn');
     let end = row;
     while (buf.getLine(end + 1)?.isWrapped) end++;
     // A marker follows the line when the terminal reflows, which it does as the window settles.
@@ -336,10 +341,10 @@ export function openTerminal(net: Net, workerId: string, onChanges?: () => void,
 
   const modal = openModal(el, {
     backdropCloses: true,
-    doing: `💻 in ${info.name}'s terminal`,
+    doing: `💻 terminalde: ${info.name}`,
     onClose: (byEsc) => {
       // Leaving with Esc while the program wanted one (you were in /skills, say): say how to send it one.
-      if (byEsc && ready && screenMentionsEsc(term)) toast(`Esc left the terminal. To send ${store.workers.get(workerId)?.name ?? info.name} an Esc (to close a menu), use ⎋ Esc at the top or Ctrl+[`);
+      if (byEsc && ready && screenMentionsEsc(term)) toast(`Esc terminalden çıktı. ${store.workers.get(workerId)?.name ?? info.name} çalışanına Esc göndermek için (menüyü kapatmak gibi) üstteki ⎋ Esc'i ya da Ctrl+['yi kullan`);
       listeners.delete(onMsg);
       unsub();
       unsubPeers();
@@ -428,6 +433,18 @@ export function openTerminal(net: Net, workerId: string, onChanges?: () => void,
       el.classList.toggle('uploading', --uploading > 0);
     }
   };
+  // Paths (relative to its folder) the agent made: typed in as a paste, for it to open.
+  const insertPaths = (paths: string[]) => {
+    sayTyping();
+    sendSize(true);
+    term.paste(`${droppedPaths(paths)} `);
+    term.focus();
+  };
+  pickBtn.addEventListener('click', () => picker.click());
+  picker.addEventListener('change', () => {
+    void insertFiles([...(picker.files ?? [])]);
+    picker.value = '';
+  });
   const hasFiles = (e: DragEvent) => !!e.dataTransfer?.types.includes('Files');
   // The whole screen is the drop zone while the terminal is open, so a near miss doesn't open the file in the browser.
   let dragDepth = 0;

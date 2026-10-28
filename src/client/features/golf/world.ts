@@ -245,7 +245,7 @@ export function buildGreen(ground: THREE.Group, colliders: Collider[], night: Ni
     colliders.push({ minX: sx + dx - 0.08, maxX: sx + dx + 0.08, minZ: sz - 0.08, maxZ: sz + 0.08, bottom: G, top: G + 1.5 });
   }
   ground.add(mergeByMaterial(parts));
-  const sign = textPlane('⛳ Hole 1 · Par 1', { bg: '#2b2d42', color: '#fffaf3', size: 64, border: '#fffaf3' });
+  const sign = textPlane('⛳ Delik 1 · Par 1', { bg: '#2b2d42', color: '#fffaf3', size: 64, border: '#fffaf3' });
   sign.position.set(sx, G + 1.5, sz - 0.07);
   sign.rotation.y = Math.PI;
   ground.add(sign);
@@ -502,22 +502,22 @@ export function pinText(m: number): string {
 
 /** Where a ball stopped, in words. */
 export function lieText(f: Flight): string {
-  if (f.holed) return 'In the hole!';
+  if (f.holed) return 'Deliğe girdi!';
   switch (f.lie) {
     case 'lost':
-      return 'Lost';
+      return 'Kayıp';
     case 'deck':
-      return "Didn't clear the railing";
+      return 'Korkuluğu aşamadı';
     case 'below':
-      return 'Onto the balcony below';
+      return 'Alttaki balkona düştü';
     case 'roof':
-      return 'On the roof';
+      return 'Çatıda';
     case 'sand':
-      return `In the bunker · ${pinText(f.fromPin)}`;
+      return `Kum tuzağında · ${pinText(f.fromPin)}`;
     case 'green':
-      return `On the green · ${pinText(f.fromPin)}`;
+      return `Çimde · ${pinText(f.fromPin)}`;
     default:
-      return `${pinText(f.fromPin)} from the pin`;
+      return `Bayrağa ${pinText(f.fromPin)}`;
   }
 }
 

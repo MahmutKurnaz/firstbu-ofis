@@ -62,11 +62,12 @@ export function hireRole(floor: HireFloor, roleName: string, by: string, prompt?
   // One still running (or asleep, to be woken with a task) holds the role; one whose terminal ended doesn't.
   if (floor.workers.list().some((w) => w.role === role.name && w.status !== 'exited')) return `${role.name} zaten masasında: iş ver`;
   let desk = role.desk;
-  if (desk) {
-    if (floor.workers.deskOccupied(desk)) return `${role.name}'in masası (${desk}) dolu`;
-  } else {
+  if (desk && floor.workers.deskOccupied(desk)) return `${role.name}'in masası (${desk}) dolu`;
+  if (!desk) {
+    // The desks other roles are given by name stay theirs: a hire without one of its own doesn't sit at them.
+    const reserved = new Set(loaded.config.offices.flatMap((o) => o.teams.flatMap((t) => t.roles.flatMap((r) => (r.desk ? [r.desk] : [])))));
     const mine = new Set(zones?.[loaded.config.offices.indexOf(found.office)] ?? []);
-    const free = (id: string) => !floor.workers.deskOccupied(id);
+    const free = (id: string) => !floor.workers.deskOccupied(id) && !reserved.has(id);
     desk = SEATS.find((d) => mine.has(d.id) && free(d.id) && deskBuilt(d, floor.plan.wing))?.id ?? nextFreeSeat((id) => !free(id), floor.plan.wing)?.id;
     if (!desk) return 'Boş masa yok: önce birini eve gönder';
   }

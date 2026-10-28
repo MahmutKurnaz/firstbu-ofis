@@ -40,10 +40,10 @@ export function installHerald(ctx: Ctx, parts: Pick<Parts, 'place' | 'you' | 'ac
     const { actions, views } = parts;
     const h = plan().herald;
     if (!h || actions.officeIsFull()) return;
-    if (!actions.firstFreeSeat()) return toast(`${h.name}: every seat at the tables is taken — send someone home first`, 'warn');
+    if (!actions.firstFreeSeat()) return toast(`${h.name}: masalardaki bütün koltuklar dolu — önce birini eve gönder`, 'warn');
     openPrompt({
-      title: `${plan().icon} ${h.name}: send out a worker`,
-      subtitle: `Say what it’s to do. A new worker runs off to a free seat and gets started${plan().lineup.length ? `, and comes back to line up${plan().throne ? ' before your throne' : ''} once it’s done or needs you` : ''}.`,
+      title: `${plan().icon} ${h.name}: bir çalışan gönder`,
+      subtitle: `Ne yapacağını söyle. Yeni bir çalışan boş bir koltuğa koşup başlar${plan().lineup.length ? `, işi bitince ya da sana ihtiyacı olunca${plan().throne ? ' tahtının önünde' : ''} sıraya girmeye gelir` : ''}.`,
       warning: pressureNote(store.machine),
       placeholder: h.ask,
       submitLabel: h.button,
@@ -54,7 +54,7 @@ export function installHerald(ctx: Ctx, parts: Pick<Parts, 'place' | 'you' | 'ac
       onSubmit: (text, o) => {
         // Whichever seat is free now (someone may have sat down while you were thinking).
         const deskId = views.heraldSeat();
-        if (!deskId) return toast('Every seat at the tables is taken now', 'warn');
+        if (!deskId) return toast('Masalardaki bütün koltuklar şimdi doldu', 'warn');
         views.heraldHires.set(deskId, { floor: store.floor, at: performance.now() });
         actions.hire(deskId, text || undefined, o.worktree, o.provider, o.model, o.effort, undefined, o.repos, 'herald');
       },
@@ -67,8 +67,8 @@ export function installHerald(ctx: Ctx, parts: Pick<Parts, 'place' | 'you' | 'ac
       const hd = plan().herald;
       const full = !parts.actions.firstFreeSeat();
       const m = store.machine;
-      const why = full ? 'every seat is taken' : officeFull(m) ? `🚫 Office full · ${m.workers} of ${m.limit} workers` : hiringPaused() ? '💸 Budget spent — hiring resumes tomorrow' : '';
-      return { k: `${hd?.name}|${why}`, parts: [hintTitle(`${plan().icon} ${hd?.name ?? 'Herald'}`), why ? h('span.cost', {}, why) : aside(hd?.says ?? ''), why ? '' : key('E', 'Send out a new worker')] };
+      const why = full ? 'bütün koltuklar dolu' : officeFull(m) ? `🚫 Ofis dolu · ${m.workers}/${m.limit} çalışan` : hiringPaused() ? '💸 Bütçe bitti — işe alım yarın yeniden başlar' : '';
+      return { k: `${hd?.name}|${why}`, parts: [hintTitle(`${plan().icon} ${hd?.name ?? 'Haberci'}`), why ? h('span.cost', {}, why) : aside(hd?.says ?? ''), why ? '' : key('E', 'Yeni çalışan gönder')] };
     },
     use: onE(() => hireFromHerald()),
   });

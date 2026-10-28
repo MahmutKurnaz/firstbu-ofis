@@ -86,7 +86,7 @@ export async function officeWorkers(ctx: Ctx, req: http.IncomingMessage, res: ht
       for (const w of floor.workers.list()) {
         const landed = floor.landed(w);
         if (!landed) continue;
-        const why = landed.prs?.length ? `its pull requests merged (${landed.prs.join(', ')})` : `PR #${landed.pr} merged`;
+        const why = landed.prs?.length ? `pull request’leri birleştirildi (${landed.prs.join(', ')})` : `PR #${landed.pr} birleştirildi`;
         const staying = w.id === me.id ? "that's you" : notLeaving(w);
         if (staying) results.push({ worker: w.name, id: w.id, skipped: `${why}, but it's ${staying}` });
         else going.push({ w, why });
@@ -105,7 +105,7 @@ export async function officeWorkers(ctx: Ctx, req: http.IncomingMessage, res: ht
         results.push({ worker: w.name, id: w.id, skipped: 'it had already gone' });
         continue;
       }
-      ctx.toastFloor(floor, why ? `🏠 ${who} sent ${w.name} home: ${why}` : `${who} sent ${w.name} home`);
+      ctx.toastFloor(floor, why ? `🏠 ${who}, ${w.name} adlı çalışanı eve gönderdi: ${why}` : `${who}, ${w.name} adlı çalışanı eve gönderdi`);
       const { note, error } = await floor.sendHome(w.id, ask.cleanup);
       if (note) ctx.toastFloor(floor, note);
       if (error) ctx.toastFloor(floor, error, 'warn');
@@ -125,7 +125,7 @@ export async function officeWorkers(ctx: Ctx, req: http.IncomingMessage, res: ht
     if (!text) return send(res, 400, { error: 'Say what to tell it: prompt' });
     let err = floor.workers.prompt(w.id, text, who);
     // Stopped or asleep: it wakes up with this as its next message.
-    if (err === 'Worker is not running') err = floor.workers.resume(w.id, text);
+    if (err === 'Çalışan çalışmıyor') err = floor.workers.resume(w.id, text);
     if (err) return send(res, 400, { error: err });
     return send(res, 200, { ok: true, worker: row(w.id) });
   }
@@ -140,8 +140,8 @@ export async function officeWorkers(ctx: Ctx, req: http.IncomingMessage, res: ht
     if (typeof pr === 'string') return send(res, 400, { error: pr });
     const err = floor.workers.linkPr(w.id, pr);
     if (err) return send(res, 404, { error: err });
-    const whose = w.id === me.id ? 'its own' : `${w.name}'s`;
-    ctx.toastFloor(floor, pr ? `${who} said PR #${pr.number} is ${whose}` : `${who} said ${w.id === me.id ? 'it has' : `${w.name} has`} no pull request`);
+    const whose = w.id === me.id ? 'kendisinin' : `${w.name} adlı çalışanın`;
+    ctx.toastFloor(floor, pr ? `${who}, PR #${pr.number} numarasının ${whose} olduğunu söyledi` : `${who}, ${w.id === me.id ? 'kendisinin' : `${w.name} adlı çalışanın`} pull request’i olmadığını söyledi`);
     return send(res, 200, { ok: true, worker: row(w.id) });
   }
 
@@ -169,13 +169,13 @@ export async function officeWorkers(ctx: Ctx, req: http.IncomingMessage, res: ht
   const owner = floor.workers.ownerOf(me.id);
   const r = floor.workers.spawn(desk, who, ask.prompt, worktree, 'agent', provider, ask.model, ask.effort, undefined, owner);
   if (typeof r === 'string') return send(res, 400, { error: r });
-  ctx.toastFloor(floor, `${who} hired ${r.name}${ask.issue ? ` for issue #${ask.issue}` : ' with a task'}`);
+  ctx.toastFloor(floor, `${who} işe aldı: ${r.name}${ask.issue ? ` (konu #${ask.issue} için)` : ' (bir işle)'}`);
   if (ask.issue) {
     const n = ask.issue;
     floor.queue.dropIssue(n);
     const as = owner ? ctx.signins.ghAs(owner) : undefined;
-    if (typeof as === 'string') ctx.toastFloor(floor, `Couldn't assign issue #${n} on GitHub: ${as}`, 'warn');
-    else void floor.github.claim(n, as).then((e) => e && ctx.toastFloor(floor, `Couldn't assign issue #${n} on GitHub: ${e}`, 'warn'));
+    if (typeof as === 'string') ctx.toastFloor(floor, `GitHub’da #${n} numaralı konu atanamadı: ${as}`, 'warn');
+    else void floor.github.claim(n, as).then((e) => e && ctx.toastFloor(floor, `GitHub’da #${n} numaralı konu atanamadı: ${e}`, 'warn'));
   }
   send(res, 200, { ok: true, worker: row(r.id) });
 }

@@ -59,3 +59,60 @@ Karakterler ve istemler: `docs/karakterler.md` ve `blender/scripts/meshy_concept
 | 2026-10-28 | 13 rol + 10 yedek hayvan + 6 NPC için 58 konsept görsel | 348 |
 
 Bakiye: 5.411 → 5.063.
+
+## Dünyanın eşyaları ve Mahmut'un karakteri (Meshy, doğrudan)
+
+Onay: Mahmut, 2026-10-28 ("16 varlık × 2 öneri, 672 kredi"; karakter için "beni yürüten karakteri tasarla"). Betikler: `blender/scripts/meshy_props.py` (eşyalar), `blender/scripts/build_meshy_props.py` (Blender'da küçültme, ortam kararması pişirme, tek dosya: `models/meshy-props.glb`).
+Eşyalar: sokak ağacı, lamba, bank, kafe masası, kahve tezgâhı, kahve makinesi, saksı, ofis masası ve sandalyesi, yönetici masası ve koltuğu, kanepe, kitaplık, fikus, çiçek saksısı, toplantı sandalyesi. Karakter: `models/mahmut.glb` (6 fotoğraftan, gerçekçi, iskelet ve 6 klip).
+
+| Tarih | Ne | Kredi |
+| --- | --- | --- |
+| 2026-10-28 | 16 eşya × 2 görsel (12'si yinelenen, ağ hatasında tekrar gönderilen) | 204 |
+| 2026-10-28 | 16 eşya, seçilen görselden dokulu 3D | 480 |
+| 2026-10-28 | Mahmut'un konseptleri | 36 |
+| 2026-10-28 | Mahmut 3D, iskelet, 6 klip | 58 |
+
+## Yönetim ekibinin 3D karakterleri (Meshy, doğrudan)
+
+Onay: Mahmut, 2026-10-28 ("Evet, 265 kredi"). Betik: `blender/scripts/meshy_characters.py` (3D, iskelet, klipler); klipler `merge_clips.mjs --from` ile birleştirildi (idle, walk, sit, drink + kendi yetenek klibi `skill`). Konsept: `docs/konseptler/` (kızıl-panda 1, susamuru 1, kaplan 1, tavşan 0, geyik 1).
+
+| Tarih | Ne | Kredi |
+| --- | --- | --- |
+| 2026-10-28 | Kızıl Panda, Susamuru, Kaplan, Tavşan, Geyik: seçilen konseptten 3D (meshy-7.1, A-poz, 12k üçgen, dokulu) | 150 |
+| 2026-10-28 | 5 iskelet (boy: 1,55 / 1,65 / 1,95 / 1,70 / 1,95 m) | 25 |
+| 2026-10-28 | 5 × 5 klip (Idle 0, Casual_Walk 30, Chair_Sit_Idle_M 33, Sit_and_Drink 343 + Listening_Gesture 47 / Idle_02 11 / Agree_Gesture 25 / Alert 2 / Alert 2) | 75 |
+
+Toplam 250 (onaylanan 265'in altında). Bakiye 4.285 → 4.035. Modeller: `src/client/models/{kizil-panda,susamuru,kaplan,tavsan,geyik}.glb` (1,5-1,8 MB), yalnızca bir ajan giyince yüklenir.
+
+Mobilya ve yapı ölçüleri ve kaynakları: `docs/mobilya-olculeri.md` (`blender/furniture.json`).
+
+## Aşama 1-3: sokak eşyaları, NPC'ler ve kalan karakterler (Meshy, doğrudan)
+
+Onay: Mahmut, 2026-10-28 ("Hepsi, ~1.860"). Betikler: `blender/scripts/meshy_props.py` (eşyalar), `meshy_characters.py` (karakterler), `meshy_concepts.py` (karşılayıcı konsepti), `build_meshy_props.py` (paketleme).
+- **14 sokak eşyası** (agac-genis, agac-ince, cali, cop-kutusu, hidrant, kafe-koltuk, kiosk, gong, kapi, konsey-masasi, kursu, pano-cercevesi, buzdolabi, menu-sehpasi): 14 × 2 görsel = 168, 14 × 3D = 420 → 588 kredi. Ağaçlar 30k/24k üçgenle istendi, pakette 15k/12k.
+- **24 karakter** (8 rol, 10 yedek hayvan, 6 NPC) + karşılayıcı ördek: 3D 24 × 30 + konsept 12 + iskelet 25 × 5 + klipler (8 × 5, 10 × 4, 7 × 3 klip × 3 kredi) → yaklaşık 1.150 kredi.
+- Bakiye 4.035 → 2.257. Kullanılmayan: gong (animasyonlu kod gong'u yerinde kaldı), kürsü ve pano çerçevesi (üretildi, yerleştirilmedi).
+
+## Eşya turu 3 ve 4 (Meshy, doğrudan) — kafe, lounge, şezlong, istasyon, kale
+
+Onay: Mahmut, 2026-10-28 ("onlara üret", "Hepsini yapmaya başla"; ~600 krediye kadar). Betikler: `blender/scripts/meshy_props.py`, `build_meshy_props.py`. Ölçüler ve kaynakları: `blender/furniture.json`, `docs/mobilya-olculeri.md`.
+
+| Tarih | Ne | Kredi |
+| --- | --- | --- |
+| 2026-10-28 | Tur 3: sehpa, ayaklı lamba, puf, kafe tabure, yuvarlak bistro masası, şemsiye (6 × 2 görsel + 6 × 3D) | 252 |
+| 2026-10-28 | Tur 4: şezlong, ateş çukuru, istasyon bankı, kargo sandığı, kale masası, heykel (6 × 2 görsel + 6 × 3D) | 252 |
+
+Bakiye 2.115 → 1.611 (bu iki tur; Tuğer işi ayrıca, yerel dalda). Yerleştirilenler: tur 3'ten kafe seti ve takım ofisi lounge'u; tur 4'ten çatı şezlongları, kale heykelleri, istasyon sandıkları. Hazır ama yerleştirilmeyenler: puf, ateş çukuru, istasyon bankı, kale masası (haritaların masaları plandan çiziliyor).
+
+Binalar (8 yeni cadde binası) Blender'da elle modellendi, kredi harcanmadı: `blender/scripts/build_buildings.py`.
+
+## Eşya turu 5 (Meshy, doğrudan) — caddenin uzun masası ve bankları
+
+Onay: Mahmut, 2026-10-28 ("yap hepsini"; masa tasarımı için ~80 kredi). Betikler: `blender/scripts/meshy_props.py` (`kafe-uzun-masa`, `kafe-uzun-bank`), `build_meshy_props.py`. Her biri 2.5 m'lik bir modül; kafe masası uzunluğuna göre modül sayısı kadar yan yana dizilir (`world/cadde/index.ts`).
+
+| Tarih | Ne | Kredi |
+| --- | --- | --- |
+| 2026-10-28 | 2 eşya × 2 görsel (nano-banana-2) | 24 |
+| 2026-10-28 | 2 × 3D (meshy-7.1, dokulu, 8k üçgen) | 60 |
+
+Toplam 84; bakiye yaklaşık 1.611 → 1.527.

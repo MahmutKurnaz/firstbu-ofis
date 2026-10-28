@@ -36,8 +36,8 @@ export function buildOffice(kit: CaddeKit & { offices?: OfficeView[] }, p: PropC
   // What never changes is merged with the rest of the street (see kit.still), so it's placed the same way on its own.
   const solid = placed(o.x, 0, o.z, o.rotY);
   const accent = toonUnique(NEUTRAL);
-  // The floor: pale oak, a step up from the street.
-  solid.add(mesh(box(o.width - 0.1, 0.04, o.length - 0.1), kit.street.wood, 0, 0.02, 0, false));
+  // The floor: pale oak (light, so the office reads bright), a 1 cm step up from the street, so what stands on it (wheels, feet) isn't sunk into it.
+  solid.add(mesh(box(o.width - 0.1, 0.012, o.length - 0.1), toonUnique('#e6d3b0'), 0, 0.006, 0, false));
   // The back: a wall in the team's color inside, plain outside.
   solid.add(mesh(box(o.width, H, OFFICE_WALL), kit.mats.hull, 0, H / 2, -hl + OFFICE_WALL / 2));
   g.add(mesh(box(o.width - 0.4, H - 0.6, 0.04), accent, 0, H / 2 - 0.1, -hl + OFFICE_WALL + 0.02, false));

@@ -91,6 +91,8 @@ NPC = {
                   "Wearing a cycling helmet, a bright courier bag across the chest and a light athletic outfit"),
     "npc-dede": ("tortoise", "small hunched wise build, a shell on the back, wrinkled friendly face",
                  "Wearing a knitted vest over a shirt, tiny round glasses and a walking cane hooked over the arm"),
+    "npc-karsilayici": ("duck", "plump friendly upright build, cheerful face with a small orange bill, soft white and cream feathers",
+                        "Wearing a small plum bellhop-style cap, a plum waistcoat with brass buttons and a bow tie, wings shaped like arms with small hands"),
     "npc-rehber": ("zebra", "tall slim build, black and white stripes, cheerful face",
                    "Wearing a tour guide cap with a small flag pinned to it, a lanyard guide card and a light vest"),
 }

@@ -18,14 +18,14 @@ const TAIL_BYTES = 16 * 1024;
 
 /** What git says it's doing, in words for the elevator. */
 const STEPS: Record<string, string> = {
-  'Enumerating objects': 'GitHub is packing it up',
-  'Counting objects': 'GitHub is packing it up',
-  'Compressing objects': 'GitHub is packing it up',
-  'Receiving objects': 'Downloading',
-  'Resolving deltas': 'Unpacking',
-  'Checking connectivity': 'Checking it over',
-  'Updating files': 'Checking out files',
-  'Filtering content': 'Downloading LFS files',
+  'Enumerating objects': 'GitHub paketliyor',
+  'Counting objects': 'GitHub paketliyor',
+  'Compressing objects': 'GitHub paketliyor',
+  'Receiving objects': 'İndiriliyor',
+  'Resolving deltas': 'Paket açılıyor',
+  'Checking connectivity': 'Kontrol ediliyor',
+  'Updating files': 'Dosyalar çıkarılıyor',
+  'Filtering content': 'LFS dosyaları indiriliyor',
 };
 
 const PROGRESS = /^(?:remote: )?([A-Z][a-z]+ [a-z]+):\s+(?:(\d{1,3})%(?: \(\d+\/\d+\))?|\d+)(?:, ([\d.]+ [KMGT]?i?B)(?: \| ([\d.]+ [KMGT]?i?B\/s))?)?/;
@@ -39,7 +39,7 @@ export function parseProgress(output: string): CloneProgress | undefined {
       const detail = [m[3], m[4]].filter(Boolean).join(' · ');
       return { step: STEPS[m[1]], ...(m[2] ? { percent: Math.min(100, Number(m[2])) } : {}), ...(detail ? { detail } : {}) };
     }
-    if (/^Cloning into /.test(lines[i].trim())) return { step: 'Connecting to GitHub' };
+    if (/^Cloning into /.test(lines[i].trim())) return { step: 'GitHub’a bağlanılıyor' };
   }
   return undefined;
 }
@@ -51,11 +51,11 @@ export function whyCloneFailed(output: string): string {
     .map((l) => l.trim())
     .filter((l) => l && !PROGRESS.test(l) && !/^Cloning into /.test(l));
   const all = said.join('\n');
-  if (/Host key verification failed/i.test(all)) return "ssh on the office's machine hasn't accepted github.com's host key yet. Run `ssh -T git@github.com` there once, or clone over https with `gh config set git_protocol https`";
-  if (/passphrase/i.test(all)) return "the office's ssh key needs its passphrase. Add it to the ssh agent (`ssh-add`), or clone over https with `gh config set git_protocol https`";
-  if (/Permission denied \(publickey/i.test(all)) return "GitHub didn't take the office's ssh key. Add it with `gh ssh-key add`, or clone over https with `gh config set git_protocol https`";
-  if (/terminal prompts disabled|could not read (Username|Password)|Authentication failed/i.test(all)) return "git wanted a GitHub password. Run `gh auth setup-git` on the office's machine so git uses gh's login";
-  return said.slice(-2).join(' ') || 'gh failed';
+  if (/Host key verification failed/i.test(all)) return "ofis makinesindeki ssh henüz github.com'un host anahtarını kabul etmedi. Orada bir kez `ssh -T git@github.com` çalıştır ya da `gh config set git_protocol https` ile https üzerinden klonla";
+  if (/passphrase/i.test(all)) return "ofisin ssh anahtarı parolasını istiyor. Onu ssh agent’a ekle (`ssh-add`) ya da `gh config set git_protocol https` ile https üzerinden klonla";
+  if (/Permission denied \(publickey/i.test(all)) return "GitHub ofisin ssh anahtarını kabul etmedi. `gh ssh-key add` ile ekle ya da `gh config set git_protocol https` ile https üzerinden klonla";
+  if (/terminal prompts disabled|could not read (Username|Password)|Authentication failed/i.test(all)) return "git bir GitHub parolası istedi. Git’in gh girişini kullanması için ofis makinesinde `gh auth setup-git` çalıştır";
+  return said.slice(-2).join(' ') || 'gh başarısız oldu';
 }
 
 /** How a clone ended: stopped (and why), or the process's exit code (null when an office before this one started it). */
@@ -102,7 +102,7 @@ export class CloneRun {
     try {
       fd = openSync(log, 'w', 0o600);
     } catch (err) {
-      return Promise.resolve(`Couldn't write ${log}: ${(err as Error).message}`);
+      return Promise.resolve(`${log} yazılamadı: ${(err as Error).message}`);
     }
     return new Promise((resolve) => {
       let child: ChildProcess;
@@ -118,7 +118,7 @@ export class CloneRun {
       } finally {
         closeSync(fd);
       }
-      child.once('error', (err: NodeJS.ErrnoException) => resolve(err.code === 'ENOENT' ? "The GitHub CLI (gh) isn't installed on the office's machine" : `Couldn't run gh: ${err.message}`));
+      child.once('error', (err: NodeJS.ErrnoException) => resolve(err.code === 'ENOENT' ? 'GitHub CLI (gh) ofis makinesinde kurulu değil' : `gh çalıştırılamadı: ${err.message}`));
       child.once('spawn', () => {
         const run = new CloneRun(child.pid!, log, child, opts);
         child.once('exit', (code) => run.end(code));
@@ -181,7 +181,7 @@ export class CloneRun {
       }
     } else if (Date.now() - this.grewAt > stallMs) {
       const mins = Math.max(1, Math.round(stallMs / 60_000));
-      this.stop(`Cloning stalled: nothing new from GitHub in ${mins} minute${mins === 1 ? '' : 's'}. Try again, or check the office machine's connection`);
+      this.stop(`Klonlama takıldı: GitHub’dan ${mins} dakikadır yeni bir şey gelmedi. Yeniden dene ya da ofis makinesinin bağlantısını kontrol et`);
     }
   }
 

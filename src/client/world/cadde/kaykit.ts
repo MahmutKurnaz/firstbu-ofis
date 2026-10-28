@@ -3,6 +3,7 @@ import type { PropConfig } from '../../../shared/maps';
 import { officeBox, officePoint } from '../../../shared/maps/cadde-props';
 import { loadModel, type ModelName } from '../models';
 import { collide, placed } from '../station/kit';
+import { standMeshy } from './meshy';
 import { toon } from '../toon';
 import type { CaddeKit } from './kit';
 
@@ -79,7 +80,7 @@ function solid(kit: CaddeKit, x: number, z: number, w: number, d: number, top: n
 
 /**
  * Furnishes an office: a sofa, a low table and a lamp on a rug in a front corner (out of the way of
- * its door and its table), a shelf and pictures on its back wall, a cactus by the shelf.
+ * its door and its table); the back wall is the team's (./interiors.ts).
  */
 export function furnish(kit: CaddeKit, p: PropConfig, index: number) {
   const o = officeBox(p);
@@ -95,42 +96,37 @@ export function furnish(kit: CaddeKit, p: PropConfig, index: number) {
   const lo = hl - 2.6;
   put('kaykit-furniture', 'rug_rectangle_stripes_A', ls, lo, Math.PI / 2, 0.9);
   // The sofa along the side wall, facing across the office; the table in front of it.
-  put('kaykit-furniture', 'couch_pillows', s * (hw - 0.6), lo, -s * (Math.PI / 2));
-  put('kaykit-furniture', 'table_low', ls + -s * 0.4, lo, Math.PI / 2, 0.8);
-  put('kaykit-furniture', 'lamp_standing', s * (hw - 0.6), lo - 1.6);
+  // (the street's own: a cognac leather sofa 2 m long, a walnut coffee table 1 m long and 42 cm high, a brass floor lamp)
+  const [sx, sz] = at(s * (hw - 0.6), lo);
+  standMeshy(kit, 'kanepe', sx, sz, o.rotY - s * (Math.PI / 2));
+  const [tx, tz] = at(ls + -s * 0.4, lo);
+  standMeshy(kit, 'sehpa', tx, tz, o.rotY + Math.PI / 2);
+  const [lx, lz] = at(s * (hw - 0.6), lo - 1.6);
+  standMeshy(kit, 'ayakli-lamba', lx, lz, 0);
   for (const [side, out, w, d] of [
     [s * (hw - 0.6), lo, 0.9, 1.6],
     [ls - s * 0.4, lo, 0.8, 1.0],
   ])
     solid(kit, ...at(side, out), w, d, 0.6, o.rotY);
-  // The back wall: a shelf, pictures over the table, a cactus.
-  put('kaykit-furniture', 'shelf_B_large_decorated', -s * (hw - 1.8), -hl + 0.5);
-  put('kaykit-furniture', 'cactus_medium_A', -s * (hw - 0.6), -hl + 0.6);
-  for (const [side, part] of [
-    [-1.4, 'pictureframe_large_A'],
-    [1.4, 'pictureframe_large_B'],
-  ] as const) {
-    const [x, z] = at(side, -hl + 0.32);
-    kay(kit, 'kaykit-furniture', part, x, z, o.rotY, 0.9, 1.4);
-  }
-  solid(kit, ...at(-s * (hw - 1.8), -hl + 0.5), 1, 1, 0.5, o.rotY);
 }
 
 /** The street's furniture: bushes by the office doors, hydrants and bins by the benches, the café's fridge, menu and crate by its counter. */
-export function dress(kit: CaddeKit, props: PropConfig[]) {
-  for (const p of props.filter((q) => q.kind === 'office')) {
+export function dress(kit: CaddeKit, props: PropConfig[], furnished = false) {
+  // A `furnished` map has them as props of its own (see streetFurniture), put up with the rest.
+  for (const p of furnished ? [] : props.filter((q) => q.kind === 'office')) {
     const o = officeBox(p);
     for (const side of [-1, 1]) {
       // Out on the pavement, clear of the glass: a bush is about a meter across and two high.
       const [x, z] = officePoint(p, side * (o.width / 2 - 0.8), o.length / 2 + 1.1);
-      kay(kit, 'kaykit-city', 'bush', x, z, 0, 1);
-      solid(kit, x, z, 0.8, 0.8, 1.5);
+      standMeshy(kit, 'cali', x, z);
+      solid(kit, x, z, 0.8, 0.8, 1.0);
     }
   }
-  for (const side of [-1, 1]) {
-    kay(kit, 'kaykit-city', 'firehydrant', side * 8.6, 22, 0, 1.2);
-    kay(kit, 'kaykit-city', 'trash_A', side * 8.4, 16.6, 0, 1.6);
-    solid(kit, side * 8.6, 22, 0.6, 0.6, 1);
+  for (const side of furnished ? [] : [-1, 1]) {
+    standMeshy(kit, 'hidrant', side * 8.6, 22);
+    standMeshy(kit, 'cop-kutusu', side * 8.4, 16.6);
+    solid(kit, side * 8.6, 22, 0.5, 0.5, 0.8);
+    solid(kit, side * 8.4, 16.6, 0.5, 0.5, 0.95);
   }
   // Behind the counter: the fridge and a crate; the menu stand out front. (No counter, none of them.)
   const c = props.find((q) => q.kind === 'counter');
@@ -139,10 +135,12 @@ export function dress(kit: CaddeKit, props: PropConfig[]) {
   const by = (across: number, out: number): [number, number] => [c.x + Math.cos(r) * across + Math.sin(r) * out, c.z - Math.sin(r) * across + Math.cos(r) * out];
   const w = (c.width ?? 4) * (c.scale ?? 1);
   const fridge = by(-w / 2 + 0.2, -1.2);
-  kay(kit, 'kaykit-cafe', 'fridge_A_decorated', ...fridge, r, 0.9);
-  solid(kit, ...fridge, 1, 1, 2, r);
+  if (!furnished) {
+    standMeshy(kit, 'buzdolabi', fridge[0], fridge[1], r);
+    solid(kit, ...fridge, 0.8, 0.8, 1.9, r);
+  }
   kay(kit, 'kaykit-cafe', 'crate_carrots', ...by(w / 2, -1.2), r + 0.3, 0.6);
-  kay(kit, 'kaykit-cafe', 'menu', ...by(w / 2 + 0.2, 1.8), r + 0.5, 1.6);
+  if (!furnished) standMeshy(kit, 'menu-sehpasi', ...by(w / 2 + 0.2, 1.8), r + 0.5);
 }
 
 /** The city's nearer row: KayKit buildings facing the street from beyond its edges, at `scale` their street size. */

@@ -26,9 +26,9 @@ export const planHandlers = {
     if (typeof r === 'string') return ctx.warn(c, r);
     if (!r.label && !r.old) return;
     planChanged(ctx, floor);
-    const desk = DESK_BY_ID.get(deskId)?.label ?? 'a desk';
-    if (r.label && r.label.text !== r.old?.text) ctx.toastFloor(floor, `🪧 ${who} hung a sign over ${desk}: “${r.label.text}”`);
-    else if (!r.label) ctx.toastFloor(floor, `🪧 ${who} took the “${r.old!.text}” sign down from ${desk}`);
+    const desk = DESK_BY_ID.get(deskId)?.label ?? 'bir masa';
+    if (r.label && r.label.text !== r.old?.text) ctx.toastFloor(floor, `🪧 ${who}, ${desk} üstüne bir tabela astı: “${r.label.text}”`);
+    else if (!r.label) ctx.toastFloor(floor, `🪧 ${who}, ${desk} üstündeki “${r.old!.text}” tabelasını indirdi`);
   },
   'floor.expand'(ctx, c) {
     const who = c.peer.name;
@@ -37,7 +37,7 @@ export const planHandlers = {
     const r = floor.plan.expand();
     if (typeof r === 'string') return ctx.warn(c, r);
     planChanged(ctx, floor);
-    ctx.toastFloor(floor, `🔨 ${who} knocked out the back wall: ${r.map((id) => DESK_BY_ID.get(id)?.label).join(' and ')} are ready for workers`);
+    ctx.toastFloor(floor, `🔨 ${who} arka duvarı yıktı: ${r.map((id) => DESK_BY_ID.get(id)?.label).join(' ve ')} çalışanlar için hazır`);
   },
   'floor.shrink'(ctx, c) {
     const who = c.peer.name;
@@ -46,6 +46,6 @@ export const planHandlers = {
     const r = floor.plan.shrink((id) => floor.workers.deskOccupied(id));
     if (typeof r === 'string') return ctx.warn(c, r);
     planChanged(ctx, floor);
-    ctx.toastFloor(floor, `🧱 ${who} walled the back office back up, and ${r.map((id) => DESK_BY_ID.get(id)?.label).join(' and ')} went with it`);
+    ctx.toastFloor(floor, `🧱 ${who} arka ofisi yeniden duvarla kapattı; ${r.map((id) => DESK_BY_ID.get(id)?.label).join(' ve ')} de onunla gitti`);
   },
 } satisfies HandlerMap<PlanClientMsg>;

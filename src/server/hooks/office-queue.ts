@@ -39,6 +39,6 @@ export async function officeQueue(ctx: Ctx, req: http.IncomingMessage, res: http
   const err = floor.queue.add(str(body?.prompt, 20000), agent.name, str(body?.title, 200) || undefined, issue, undefined, undefined, undefined, floor.workers.ownerOf(agent.id));
   if (err) return send(res, 400, { error: err });
   const task = floor.queue.state().tasks.at(-1)!;
-  ctx.toastFloor(floor, `📋 The ${agent.name} queued ${issue !== undefined ? `issue #${issue}` : `“${task.title}”`}`);
+  ctx.toastFloor(floor, `📋 ${agent.name} sıraya ekledi: ${issue !== undefined ? `konu #${issue}` : `“${task.title}”`}`);
   send(res, 200, { ok: true, task: { id: task.id, title: task.title, status: task.status } });
 }

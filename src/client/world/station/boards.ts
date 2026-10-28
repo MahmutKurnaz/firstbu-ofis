@@ -5,7 +5,7 @@ import { mesh, textPlane } from '../toon';
 import { box, type Kit } from './kit';
 
 /** The four boards: big displays on the walls, a line of light round each and its name over it. */
-export function buildBoards(kit: Kit): Record<BoardKey, THREE.Mesh> {
+export function buildBoards(kit: Kit, dress?: (g: THREE.Group, bd: { width: number; height: number }, frame: THREE.Object3D[]) => void): Record<BoardKey, THREE.Mesh> {
   const { mats } = kit;
   const faces = {} as Record<BoardKey, THREE.Mesh>;
   for (const k of BOARD_KEYS) {
@@ -18,6 +18,8 @@ export function buildBoards(kit: Kit): Record<BoardKey, THREE.Mesh> {
     g.add(mesh(box(bd.width + 0.34, bd.height + 0.34, 0.12), mats.black, 0, 0, 0));
     for (const sy of [-1, 1]) g.add(mesh(box(bd.width + 0.34, 0.04, 0.02), mats.accent, 0, sy * (bd.height / 2 + 0.15), 0.065, false));
     for (const sx of [-1, 1]) g.add(mesh(box(0.04, bd.height + 0.34, 0.02), mats.accent, sx * (bd.width / 2 + 0.15), 0, 0.065, false));
+    // A map's own frame can take the place of this one (the street's).
+    dress?.(g, bd, [...g.children]);
     const face = new THREE.Mesh(new THREE.PlaneGeometry(bd.width, bd.height), new THREE.MeshBasicMaterial({ color: '#ffffff' }));
     face.position.z = 0.07;
     g.add(face);

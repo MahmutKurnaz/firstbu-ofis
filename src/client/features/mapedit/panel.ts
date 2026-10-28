@@ -1,0 +1,134 @@
+// The map editor's panel (features/mapedit): what's selected, buttons for what can be done to it, and the catalog
+// to click an item out of. It only draws and reports clicks; index.ts holds the state.
+import { CATALOG, GROUPS, footprint, nameOf, type AlignMode, type Prop } from './logic';
+
+export interface PanelState {
+  selected: Prop | null;
+  /** How many are picked together (0 for one or none). */
+  group: number;
+  /** The catalog item chosen to put down (an index into CATALOG), or -1. */
+  pick: number;
+  canUndo: boolean;
+}
+
+export interface PanelActions {
+  turn(by: 1 | -1): void;
+  scale(up: boolean): void;
+  copy(): void;
+  remove(): void;
+  undo(): void;
+  leave(): void;
+  plan(): void;
+  align(mode: AlignMode): void;
+  spread(axis: 'x' | 'z'): void;
+  center(axis: 'x' | 'z'): void;
+  /** Equal gaps, and the whole row in the middle of the hall. */
+  fill(axis: 'x' | 'z'): void;
+  choose(i: number): void;
+  swap(): void;
+}
+
+/** A map's own words (a prop's kind or model) go into the panel's HTML, so they're escaped. */
+const esc = (t: string) => t.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
+
+const BTN = 'border:0;border-radius:8px;padding:5px 9px;margin:2px 3px 2px 0;background:#2c3644;color:#eef3f8;font:inherit;cursor:pointer';
+
+export function createPanel(act: PanelActions) {
+  const el = document.createElement('div');
+  el.style.cssText =
+    'position:fixed;left:12px;top:70px;z-index:50;width:290px;max-height:calc(100vh - 100px);overflow:auto;padding:10px 12px;border-radius:12px;background:rgba(20,24,32,.94);color:#eef3f8;font:13px/1.45 system-ui,sans-serif;box-shadow:0 4px 18px #0006;display:none';
+  // What each piece looks like (blender/scripts/render_thumbs.py makes the pictures), beside its name.
+  const thumb = (id: string) => new URL(`./thumbs/${id.replace(/^meshy-/, '')}.png`, import.meta.url).href;
+  const CARD = 'display:flex;flex-direction:column;align-items:center;gap:2px;border:0;border-radius:10px;padding:5px 3px;background:#2c3644;color:#eef3f8;font:inherit;font-size:11px;line-height:1.2;cursor:pointer;min-width:0';
+  const items = GROUPS.map(
+    (g) =>
+      `<div style="margin:8px 0 3px;opacity:.75">${g.title}</div><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px">` +
+      g.ids
+        .map((id) => {
+          const label = esc(CATALOG.find((c) => c.id === id)?.label ?? id);
+          return `<button data-a="choose" data-i="${CATALOG.findIndex((c) => c.id === id)}" title="${label}" style="${CARD}"><img src="${thumb(id)}" alt="" width="64" height="64" loading="lazy" style="width:64px;height:64px;object-fit:contain;pointer-events:none"><span>${label}</span></button>`;
+        })
+        .join('') +
+      '</div>',
+  ).join('');
+  el.innerHTML =
+    '<div style="display:flex;justify-content:space-between;align-items:center"><b>✏️ Düzenleme modu</b><button data-a="leave" title="Kapat (J)" style="border:0;background:none;color:#eef3f8;font-size:18px;cursor:pointer">✕</button></div>' +
+    '<div style="margin-top:6px"><button data-a="plan" style="' +
+    BTN +
+    ';background:#3b5f8a">📐 2D plan (P)</button></div><div data-sel style="margin-top:6px"></div>' +
+    '<div style="margin-top:10px;border-top:1px solid #fff2;padding-top:6px"><b>Katalog</b> <span style="opacity:.7">tıkla, sonra haritada yere tıkla</span></div>' +
+    `<div data-cat>${items}</div>` +
+    '<div style="margin-top:8px;opacity:.6;font-size:12px">Kısayollar: R döndür · [ ] boyut · Delete sil · Ctrl+D kopyala · Ctrl+Z geri al · J çık</div>';
+  // Clicking a button must not take the keyboard from the game (Enter or Space would press it again).
+  el.addEventListener('mousedown', (e) => e.preventDefault());
+  el.addEventListener('click', (e) => {
+    const b = (e.target as HTMLElement).closest('button');
+    if (!b || b.disabled) return;
+    const a = b.dataset.a;
+    if (a === 'choose') act.choose(Number(b.dataset.i));
+    else if (a === 'turn') act.turn(1);
+    else if (a === 'turnback') act.turn(-1);
+    else if (a === 'smaller') act.scale(false);
+    else if (a === 'bigger') act.scale(true);
+    else if (a === 'copy') act.copy();
+    else if (a === 'remove') act.remove();
+    else if (a === 'undo') act.undo();
+    else if (a === 'swap') act.swap();
+    else if (a === 'leave') act.leave();
+    else if (a === 'plan') act.plan();
+    else if (a === 'spread-x') act.spread('x');
+    else if (a === 'spread-z') act.spread('z');
+    else if (a === 'center-x') act.center('x');
+    else if (a === 'center-z') act.center('z');
+    else if (a === 'fill-x') act.fill('x');
+    else if (a === 'fill-z') act.fill('z');
+    else if (a?.startsWith('align-')) act.align(a.slice(6) as AlignMode);
+  });
+  document.body.appendChild(el);
+  const sel = el.querySelector('[data-sel]') as HTMLElement;
+
+  /** What the panel shows now: it's redrawn only when this changes, or a button is gone from under the pointer between the press and the release. */
+  let shown = '';
+  function render(on: boolean, s: PanelState) {
+    el.style.display = on ? 'block' : 'none';
+    if (!on) return;
+    const p = s.selected;
+    const chosen = s.pick >= 0 ? CATALOG[s.pick] : null;
+    const btn = (a: string, text: string, off = false) => `<button data-a="${a}" ${off ? 'disabled' : ''} style="${BTN}${off ? ';opacity:.4;cursor:default' : ''}">${text}</button>`;
+    let h = '';
+    if (chosen) h += `<div style="color:#8fe39a">➕ Seçtiğin: <b>${esc(chosen.label)}</b>. Haritada boş bir yere tıkla, oraya koyulur.</div>`;
+    if (s.group > 1) {
+      h +=
+        `<div style="color:#ffb547;margin-top:4px"><b>${s.group} eşya seçili</b></div>` +
+        '<div style="opacity:.75;font-size:12px">Hizala (en dıştaki eşyaya göre):</div>' +
+        btn('align-left', '⇤ Sola') + btn('align-hcenter', '⇔ Ortala') + btn('align-right', '⇥ Sağa') +
+        btn('align-top', '⤒ Üste') + btn('align-vcenter', '⇕ Ortala') + btn('align-bottom', '⤓ Alta') +
+        '<div style="opacity:.75;font-size:12px;margin-top:4px">Eşit aralıkla diz (3 ya da daha fazla):</div>' +
+        btn('spread-x', '↔ Yatay') + btn('spread-z', '↕ Dikey') +
+        '<div style="opacity:.75;font-size:12px;margin-top:4px">Hepsini birlikte salonun tam ortasına al:</div>' +
+        btn('center-x', '🎯 Yatay ortala') + btn('center-z', '🎯 Dikey ortala') +
+        '<div style="opacity:.75;font-size:12px;margin-top:4px">Eşit aralıkla diz ve ortala (3 eşya: tam orta, tam boşluk):</div>' +
+        btn('fill-x', '✨ Yatay') + btn('fill-z', '✨ Dikey') +
+        '<br>' + btn('remove', '🗑 Hepsini sil') + btn('undo', '↶ Geri al', !s.canUndo) +
+        '<div style="opacity:.65;font-size:12px">Birini sürüklersen hepsi birlikte gider. R hepsini döndürür. Esc seçimi bırakır.</div>';
+    } else if (p) {
+      const [w, l] = footprint(p);
+      const table = (p.kind === 'table' && typeof p.tableIndex === 'number') || p.kind === 'throne';
+      h +=
+        `<div style="color:#ffb547;margin-top:4px">Seçili: <b>${esc(nameOf(p))}</b><br><span style="opacity:.85">konum ${p.x.toFixed(1)}, ${p.z.toFixed(1)} · ${w.toFixed(1)}×${l.toFixed(1)} m${p.rotY ? ` · ${(Number(p.rotY) * 57.3).toFixed(0)}°` : ''}</span></div>` +
+        (table
+          ? btn('turn', '↻ Döndür') + btn('undo', '↶ Geri al', !s.canUndo) + '<div style="opacity:.65;font-size:12px">Sürükleyerek taşı (masanın koltukları, senin koltuğunda da sen onunla gelirsin).</div>'
+          : btn('turn', '↻ Döndür') + btn('smaller', '− Küçült') + btn('bigger', '+ Büyüt') + btn('copy', '⧉ Kopyala') + btn('remove', '🗑 Sil') + btn('undo', '↶ Geri al', !s.canUndo)) +
+        (chosen && !table ? `<br>${btn('swap', `🔁 Bunu «${esc(chosen.label)}» yap`)}` : table ? '' : '<div style="opacity:.65;font-size:12px">Sürükleyip bırakarak taşı.</div>');
+    } else if (!chosen)
+      h += `<div style="opacity:.75;margin-top:4px">Hiçbir şey seçili değil. Haritadaki bir eşyaya tıkla ya da yanına yürü (mavi çerçeveli olanı <b>Enter</b> seçer), sürükleyip taşı. Birkaçını birden seçmek için <b>Shift</b>+tıkla, planda <b>Shift</b>+sürükleyip kutu çiz.</div>${btn('undo', '↶ Geri al', !s.canUndo)}`;
+    if (h !== shown) {
+      shown = h;
+      sel.innerHTML = h;
+    }
+    el.querySelectorAll<HTMLElement>('[data-a="choose"]').forEach((b) => {
+      b.style.background = Number(b.dataset.i) === s.pick ? '#3b7d4a' : '#2c3644';
+    });
+  }
+  return { render, el };
+}

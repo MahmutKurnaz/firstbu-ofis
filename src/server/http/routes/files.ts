@@ -38,20 +38,20 @@ export const fileRoutes = {
     async handle(ctx, { req, res, url }) {
       const floor = floorParam(ctx, url);
       // Pictures on the whiteboard. Their ids are hashes of what's in them, so they never change.
-      if (!floor) return send(res, 404, { error: 'No such floor' });
+      if (!floor) return send(res, 404, { error: 'Böyle bir kat yok' });
       if (req.method === 'GET') {
         const f = floor.whiteboard.file(url.searchParams.get('id') ?? '');
-        if (!f) return send(res, 404, { error: 'No such picture' });
+        if (!f) return send(res, 404, { error: 'Böyle bir resim yok' });
         return send(res, 200, f, { 'cache-control': 'private, max-age=31536000, immutable' });
       }
-      if (req.method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
-      if (!sameOrigin(req, ctx.cfg)) return send(res, 403, { error: 'Forbidden' });
+      if (req.method !== 'POST') return send(res, 405, { error: 'Bu yöntem desteklenmiyor' });
+      if (!sameOrigin(req, ctx.cfg)) return send(res, 403, { error: 'Yasak' });
       let body: unknown;
       try {
         body = JSON.parse(await readBody(req, WB_MAX_FILE_BYTES + 4096));
       } catch (err) {
-        if ((err as Error).message === 'too large') return send(res, 413, { error: 'That picture is too big for the whiteboard' });
-        return send(res, 400, { error: 'Bad request' });
+        if ((err as Error).message === 'too large') return send(res, 413, { error: 'Bu resim beyaz tahta için çok büyük' });
+        return send(res, 400, { error: 'Hatalı istek' });
       }
       const error = floor.whiteboard.addFile(body);
       return error ? send(res, 400, { error }) : send(res, 200, { ok: true });
@@ -63,21 +63,21 @@ export const fileRoutes = {
     async handle(ctx, { req, res, url }) {
       const floor = floorParam(ctx, url);
       // A file dropped or pasted into a worker's terminal, kept on this machine for the terminal to type its path.
-      if (req.method !== 'POST') return send(res, 405, { error: 'Method not allowed' });
-      if (!sameOrigin(req, ctx.cfg)) return send(res, 403, { error: 'Forbidden' });
-      if (!floor) return send(res, 404, { error: 'No such floor' });
+      if (req.method !== 'POST') return send(res, 405, { error: 'Bu yöntem desteklenmiyor' });
+      if (!sameOrigin(req, ctx.cfg)) return send(res, 403, { error: 'Yasak' });
+      if (!floor) return send(res, 404, { error: 'Böyle bir kat yok' });
       const workerId = str(url.searchParams.get('worker'), 32);
-      if (!floor.workers.get(workerId)) return send(res, 404, { error: 'No such worker' });
-      const tooBig = `That file is too big to drop into a terminal (${DROP_MAX_BYTES / 1024 / 1024} MB at most)`;
+      if (!floor.workers.get(workerId)) return send(res, 404, { error: 'Böyle bir çalışan yok' });
+      const tooBig = `Bu dosya terminale bırakmak için çok büyük (en çok ${DROP_MAX_BYTES / 1024 / 1024} MB)`;
       if (Number(req.headers['content-length']) > DROP_MAX_BYTES) return send(res, 413, { error: tooBig });
       let body: Buffer;
       try {
         body = await readBytes(req, DROP_MAX_BYTES);
       } catch (err) {
-        return (err as Error).message === 'too large' ? send(res, 413, { error: tooBig }) : send(res, 400, { error: 'Bad request' });
+        return (err as Error).message === 'too large' ? send(res, 413, { error: tooBig }) : send(res, 400, { error: 'Hatalı istek' });
       }
       const file = floor.workers.drop(workerId, str(url.searchParams.get('name'), 256), str(req.headers['content-type'], 128), body);
-      return file ? send(res, 200, { path: file }) : send(res, 500, { error: 'The office could not keep that file' });
+      return file ? send(res, 200, { path: file }) : send(res, 500, { error: 'Ofis bu dosyayı saklayamadı' });
     },
   },
   changedFile: {
@@ -86,13 +86,13 @@ export const fileRoutes = {
     async handle(ctx, { req, res, url }) {
       const floor = floorParam(ctx, url);
       // A changed picture in the Changes window at a desk: before (old) or after (new) the worker's edits.
-      if (req.method !== 'GET') return send(res, 405, { error: 'Method not allowed' });
+      if (req.method !== 'GET') return send(res, 405, { error: 'Bu yöntem desteklenmiyor' });
       const workerId = str(url.searchParams.get('worker'), 32);
       const file = str(url.searchParams.get('path'), 4096);
       const side = url.searchParams.get('side');
-      if (!workerId || !file || (side !== 'old' && side !== 'new')) return send(res, 400, { error: 'Bad request' });
-      if (!floor) return send(res, 404, { error: 'No such floor' });
-      if (!floor.workers.get(workerId)) return send(res, 404, { error: 'No such worker' });
+      if (!workerId || !file || (side !== 'old' && side !== 'new')) return send(res, 400, { error: 'Hatalı istek' });
+      if (!floor) return send(res, 404, { error: 'Böyle bir kat yok' });
+      if (!floor.workers.get(workerId)) return send(res, 404, { error: 'Böyle bir çalışan yok' });
       const r = await floor.changes.file(workerId, file, side, repoOf(url.searchParams.get('repo')));
       if ('error' in r) return send(res, r.status, { error: r.error });
       res.writeHead(200, {
@@ -114,10 +114,10 @@ export const fileRoutes = {
     async handle(ctx, { res, url, path: p }) {
       const floor = floorParam(ctx, url);
       // The bookshelf: the project's Markdown files, one to read, and the pictures in it (see docs.ts).
-      if (!floor) return send(res, 404, { error: 'No such floor' });
+      if (!floor) return send(res, 404, { error: 'Böyle bir kat yok' });
       if (p === '/api/docs') return send(res, 200, await floor.docs.list());
       const file = str(url.searchParams.get('path'), 4096);
-      if (!file) return send(res, 400, { error: 'Bad request' });
+      if (!file) return send(res, 400, { error: 'Hatalı istek' });
       if (p === '/api/docs/file') {
         const r = await floor.docs.read(file);
         return 'error' in r ? send(res, r.status, { error: r.error }) : send(res, 200, r);
@@ -136,7 +136,7 @@ export const fileRoutes = {
         res.end(r.body);
         return;
       }
-      return send(res, 404, { error: 'Not found' });
+      return send(res, 404, { error: 'Bulunamadı' });
     },
   },
 } satisfies Record<string, Route>;

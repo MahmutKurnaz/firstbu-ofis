@@ -185,7 +185,7 @@ test('answers the open routes before anyone signs in', async () => {
   assert.equal((await get('/lite')).headers.get('location'), '/login?next=/lite');
   const whoami = await get('/api/whoami');
   assert.equal(whoami.status, 401);
-  assert.deepEqual(await whoami.json(), { error: 'Not logged in' });
+  assert.deepEqual(await whoami.json(), { error: 'Giriş yapılmamış' });
   assert.equal((await get('/%zz')).status, 400);
   assert.match(await (await get('/claim')).text(), /<title>claim<\/title>/);
   assert.match(await (await get('/join.html')).text(), /<title>join<\/title>/);
@@ -193,8 +193,8 @@ test('answers the open routes before anyone signs in', async () => {
   // A route for another method is passed over, on to the sign-in check.
   const put = await fetch(base + '/api/login', { method: 'PUT' });
   assert.equal(put.status, 401);
-  assert.deepEqual(await put.json(), { error: 'Not logged in' });
-  assert.deepEqual(await (await post('/api/claim', { token: 'nope' })).json(), { error: 'This office has already been claimed. Sign in with the password you saved.' });
+  assert.deepEqual(await put.json(), { error: 'Giriş yapılmamış' });
+  assert.deepEqual(await (await post('/api/claim', { token: 'nope' })).json(), { error: 'Bu ofis zaten sahiplenilmiş. Kaydettiğin parolayla giriş yap.' });
   assert.equal((await post('/api/link', { key: 'nope' })).status, 410);
   assert.equal((await post('/api/join', { token: 'nope' })).status, 410);
 });
@@ -202,7 +202,7 @@ test('answers the open routes before anyone signs in', async () => {
 test('signs in with the office password', async () => {
   const wrong = await post('/api/login', { password: 'nope' });
   assert.equal(wrong.status, 401);
-  assert.deepEqual(await wrong.json(), { error: 'Wrong password' });
+  assert.deepEqual(await wrong.json(), { error: 'Parola yanlış' });
   assert.equal((await post('/api/login', 'not json')).status, 400);
 
   const ok = await post('/api/login', { password: PASSWORD });
@@ -226,21 +226,21 @@ test('answers the signed-in routes', async () => {
     assert.equal(res.status, status);
     assert.deepEqual(await res.json(), { error });
   };
-  await bad(await get('/api/gh/pull?number=0', me), 400, 'Bad number');
-  await bad(await get('/api/gh/pull?number=3&floor=nope', me), 404, 'No such floor');
-  await bad(await get('/api/docs?floor=nope', me), 404, 'No such floor');
-  await bad(await get('/api/whiteboard/file?floor=nope', me), 404, 'No such floor');
-  await bad(await get(`/api/whiteboard/file?floor=${floor}&id=nope`, me), 404, 'No such picture');
-  await bad(await get('/api/term/drop', me), 405, 'Method not allowed');
-  await bad(await post('/api/term/drop', '', me), 403, 'Forbidden');
-  await bad(await get('/api/changes/file', me), 400, 'Bad request');
-  await bad(await get(`/api/docs/file?floor=${floor}`, me), 400, 'Bad request');
-  await bad(await get(`/api/docs/other?floor=${floor}&path=x`, me), 404, 'Not found');
+  await bad(await get('/api/gh/pull?number=0', me), 400, 'Geçersiz numara');
+  await bad(await get('/api/gh/pull?number=3&floor=nope', me), 404, 'Böyle bir kat yok');
+  await bad(await get('/api/docs?floor=nope', me), 404, 'Böyle bir kat yok');
+  await bad(await get('/api/whiteboard/file?floor=nope', me), 404, 'Böyle bir kat yok');
+  await bad(await get(`/api/whiteboard/file?floor=${floor}&id=nope`, me), 404, 'Böyle bir resim yok');
+  await bad(await get('/api/term/drop', me), 405, 'Bu yöntem desteklenmiyor');
+  await bad(await post('/api/term/drop', '', me), 403, 'Yasak');
+  await bad(await get('/api/changes/file', me), 400, 'Hatalı istek');
+  await bad(await get(`/api/docs/file?floor=${floor}`, me), 400, 'Hatalı istek');
+  await bad(await get(`/api/docs/other?floor=${floor}&path=x`, me), 404, 'Bulunamadı');
   assert.deepEqual(await (await fetch(base + '/api/whoami', { method: 'POST', headers: me })).json(), { ok: true, me: { admin: true } });
   for (const [method, p] of [['GET', '/nothing-here.txt'], ['PUT', '/api/login'], ['POST', '/api/docs'], ['POST', '/api/search']]) {
     const missing = await fetch(base + p, { method, headers: me });
     assert.equal(missing.status, 404, `${method} ${p}`);
-    assert.equal(await missing.text(), 'Not found');
+    assert.equal(await missing.text(), 'Bulunamadı');
   }
 
   const out = await post('/api/logout', {}, me);
@@ -298,19 +298,19 @@ test('welcomes a browser and dispatches what it sends', async () => {
   // A sign over a desk: the floor sees the plan change and hears who hung it.
   a.send({ t: 'desk.label', deskId: 'desk-1', text: 'Payments' });
   assert.equal((await b.take('plan')).plan.labels['desk-1']?.text, 'Payments');
-  for (const who of [a, b]) assert.equal((await who.take('toast', (m) => m.text.includes('Payments'))).text, '🪧 Ada L hung a sign over Desk 1: “Payments”');
+  for (const who of [a, b]) assert.equal((await who.take('toast', (m) => m.text.includes('Payments'))).text, '🪧 Ada L, Masa 1 üstüne bir tabela astı: “Payments”');
 
   a.send({ t: 'leaveOnMerge.set', on: true });
   for (const who of [a, b]) {
     assert.equal((await who.take('leaveOnMerge')).state.on, true);
-    assert.match((await who.take('toast', (m) => m.text.includes('go home'))).text, /^🏠 Ada L set workers to go home/);
+    assert.match((await who.take('toast', (m) => m.text.includes('eve gitmesini'))).text, /^🏠 Ada L çalışanların pull request/);
   }
 
   // Only for Ada: a floor that isn't there, sign-ins on the shared password, and the accounts list.
   a.send({ t: 'floor.go', floor: 'nope' });
-  assert.deepEqual(await a.take('toast', (m) => m.level === 'warn'), { t: 'toast', text: 'No such floor', level: 'warn' });
+  assert.deepEqual(await a.take('toast', (m) => m.level === 'warn'), { t: 'toast', text: 'Böyle bir kat yok', level: 'warn' });
   a.send({ t: 'signins.get' });
-  assert.equal((await a.take('toast', (m) => m.level === 'warn')).text, "On the shared office password, workers run on the office's own sign-ins");
+  assert.equal((await a.take('toast', (m) => m.level === 'warn')).text, 'Ortak ofis parolasıyla, çalışanlar ofisin kendi girişleriyle çalışır');
   a.send({ t: 'accounts.get' });
   assert.equal((await a.take('accounts')).state.sharedPassword, true);
 
@@ -335,12 +335,12 @@ test('the toys on a floor, and letting go of them on leaving the floor or the of
 
   a.send({ t: 'jukebox.skip' });
   assert.equal((await b.take('jukebox')).state.on, true);
-  assert.match((await b.take('toast', (m) => m.text.startsWith('⏭️'))).text, /^⏭️ Cy skipped to “.+”$/);
+  assert.match((await b.take('toast', (m) => m.text.startsWith('⏭️'))).text, /^⏭️ Cy şuna geçti: “.+”$/);
   a.send({ t: 'jukebox.stop' });
   assert.equal((await b.take('jukebox')).state.on, false);
-  assert.equal((await b.take('toast', (m) => m.text.startsWith('🔇'))).text, '🔇 Cy turned the jukebox off');
+  assert.equal((await b.take('toast', (m) => m.text.startsWith('🔇'))).text, '🔇 Cy müzik kutusunu kapattı');
   a.send({ t: 'dog.name', name: 'Rex' });
-  assert.equal((await b.take('toast', (m) => m.text.startsWith('🐶'))).text, '🐶 Cy named the dog Rex');
+  assert.equal((await b.take('toast', (m) => m.text.startsWith('🐶'))).text, '🐶 Cy köpeğe Rex adını verdi');
 
   // The gong once, not twice in a row; no air horn off the roof, and no golf without a club.
   a.send({ t: 'gong' });
@@ -393,17 +393,17 @@ test('settings, accounts, sign-ins and the boards answer as before', async () =>
   a.send({ t: 'theme.set', pick: 'nope' });
   a.send({ t: 'theme.set', pick: 'off' });
   assert.equal((await a.take('theme')).state.pick, 'off');
-  assert.equal(await told('Eve took'), 'Eve took the holiday decorations down');
+  assert.equal(await told('Eve bayram'), 'Eve bayram süslerini indirdi');
   a.send({ t: 'map.set', map: 'nowhere' });
-  await warned('There’s no map by that name, or it won’t load: see ⚙️ Settings');
+  await warned('Bu adda bir harita yok ya da yüklenmiyor: ⚙️ Ayarlar’a bak');
   a.send({ t: 'machine.limit', limit: 0 });
-  await warned('The worker limit is a whole number from 1 to 500');
+  await warned('Çalışan sınırı 1 ile 500 arasında bir tam sayı olmalı');
   a.send({ t: 'machine.limit', limit: 3 });
   assert.equal((await a.take('machine', (m) => m.state.limit === 3)).state.limit, 3);
-  assert.equal(await told('⚙️'), '⚙️ Eve set the worker limit to 3');
+  assert.equal(await told('⚙️'), '⚙️ Eve çalışan sınırını 3 yaptı');
   a.send({ t: 'prompts.set', id: 'nope', text: 'x' });
   a.send({ t: 'prompts.agent', choice: null });
-  assert.equal(await told('🤖'), '🤖 Eve put the office’s default worker back to claude');
+  assert.equal(await told('🤖'), '🤖 Eve ofisin varsayılan çalışanını eski hâline getirdi: claude');
   a.send({ t: 'notify.webhook', url: 'not a url' });
   assert.match((await a.take('toast', (m) => m.level === 'warn')).text, /./);
   a.send({ t: 'upgrade.check' });
@@ -418,33 +418,33 @@ test('settings, accounts, sign-ins and the boards answer as before', async () =>
   a.send({ t: 'accounts.revoke', accountId: 'nobody' });
   for (const t of ['signins.start', 'signins.cancel', 'signins.signout'] as const) {
     a.send({ t, which: 'github' });
-    await warned("On the shared office password, workers run on the office's own sign-ins");
+    await warned('Ortak ofis parolasıyla, çalışanlar ofisin kendi girişleriyle çalışır');
   }
 
   a.send({ t: 'gh.merge', number: 0, method: 'squash', deleteBranch: false });
   a.send({ t: 'gh.close', kind: 'nope', number: 3 });
   a.send({ t: 'gh.comment', kind: 'issue', number: 3, body: '  ' });
-  assert.deepEqual(await a.take('gh.commented'), { t: 'gh.commented', kind: 'issue', number: 3, error: 'The comment is empty' });
+  assert.deepEqual(await a.take('gh.commented'), { t: 'gh.commented', kind: 'issue', number: 3, error: 'Yorum boş' });
   a.send({ t: 'gh.labels', kind: 'pull', number: 3, add: [], remove: [''] });
-  assert.deepEqual(await a.take('gh.labeled'), { t: 'gh.labeled', kind: 'pull', number: 3, error: 'No labels to change' });
+  assert.deepEqual(await a.take('gh.labeled'), { t: 'gh.labeled', kind: 'pull', number: 3, error: 'Değiştirilecek etiket yok' });
   a.send({ t: 'queue.add', prompt: 'x', provider: 'nope' });
-  await warned('Unknown agent provider');
+  await warned('Bilinmeyen ajan sağlayıcısı');
   a.send({ t: 'meeting.start', pattern: 'debate', prompt: 'x', roles: [], provider: 'nope' });
-  await warned('Unknown agent provider');
+  await warned('Bilinmeyen ajan sağlayıcısı');
   a.send({ t: 'queue.move', taskId: 'nope', delta: 1 });
   a.send({ t: 'changes.watch', workerId: 'nope' });
   a.send({ t: 'changes.unwatch', workerId: 'nope' });
   a.send({ t: 'changes.diff', workerId: 'nope', path: 'a.ts' });
-  assert.deepEqual(await a.take('changes.diff'), { t: 'changes.diff', workerId: 'nope', path: 'a.ts', diff: '', truncated: false, error: 'No such worker' });
+  assert.deepEqual(await a.take('changes.diff'), { t: 'changes.diff', workerId: 'nope', path: 'a.ts', diff: '', truncated: false, error: 'Böyle bir çalışan yok' });
   a.send({ t: 'worker.resume', workerId: 'nope' });
-  await warned('No such worker');
+  await warned('Böyle bir çalışan yok');
   a.send({ t: 'worker.prompt', workerId: 'nope', prompt: 'hi' });
-  await warned('No such worker');
+  await warned('Böyle bir çalışan yok');
 
   a.send({ t: 'worker.spawn', deskId: 'desk-1', provider: 'nope' });
-  await warned('Unknown agent provider');
+  await warned('Bilinmeyen ajan sağlayıcısı');
   a.send({ t: 'worker.spawn', deskId: 'desk-1', kind: 'shell', repos: ['nope'] });
-  await warned('That project is no longer in the building');
+  await warned('Bu proje artık binada değil');
   a.send({ t: 'worker.kill', workerId: 'nope' });
   a.send({ t: 'worker.detach', workerId: 'nope' });
   a.send({ t: 'worker.attach', workerId: 'nope' });
@@ -453,12 +453,12 @@ test('settings, accounts, sign-ins and the boards answer as before', async () =>
   a.send({ t: 'term.resize', workerId: 'nope', cols: 80, rows: 24 });
   a.send({ t: 'floor.expand' });
   assert.equal((await a.take('plan')).plan.wing, 1);
-  assert.match(await told('🔨'), /^🔨 Eve knocked out the back wall: Desk \d+ and Desk \d+ are ready for workers$/);
+  assert.match(await told('🔨'), /^🔨 Eve arka duvarı yıktı: Masa \d+ ve Masa \d+ çalışanlar için hazır$/);
   a.send({ t: 'floor.shrink' });
   assert.equal((await a.take('plan')).plan.wing, 0);
-  assert.match(await told('🧱'), /^🧱 Eve walled the back office back up, and Desk \d+ and Desk \d+ went with it$/);
+  assert.match(await told('🧱'), /^🧱 Eve arka ofisi yeniden duvarla kapattı; Masa \d+ ve Masa \d+ de onunla gitti$/);
   a.send({ t: 'floor.projectsDir', dir: 'relative/dir' });
-  await warned('Use a full path, like ~/Workspace');
+  await warned('Tam bir yol kullan, örneğin ~/Workspace');
   a.send({ t: 'floor.remove', floor: 'nope' });
   assert.match((await a.take('toast', (m) => m.level === 'warn')).text, /./);
   a.send({ t: 'floor.go', floor: office.floors()[0].id });

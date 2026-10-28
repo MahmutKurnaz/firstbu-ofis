@@ -13,28 +13,36 @@ import { BENCH_TOP, TABLE_TOP, box, collide, lit, xz, type Kit } from './kit';
 // captain's chair on it. Everything is where the plan has it (see planMap), as in the castle.
 
 /** The long benches the workers work at, as the plan has them: a white top with a line of light down it, a padded seat down each side. */
-export function buildBenches(kit: Kit) {
+export function buildBenches(kit: Kit, dress?: (t: Kit['plan']['tables'][number]) => boolean) {
   const { mats } = kit;
   for (const t of kit.plan.tables) {
+    // A map's own desks are furnished by its builder (the street's executive suite).
+    if (t.look === 'desk') continue;
+    // A map's own look for it (the street's Meshy table and benches, which can't be in `kit.still`: that's merged into one mesh) in place of what's drawn here.
+    const own = dress?.(t) === true;
     const g = new THREE.Group();
     g.position.set(t.x, 0, t.z);
     g.rotation.y = t.rotY;
-    g.add(mesh(roundedBox(t.width, 0.08, t.length, 0.08), mats.white, 0, TABLE_TOP - 0.04, 0));
-    g.add(mesh(box(t.width - 0.12, 0.05, t.length - 0.12), mats.metalDark, 0, TABLE_TOP - 0.105, 0, false));
-    g.add(mesh(box(0.1, 0.03, t.length - 0.6), mats.accent, 0, TABLE_TOP + 0.012, 0, false));
-    const legs = Math.max(2, Math.round(t.length / 3.4) + 1);
-    for (let i = 0; i < legs; i++) {
-      const lz = -t.length / 2 + 0.5 + (i * (t.length - 1)) / (legs - 1);
-      g.add(mesh(box(t.width - 0.5, TABLE_TOP - 0.13, 0.22), mats.metalDark, 0, (TABLE_TOP - 0.13) / 2, lz));
-      g.add(mesh(box(t.width - 0.2, 0.05, 0.5), mats.metal, 0, 0.025, lz, false));
+    if (!own) {
+      g.add(mesh(roundedBox(t.width, 0.08, t.length, 0.08), mats.white, 0, TABLE_TOP - 0.04, 0));
+      g.add(mesh(box(t.width - 0.12, 0.05, t.length - 0.12), mats.metalDark, 0, TABLE_TOP - 0.105, 0, false));
+      g.add(mesh(box(0.1, 0.03, t.length - 0.6), mats.accent, 0, TABLE_TOP + 0.012, 0, false));
+      const legs = Math.max(2, Math.round(t.length / 3.4) + 1);
+      for (let i = 0; i < legs; i++) {
+        const lz = -t.length / 2 + 0.5 + (i * (t.length - 1)) / (legs - 1);
+        g.add(mesh(box(t.width - 0.5, TABLE_TOP - 0.13, 0.22), mats.metalDark, 0, (TABLE_TOP - 0.13) / 2, lz));
+        g.add(mesh(box(t.width - 0.2, 0.05, 0.5), mats.metal, 0, 0.025, lz, false));
+      }
     }
     for (const s of t.sides) {
       const bx = s * (t.width / 2 + BENCH_OUT);
-      g.add(mesh(roundedBox(0.44, 0.09, t.length - 0.2, 0.05), mats.pad, bx, BENCH_TOP - 0.045, 0));
-      g.add(mesh(box(0.26, BENCH_TOP - 0.09, t.length - 0.8), mats.metalDark, bx, (BENCH_TOP - 0.09) / 2, 0));
+      if (!own) {
+        g.add(mesh(roundedBox(0.44, 0.09, t.length - 0.2, 0.05), mats.pad, bx, BENCH_TOP - 0.045, 0));
+        g.add(mesh(box(0.26, BENCH_TOP - 0.09, t.length - 0.8), mats.metalDark, bx, (BENCH_TOP - 0.09) / 2, 0));
+      }
       collide(kit, t.x + Math.cos(t.rotY) * bx, t.z - Math.sin(t.rotY) * bx, 0.44, t.length - 0.2, t.rotY, BENCH_TOP);
     }
-    kit.still.add(g);
+    if (!own) kit.still.add(g);
     collide(kit, t.x, t.z, t.width, t.length, t.rotY, TABLE_TOP);
   }
 }
@@ -46,7 +54,8 @@ export function placeSetting(kit: Kit, def: DeskDef, overflow: boolean): { view:
   g.rotation.y = def.rotY;
   const laptopAnchor = new THREE.Object3D();
   laptopAnchor.position.set(0, TABLE_TOP, -0.02);
-  laptopAnchor.scale.setScalar(1.2);
+  // A 16 inch laptop: its model is drawn 0.72 m across the screen, so half of that is 0.36 m.
+  laptopAnchor.scale.setScalar(0.5);
   g.add(laptopAnchor);
   // On the bench, facing the table.
   const seatAnchor = new THREE.Object3D();
@@ -71,10 +80,10 @@ export function placeSetting(kit: Kit, def: DeskDef, overflow: boolean): { view:
   return { view: { def, group: g, laptopAnchor, seatAnchor, stage, chair: new THREE.Group(), vacancy, vacancyY: 1.35 }, it };
 }
 
-const CONSOLE_SIGN: Record<StationKind, string> = { issues: '📡 Ask me', pulls: '🔀 Ask me', queue: '📋 Ask me' };
+const CONSOLE_SIGN: Record<StationKind, string> = { issues: '📡 Bana sor', pulls: '🔀 Bana sor', queue: '📋 Bana sor' };
 
 /** A board agent's console: a slanted panel on a pedestal, lit in the agent's color; it stands behind it, as at the office's kiosk. */
-export function agentConsole(kit: Kit, def: DeskDef): DeskView {
+export function agentConsole(kit: Kit, def: DeskDef, dress?: (g: THREE.Group, parts: THREE.Object3D[]) => void): DeskView {
   const kind = def.station!;
   const g = new THREE.Group();
   g.position.set(def.x, 0, def.z);
@@ -91,6 +100,8 @@ export function agentConsole(kit: Kit, def: DeskDef): DeskView {
   top.add(mesh(box(KIOSK.width - 0.3, 0.014, 0.05), lit(color), 0, 0.045, -0.1, false));
   top.add(mesh(box(KIOSK.width - 0.4, 0.014, 0.05), lit(color), -0.05, 0.045, 0.02, false));
   g.add(top);
+  // A map's own lectern can take the place of this one (the street's).
+  dress?.(g, [...g.children]);
   // The agent's color round the pedestal, and a sign facing whoever walks up (-z, the room).
   g.add(mesh(new THREE.TorusGeometry(0.13, 0.03, 6, 20).rotateX(Math.PI / 2), lit(color), 0, 0.72, 0, false));
   const sign = textPlane(CONSOLE_SIGN[kind], { bg: '#0f1a26', color: '#e6f6ff', border: color, size: 56 });
@@ -126,7 +137,7 @@ export function agentConsole(kit: Kit, def: DeskDef): DeskView {
 }
 
 /** The round briefing table, its chairs, and the display on a stand with the meeting's board and sign. */
-export function buildBriefing(kit: Kit, name = '🤝 Briefing room'): { board?: THREE.Mesh; sign?: THREE.Mesh } {
+export function buildBriefing(kit: Kit, name = '🤝 Briefing room', dress?: (table: THREE.Group) => void): { board?: THREE.Mesh; sign?: THREE.Mesh } {
   const cp = kit.plan.council;
   if (!cp) return {};
   const { mats } = kit;
@@ -139,6 +150,7 @@ export function buildBriefing(kit: Kit, name = '🤝 Briefing room'): { board?: 
   // A projector let into the middle of it.
   t.add(mesh(new THREE.CylinderGeometry(0.3, 0.3, 0.012, 24), mats.black, 0, COUNCIL.height + 0.006, 0, false));
   t.add(mesh(new THREE.TorusGeometry(0.3, 0.018, 6, 28).rotateX(Math.PI / 2), mats.glow, 0, COUNCIL.height + 0.012, 0, false));
+  dress?.(t);
   kit.group.add(t);
   // A square inside the round top, so its corners don't stick out past the edge.
   const r = COUNCIL.radius * Math.SQRT1_2;
@@ -190,7 +202,7 @@ function briefingChair(kit: Kit, def: DeskDef): DeskView {
   g.add(chair);
   const laptopAnchor = new THREE.Object3D();
   laptopAnchor.position.set(0, COUNCIL.height, COUNCIL.tome.z);
-  laptopAnchor.scale.setScalar(COUNCIL.tome.scale);
+  laptopAnchor.scale.setScalar(0.5);
   g.add(laptopAnchor);
   const seatAnchor = new THREE.Object3D();
   seatAnchor.position.set(0, 0.46, 0.85);
