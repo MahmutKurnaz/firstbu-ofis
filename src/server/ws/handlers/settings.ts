@@ -98,6 +98,14 @@ export const settingsHandlers = {
     }
     mapNews(ctx, was, who);
   },
+  'map.edit'(ctx, c, msg) {
+    const who = c.peer.name;
+    if (!ctx.meOf(c.accountId).admin) return ctx.warn(c, 'Haritayı yalnızca yöneticiler düzenleyebilir');
+    const was = ctx.maps.pick();
+    const err = ctx.maps.saveEdit(str(msg.base, 64), msg.props, who);
+    if (err) return ctx.warn(c, err);
+    mapNews(ctx, was, who);
+  },
   'leaveOnMerge.set'(ctx, c, msg) {
     const who = c.peer.name;
     const on = msg.on === true;

@@ -1,7 +1,10 @@
-import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import type { MapState } from '../shared/protocol.js';
 import { OFFICE_MAP, checkCustomMaps, isMapChoice, planOf, type CustomMap, type MapPlan } from '../shared/maps/index.js';
+
+/** The id of the street as someone rearranged it (see saveEdit). */
+export const EDIT_ID = 'duzen';
 
 /** The most custom maps read, and the biggest file that's read as one. */
 const MAX_FILES = 24;
@@ -61,6 +64,32 @@ export class Maps {
     this.saved = { pick, by, at: Date.now() };
     this.persist();
     return true;
+  }
+
+  /**
+   * The street, rearranged by someone in the editor (see features/mapedit): its props as they put them, saved as a map of
+   * your own that extends the street (`duzen.json`) and picked. Null if it went through, or why it didn't.
+   */
+  saveEdit(base: string, props: unknown, by: string): string | null {
+    if (base !== 'cadde' && base !== EDIT_ID) return 'Yalnızca cadde haritası düzenlenebilir';
+    if (!Array.isArray(props) || props.length > 400) return 'Eşya listesi geçersiz';
+    const keep = ['kind', 'x', 'z', 'y', 'rotY', 'scale', 'width', 'height', 'length', 'color', 'light', 'model', 'style'];
+    const clean = props.map((p) => {
+      const o: Record<string, unknown> = {};
+      if (typeof p === 'object' && p !== null) for (const k of keep) if ((p as Record<string, unknown>)[k] !== undefined) o[k] = (p as Record<string, unknown>)[k];
+      return o;
+    });
+    const json = { id: EDIT_ID, name: 'Cadde (düzenlenmiş)', icon: '✏️', description: 'Caddenin senin yerleştirdiğin hâli (düzenleme modu).', extends: 'cadde', props: clean };
+    const [checked] = checkCustomMaps([{ file: `${EDIT_ID}.json`, json }]);
+    if (!checked?.config) return checked?.error ?? 'Harita geçersiz';
+    try {
+      mkdirSync(this.dir, { recursive: true });
+      writeFileSync(path.join(this.dir, `${EDIT_ID}.json`), JSON.stringify(json, null, 2));
+    } catch {
+      return 'Harita dosyası yazılamadı';
+    }
+    this.reload();
+    return this.set(EDIT_ID, by) ? null : 'Harita yüklenemedi';
   }
 
   /** Reads the custom maps again; true if anything in the folder changed. */

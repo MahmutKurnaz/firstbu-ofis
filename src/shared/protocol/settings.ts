@@ -185,6 +185,8 @@ export type SettingsClientMsg =
   | { t: 'sky.clock'; real: boolean }
   /** Change the building's map (see MapState), or with no map, read the custom maps' folder again. */
   | { t: 'map.set'; map?: string }
+  /** Save the street rearranged (its props as the editor has them) as a map of your own, and switch everyone to it. */
+  | { t: 'map.edit'; base: string; props: Record<string, unknown>[] }
   /** Workers whose pull request merged go home by themselves (true), or wait to be sent home. */
   | { t: 'leaveOnMerge.set'; on: boolean }
   /** Rewrite one of the office's prompts (admins only); null puts the default back. */

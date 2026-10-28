@@ -35,6 +35,7 @@ import { installBoards } from './features/boards';
 import { installBookshelf } from './features/bookshelf';
 import { installCabinet } from './features/cabinet';
 import { installAvatar } from './features/avatar';
+import { installMapEdit } from './features/mapedit';
 import { installTeamBoards } from './features/teamboards';
 import { installCharacters } from './features/characters';
 import { installGhosts } from './features/ghosts';
@@ -153,6 +154,7 @@ installOrdu(ctx, { openTerminal: (id) => parts.waiting.openWorkerTerminal(id) })
 installGhosts(ctx);
 installCharacters(ctx, { workerViews: parts.views.workerViews });
 installAvatar(ctx);
+installMapEdit(ctx);
 installTeamBoards(ctx);
 parts.needsYou = installNeedsYou(ctx, parts);
 installPalette(ctx, parts);
