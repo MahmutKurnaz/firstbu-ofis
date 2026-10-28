@@ -9,10 +9,10 @@ export interface JukeboxTune {
 }
 
 export const JUKEBOX_TUNES: readonly JukeboxTune[] = [
-  { id: 'rainy-window', title: 'Rainy Window', mood: 'slow and dreamy' },
-  { id: 'coffee-break', title: 'Coffee Break', mood: 'jazzy, easy swing' },
-  { id: 'late-commit', title: 'Late Commit', mood: 'minor key, 2 a.m.' },
-  { id: 'green-build', title: 'Green Build', mood: 'bright and bouncy' },
+  { id: 'rainy-window', title: 'Yağmurlu Pencere', mood: 'yavaş ve dalgın' },
+  { id: 'coffee-break', title: 'Kahve Molası', mood: 'cazlı, rahat bir salınım' },
+  { id: 'late-commit', title: 'Geç Commit', mood: 'minör tonda, gece 2' },
+  { id: 'green-build', title: 'Yeşil Build', mood: 'neşeli ve hareketli' },
 ];
 
 /** The `track` of a stream someone pasted. */
@@ -36,26 +36,26 @@ export const tuneById = (id: string): JukeboxTune | undefined => JUKEBOX_TUNES.f
 
 /** What's on, for the hint bar and the jukebox's own display: a tune's title, or where the stream comes from. */
 export function trackTitle(s: Pick<JukeboxState, 'track' | 'url'>): string {
-  if (s.track !== STREAM) return tuneById(s.track)?.title ?? 'A tune';
+  if (s.track !== STREAM) return tuneById(s.track)?.title ?? 'Bir parça';
   try {
     const u = new URL(s.url ?? '');
     const file = decodeURIComponent(u.pathname.split('/').filter(Boolean).pop() ?? '');
     return file ? `${u.hostname} · ${file}` : u.hostname;
   } catch {
-    return 'A stream';
+    return 'Bir yayın';
   }
 }
 
 export function checkStreamUrl(raw: unknown): { url: string } | { error: string } {
   const s = typeof raw === 'string' ? raw.trim() : '';
-  if (!s) return { error: 'Paste a link to a stream or an audio file' };
-  if (s.length > 2048) return { error: 'That link is too long' };
+  if (!s) return { error: 'Bir yayın ya da ses dosyası bağlantısı yapıştır' };
+  if (s.length > 2048) return { error: 'Bu bağlantı çok uzun' };
   let u: URL;
   try {
     u = new URL(s);
   } catch {
-    return { error: "That isn't a web link. Paste an address that starts with https://" };
+    return { error: 'Bu bir web bağlantısı değil. https:// ile başlayan bir adres yapıştır' };
   }
-  if (u.protocol !== 'https:' && u.protocol !== 'http:') return { error: 'Only http and https links can play on the jukebox' };
+  if (u.protocol !== 'https:' && u.protocol !== 'http:') return { error: 'Müzik kutusunda yalnızca http ve https bağlantıları çalınabilir' };
   return { url: u.href };
 }

@@ -50,7 +50,7 @@ export const orduHandlers = {
     if (!w.role) return ctx.warn(c, 'Bu bir rol ajanı değil');
     // Asleep after a restart: wake it with the task, as tell_worker does.
     let err = floor.workers.prompt(w.id, text, who);
-    if (err === 'Worker is not running') err = floor.workers.resume(w.id, text);
+    if (err === 'Çalışan çalışmıyor') err = floor.workers.resume(w.id, text);
     if (err) return ctx.warn(c, err);
     ctx.toastFloor(floor, `${who}, ${w.name}'e iş verdi`);
   },

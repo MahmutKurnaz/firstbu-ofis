@@ -73,7 +73,7 @@ export function answered(h: WorkerHandle, now = Date.now()) {
 
 /** It wants permission for `what`. */
 export function wantsPermission(h: WorkerHandle, what: string) {
-  h.info.activity = `Wants permission: ${what}`;
+  h.info.activity = `İzin istiyor: ${what}`;
   h.setStatus('needs_input');
 }
 
@@ -119,7 +119,7 @@ export function reduceLifecycle(h: WorkerHandle, report: LifecycleReport, o: Lif
       h.setStatus('working');
       break;
     case 'PreToolUse':
-      info.activity = report.tool ? truncate(report.tool, 80) : 'Using a tool';
+      info.activity = report.tool ? truncate(report.tool, 80) : 'Bir araç kullanıyor';
       info.action = toolAction(report.tool);
       h.noteTool(info.activity);
       if (tools) {

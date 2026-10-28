@@ -83,7 +83,7 @@ export function restoreWorkers(file: string, workers: Map<string, Worker>, defau
         model: savedModel(provider, s.model),
         effort: savedEffort(provider, s.effort),
         deskId: s.deskId,
-        name: s.name ?? 'Worker',
+        name: s.name ?? 'Çalışan',
         color: s.color ?? COLORS[0],
         status: 'offline',
         acked: true,

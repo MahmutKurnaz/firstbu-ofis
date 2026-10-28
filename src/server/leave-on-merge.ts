@@ -87,12 +87,12 @@ export function landedWorkers(workers: WorkerInfo[], pulls: GhPull[], tasks: Que
  * undefined when nothing keeps it.
  */
 export function notLeaving(w: WorkerInfo): string | undefined {
-  if (w.kind !== 'agent') return 'a shell';
-  if (w.meeting) return 'at the meeting table';
-  if (DESK_BY_ID.get(w.deskId)?.station) return 'a board agent';
-  if (isBusy(w.status)) return w.status === 'needs_input' ? 'waiting on someone' : 'still working';
-  if (w.prOpening) return 'opening a pull request';
-  if (w.viewers.length) return `${w.viewers.join(', ')} ${w.viewers.length === 1 ? 'has' : 'have'} its terminal open`;
+  if (w.kind !== 'agent') return 'bir shell';
+  if (w.meeting) return 'toplantı masasında';
+  if (DESK_BY_ID.get(w.deskId)?.station) return 'bir pano ajanı';
+  if (isBusy(w.status)) return w.status === 'needs_input' ? 'birini bekliyor' : 'hâlâ çalışıyor';
+  if (w.prOpening) return 'pull request açıyor';
+  if (w.viewers.length) return `terminali ${w.viewers.join(', ')} tarafından açık`;
   return undefined;
 }
 
@@ -114,7 +114,7 @@ function landedAcross(w: WorkerInfo, own: WorkerPr | undefined, pulls: GhPull[],
   const prs: string[] = [];
   const numbers: number[] = [];
   if (own) {
-    prs.push(`${w.worktree ? w.worktree.path.split(/[\\/]/).pop() : 'its own'} #${own.number}`);
+    prs.push(`${w.worktree ? w.worktree.path.split(/[\\/]/).pop() : 'kendi'} #${own.number}`);
     numbers.push(own.number);
   }
   for (const r of w.repos ?? []) {

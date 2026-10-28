@@ -1,8 +1,8 @@
 {
   "id": "my-castle",
-  "name": "My castle",
+  "name": "Benim kalem",
   "icon": "🏰",
-  "description": "A copy of the castle, to make your own.",
+  "description": "Kale haritasının bir kopyası: kendi haritanı yapmak için.",
   "style": "castle",
   "hall": {
     "width": 26,
@@ -33,10 +33,10 @@
     "x": 3.3,
     "z": -26.3,
     "rotY": -0.35,
-    "name": "Hand of the King",
-    "says": "Speak to me to send out a new worker",
-    "ask": "What shall they toil on, my liege?",
-    "button": "Send them out ⚔️"
+    "name": "Kralın Eli",
+    "says": "Yeni bir çalışan göndermek için benimle konuş",
+    "ask": "Ne üzerinde çalışsın, efendimiz?",
+    "button": "Yola çıksın ⚔️"
   },
   "lineup": {
     "x": 0,
@@ -78,7 +78,7 @@
       "rotY": 1.5708,
       "width": 4.4,
       "height": 2.6,
-      "label": "📜 Petitions"
+      "label": "📜 Dilekçeler"
     },
     "queue": {
       "x": -12.92,
@@ -87,7 +87,7 @@
       "rotY": 1.5708,
       "width": 4.4,
       "height": 2.6,
-      "label": "📋 Orders of the day"
+      "label": "📋 Günün emirleri"
     },
     "pulls": {
       "x": 12.92,
@@ -96,7 +96,7 @@
       "rotY": -1.5708,
       "width": 4.4,
       "height": 2.6,
-      "label": "🔀 Decrees for the seal"
+      "label": "🔀 Mühürlenecek fermanlar"
     },
     "services": {
       "x": 12.92,
@@ -105,7 +105,7 @@
       "rotY": -1.5708,
       "width": 4.4,
       "height": 2.6,
-      "label": "🌐 Services"
+      "label": "🌐 Servisler"
     }
   },
   "agents": {
@@ -259,7 +259,7 @@
   },
   "sendHome": {
     "escort": {
-      "name": "Kingsguard",
+      "name": "Kraliyet Muhafızı",
       "post": {
         "x": 6.3,
         "z": 21.8,
@@ -276,10 +276,10 @@
         "do": "say",
         "who": "escort",
         "text": [
-          "By order of the crown, you’re coming with me.",
-          "On your feet. The king’s done with you.",
-          "You’re dismissed. Come quietly.",
-          "Up. The dungeon’s waiting."
+          "Tacın emriyle, benimle geliyorsun.",
+          "Ayağa kalk. Kral seninle işini bitirdi.",
+          "Görevden alındın. Sessizce yürü.",
+          "Kalk. Zindan seni bekliyor."
         ]
       },
       {
@@ -288,11 +288,11 @@
       {
         "do": "say",
         "text": [
-          "🙏 Mercy, my liege!",
-          "😰 But my pull request…",
-          "😭 I was nearly done!",
-          "🥺 Just one more commit!",
-          "😱 Not the dungeon!",
+          "🙏 Merhamet, efendimiz!",
+          "😰 Ama pull request’im…",
+          "😭 Neredeyse bitirmiştim!",
+          "🥺 Bir commit daha!",
+          "😱 Zindan olmaz!",
           "😶 …"
         ]
       },
@@ -307,10 +307,10 @@
         "do": "say",
         "who": "escort",
         "text": [
-          "🔒 Rot in there.",
-          "🔒 Enjoy your stay.",
-          "🔒 Nobody leaves.",
-          "🔒 Should have shipped it."
+          "🔒 Orada çürü.",
+          "🔒 İyi eğlenceler.",
+          "🔒 Kimse çıkamaz.",
+          "🔒 Yayına almalıydın."
         ]
       },
       {
@@ -321,10 +321,10 @@
     "rotHours": 12
   },
   "tables": [
-    {"name":"North-west table","x":-6.8,"z":-8,"length":10,"seats":4},
-    {"name":"North-east table","x":6.8,"z":-8,"length":10,"seats":4},
-    {"name":"South-west table","x":-6.8,"z":6,"length":10,"seats":4},
-    {"name":"South-east table","x":6.8,"z":6,"length":10,"seats":4}
+    {"name":"Kuzeybatı masası","x":-6.8,"z":-8,"length":10,"seats":4},
+    {"name":"Kuzeydoğu masası","x":6.8,"z":-8,"length":10,"seats":4},
+    {"name":"Güneybatı masası","x":-6.8,"z":6,"length":10,"seats":4},
+    {"name":"Güneydoğu masası","x":6.8,"z":6,"length":10,"seats":4}
   ],
   "props": [
     {"kind":"pillar","x":-10.4,"z":-24},

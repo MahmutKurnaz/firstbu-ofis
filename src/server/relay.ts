@@ -72,7 +72,7 @@ export function relayRequest(req: http.IncomingMessage, res: http.ServerResponse
     ur.pipe(res);
   });
   up.on('error', () => {
-    if (!res.headersSent) page(res, 502, 'Not answering', `The server on port ${svc.port} (<code>${esc(svc.command)}</code>) didn't answer. It may be restarting — try again in a moment.`);
+    if (!res.headersSent) page(res, 502, 'Cevap vermiyor', `${svc.port} portundaki sunucu (<code>${esc(svc.command)}</code>) cevap vermedi. Yeniden başlıyor olabilir — birazdan yeniden dene.`);
     else res.destroy();
   });
   res.on('close', () => up.destroy());
@@ -129,19 +129,19 @@ export const RELAY_LOGIN = '/__agent-office/login';
 /** `opts` says which fields to ask for: a name when there are accounts, a password always. */
 export function signInPage(res: http.ServerResponse, port: number, opts: { accounts: boolean; shared: boolean }) {
   const askName = opts.accounts || !opts.shared;
-  const how = !askName ? 'the office password' : opts.shared ? 'your name and password (or just the office password)' : 'your name and password';
+  const how = !askName ? 'ofis parolanla' : opts.shared ? 'adın ve parolanla (ya da yalnızca ofis parolasıyla)' : 'adın ve parolanla';
   page(
     res,
     401,
-    '🔒 Sign in to the office',
-    `<p>This is a worker's server on port ${port}, reached through the office. Sign in with ${how} to see it.</p>
-<form id="f">${askName ? `<input id="name" placeholder="${opts.shared ? 'Your name (optional)' : 'Your name'}" autocomplete="username"${opts.shared ? '' : ' required'} autofocus>` : ''}<input id="pw" type="password" placeholder="${askName ? 'Password' : 'Office password'}" autocomplete="current-password"${askName ? '' : ' autofocus'}><button>Sign in</button></form><p class="err" id="err"></p>`,
+    '🔒 Ofise giriş yap',
+    `<p>Bu, ofis üzerinden ulaşılan bir çalışanın ${port} portundaki sunucusu. Görmek için ${how} giriş yap.</p>
+<form id="f">${askName ? `<input id="name" placeholder="${opts.shared ? 'Adın (isteğe bağlı)' : 'Adın'}" autocomplete="username"${opts.shared ? '' : ' required'} autofocus>` : ''}<input id="pw" type="password" placeholder="${askName ? 'Parola' : 'Ofis parolası'}" autocomplete="current-password"${askName ? '' : ' autofocus'}><button>Giriş yap</button></form><p class="err" id="err"></p>`,
     `document.getElementById('f').addEventListener('submit',async(e)=>{e.preventDefault();const err=document.getElementById('err');err.textContent='';const n=document.getElementById('name');
 try{const r=await fetch(${JSON.stringify(RELAY_LOGIN)},{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({name:n?n.value:'',password:document.getElementById('pw').value})});
-if(r.ok)location.reload();else err.textContent=(await r.json().catch(()=>({}))).error||'Sign-in failed'}catch{err.textContent='Could not reach the office'}})`,
+if(r.ok)location.reload();else err.textContent=(await r.json().catch(()=>({}))).error||'Giriş başarısız'}catch{err.textContent='Ofise ulaşılamadı'}})`,
   );
 }
 
 export function stoppedPage(res: http.ServerResponse, port: number) {
-  page(res, 503, '💤 Not running', `<p>Nothing is serving port ${port} right now. The worker may have stopped its server — check the 🌐 Services board in the office, or ask the worker to start it again.</p>`);
+  page(res, 503, '💤 Çalışmıyor', `<p>Şu anda ${port} portunu sunan bir şey yok. Çalışan sunucusunu durdurmuş olabilir — ofisteki 🌐 Servisler panosuna bak ya da çalışandan yeniden başlatmasını iste.</p>`);
 }

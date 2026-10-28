@@ -160,16 +160,16 @@ export class Docs {
 
   /** One doc's Markdown. Only Markdown, and only inside the project (not through a link out of it). */
   async read(file: string): Promise<DocText | Failure> {
-    if (!isDocPath(file)) return { status: 415, error: 'Only Markdown files are on the bookshelf' };
+    if (!isDocPath(file)) return { status: 415, error: 'Kitaplıkta yalnızca Markdown dosyaları var' };
     const abs = await insideCheckout(this.dir, file);
-    if (!abs) return { status: 404, error: 'That file is not in the project' };
+    if (!abs) return { status: 404, error: 'Bu dosya projede değil' };
     try {
       const s = await stat(abs);
-      if (!s.isFile()) return { status: 404, error: 'That is not a file' };
-      if (s.size > MAX_DOC_BYTES) return { status: 413, error: `That file is over ${MAX_DOC_BYTES / 1024 / 1024} MB` };
+      if (!s.isFile()) return { status: 404, error: 'Bu bir dosya değil' };
+      if (s.size > MAX_DOC_BYTES) return { status: 413, error: `Bu dosya ${MAX_DOC_BYTES / 1024 / 1024} MB’ı aşıyor` };
       return { path: file, text: await readFile(abs, 'utf8') };
     } catch (err) {
-      if ((err as NodeJS.ErrnoException).code === 'ENOENT') return { status: 404, error: 'That file is gone' };
+      if ((err as NodeJS.ErrnoException).code === 'ENOENT') return { status: 404, error: 'Bu dosya artık yok' };
       return { status: 500, error: (err as Error).message };
     }
   }
@@ -177,16 +177,16 @@ export class Docs {
   /** A picture a doc shows, from the project. */
   async picture(file: string): Promise<ImageResult> {
     const type = changedImageType(file);
-    if (!type) return { status: 415, error: 'Only pictures' };
+    if (!type) return { status: 415, error: 'Yalnızca resimler' };
     const abs = await insideCheckout(this.dir, file);
-    if (!abs) return { status: 404, error: 'That file is not in the project' };
+    if (!abs) return { status: 404, error: 'Bu dosya projede değil' };
     try {
       const s = await stat(abs);
-      if (!s.isFile()) return { status: 404, error: 'That is not a file' };
-      if (s.size > MAX_PICTURE_BYTES) return { status: 413, error: `That picture is over ${MAX_PICTURE_BYTES / 1024 / 1024} MB` };
+      if (!s.isFile()) return { status: 404, error: 'Bu bir dosya değil' };
+      if (s.size > MAX_PICTURE_BYTES) return { status: 413, error: `Bu resim ${MAX_PICTURE_BYTES / 1024 / 1024} MB’ı aşıyor` };
       return { type, body: await readFile(abs) };
     } catch (err) {
-      if ((err as NodeJS.ErrnoException).code === 'ENOENT') return { status: 404, error: 'That file is gone' };
+      if ((err as NodeJS.ErrnoException).code === 'ENOENT') return { status: 404, error: 'Bu dosya artık yok' };
       return { status: 500, error: (err as Error).message };
     }
   }

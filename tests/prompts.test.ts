@@ -69,11 +69,11 @@ test('a rewritten prompt is kept, used, and put back to the default', (t) => {
   assert.equal(book.text('pull.review'), PROMPTS['pull.review'].text);
 
   // Empty only where empty means "send nothing"; never too long, never an unknown prompt.
-  assert.match(book.setPrompt('issue.work', '  ', 'Ada') ?? '', /can’t be empty/);
+  assert.match(book.setPrompt('issue.work', '  ', 'Ada') ?? '', /boş olamaz/);
   assert.equal(book.setPrompt('queue.worktree', '', 'Ada'), undefined);
   assert.equal(book.text('queue.worktree'), '');
-  assert.match(book.setPrompt('issue.work', 'x'.repeat(PROMPT_MAX + 1), 'Ada') ?? '', /at most/);
-  assert.match(book.setPrompt('nope', 'x', 'Ada') ?? '', /Unknown prompt/);
+  assert.match(book.setPrompt('issue.work', 'x'.repeat(PROMPT_MAX + 1), 'Ada') ?? '', /en çok/);
+  assert.match(book.setPrompt('nope', 'x', 'Ada') ?? '', /Bilinmeyen prompt/);
   assert.equal(promptText(book.state().custom, 'office.namer'), PROMPTS['office.namer'].text);
 });
 
@@ -81,11 +81,11 @@ test('the default worker is checked before it is kept, and one the office can no
   const dir = scratch(t);
   const book = new OfficePrompts(dir, { list: ['claude', 'opencode', 'codex'], configured: 'claude' }, () => {});
   assert.equal(book.agent(), undefined);
-  assert.match(book.setAgent({ provider: 'custom' }, 'Ada') ?? '', /Unknown agent provider/);
-  assert.match(book.setAgent({ provider: 'claude', model: 'gpt-9' }, 'Ada') ?? '', /Invalid Claude model/);
-  assert.match(book.setAgent({ provider: 'codex', model: 'gpt 5.5' }, 'Ada') ?? '', /Invalid Codex model/);
-  assert.match(book.setAgent({ provider: 'codex', effort: 'enormous' as never }, 'Ada') ?? '', /Invalid effort/);
-  assert.match(book.setAgent({ provider: 'opencode', model: 'no slash' }, 'Ada') ?? '', /Invalid OpenCode model/);
+  assert.match(book.setAgent({ provider: 'custom' }, 'Ada') ?? '', /Bilinmeyen ajan sağlayıcısı/);
+  assert.match(book.setAgent({ provider: 'claude', model: 'gpt-9' }, 'Ada') ?? '', /Geçersiz Claude modeli/);
+  assert.match(book.setAgent({ provider: 'codex', model: 'gpt 5.5' }, 'Ada') ?? '', /Geçersiz Codex modeli/);
+  assert.match(book.setAgent({ provider: 'codex', effort: 'enormous' as never }, 'Ada') ?? '', /Geçersiz efor/);
+  assert.match(book.setAgent({ provider: 'opencode', model: 'no slash' }, 'Ada') ?? '', /Geçersiz OpenCode modeli/);
   assert.equal(book.setAgent({ provider: 'claude', model: 'opus', effort: 'high' }, 'Ada'), undefined);
   assert.deepEqual(book.agent(), { provider: 'claude', model: 'opus', effort: 'high' });
   assert.equal(book.state().agent?.by, 'Ada');

@@ -6,7 +6,7 @@ import { str } from '../../office/input.js';
 import { clientIp, isSecure, readBody, send } from '../util.js';
 import type { Route } from '../router.js';
 
-const TOO_MANY_ATTEMPTS = 'Too many attempts. Try again in a few minutes.';
+const TOO_MANY_ATTEMPTS = 'Çok fazla deneme. Birkaç dakika sonra yeniden dene.';
 
 /**
  * A password, claim-token or invite guess: counts it against the IP, then reads the small JSON
@@ -22,7 +22,7 @@ async function readGuess(ctx: Ctx, req: http.IncomingMessage, res: http.ServerRe
   } catch {
     // answered below
   }
-  send(res, 400, { error: 'Bad request' });
+  send(res, 400, { error: 'Hatalı istek' });
 }
 const signedIn = (ctx: Ctx, req: http.IncomingMessage, accountId?: string) => ({ 'set-cookie': ctx.auth.cookie(req, ctx.auth.issue(accountId), isSecure(req, ctx.cfg)) });
 
@@ -35,13 +35,13 @@ export async function login(ctx: Ctx, req: http.IncomingMessage, res: http.Serve
   const password = str(guess.body.password, 512);
   if (name) {
     const account = await accounts.check(name, password);
-    if (!account) return send(res, 401, { error: 'Wrong name or password' });
+    if (!account) return send(res, 401, { error: 'Ad ya da parola yanlış' });
     auth.recordSuccess(guess.ip);
     return send(res, 200, { ok: true }, signedIn(ctx, req, account.id));
   }
-  if (!accounts.sharedPassword) return send(res, 401, { error: 'Sign in with your name and your own password' });
+  if (!accounts.sharedPassword) return send(res, 401, { error: 'Adınla ve kendi parolanla giriş yap' });
   if (!(await auth.checkPassword(password))) {
-    return send(res, 401, { error: accounts.any ? 'Wrong password. With an account of your own, type your name too.' : 'Wrong password' });
+    return send(res, 401, { error: accounts.any ? 'Parola yanlış. Kendi hesabınla giriş yapıyorsan adını da yaz.' : 'Parola yanlış' });
   }
   auth.recordSuccess(guess.ip);
   return send(res, 200, { ok: true }, signedIn(ctx, req));
@@ -59,7 +59,7 @@ async function join(ctx: Ctx, req: http.IncomingMessage, res: http.ServerRespons
   if (!guess) return;
   const token = str(guess.body.token, 128);
   const invite = accounts.findInvite(token);
-  if (!invite) return send(res, 410, { error: 'This invite link has expired or was already used. Ask whoever sent it for a new one.' });
+  if (!invite) return send(res, 410, { error: 'Bu davet bağlantısının süresi dolmuş ya da zaten kullanılmış. Gönderenden yenisini iste.' });
   auth.recordSuccess(guess.ip);
   if (guess.body.peek === true) return send(res, 200, { name: invite.name, role: invite.role, by: invite.createdBy, project: ctx.officeName });
   const r = await accounts.join(token, str(guess.body.name, 64), str(guess.body.password, 1024));
@@ -85,8 +85,8 @@ export const authRoutes = {
       const { cfg, auth } = ctx;
       const guess = await readGuess(ctx, req, res);
       if (!guess) return;
-      if (!claimable(ctx)) return send(res, 410, { error: 'This office has already been claimed. Sign in with the password you saved.' });
-      if (!auth.checkToken(str(guess.body.token, 256), cfg.claimToken!)) return send(res, 403, { error: 'That claim link is not valid.' });
+      if (!claimable(ctx)) return send(res, 410, { error: 'Bu ofis zaten sahiplenilmiş. Kaydettiğin parolayla giriş yap.' });
+      if (!auth.checkToken(str(guess.body.token, 256), cfg.claimToken!)) return send(res, 403, { error: 'Bu sahiplenme bağlantısı geçerli değil.' });
       const password = cfg.password!;
       cfg.markClaimed();
       auth.recordSuccess(guess.ip);
@@ -103,7 +103,7 @@ export const authRoutes = {
       const guess = await readGuess(ctx, req, res);
       if (!guess) return;
       if (!ctx.accounts.sharedPassword || !ctx.auth.useLinkKey(str(guess.body.key, 128))) {
-        return send(res, 410, { error: 'That sign-in link was already used. Sign in with the office password.' });
+        return send(res, 410, { error: 'Bu giriş bağlantısı zaten kullanılmış. Ofis parolasıyla giriş yap.' });
       }
       ctx.auth.recordSuccess(guess.ip);
       return send(res, 200, { ok: true }, signedIn(ctx, req));

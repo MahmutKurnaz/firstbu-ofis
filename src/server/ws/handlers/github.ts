@@ -25,7 +25,7 @@ export const githubHandlers = {
         void floor.github.merge(n, method, msg.deleteBranch === true, msg.auto === true, as).then((error) => {
           ctx.sendTo(c, { t: 'gh.merged', number: n, error });
           if (error) return;
-          ctx.toastFloor(floor, msg.auto ? `${who} set PR #${n} to merge once its checks pass` : `🎉 ${who} merged PR #${n}`);
+          ctx.toastFloor(floor, msg.auto ? `${who}, PR #${n} için kontroller geçince birleştirmeyi ayarladı` : `🎉 ${who} birleştirdi: PR #${n}`);
           // An auto-merge rings once GitHub gets round to it and the boards see it merged.
           if (!msg.auto) floor.merged(n, who);
         }),
@@ -40,7 +40,7 @@ export const githubHandlers = {
     if (!floor || !Number.isSafeInteger(n) || n <= 0) return;
     const body = typeof msg.body === 'string' ? msg.body : '';
     // Refused rather than cut short: a comment that silently lost its end would read as finished.
-    const invalid = !body.trim() ? 'The comment is empty' : body.length > GH_COMMENT_MAX ? `GitHub takes comments of up to ${GH_COMMENT_MAX} characters` : '';
+    const invalid = !body.trim() ? 'Yorum boş' : body.length > GH_COMMENT_MAX ? `GitHub en çok ${GH_COMMENT_MAX} karakterlik yorum kabul eder` : '';
     if (invalid) {
       ctx.sendTo(c, { t: 'gh.commented', kind, number: n, error: invalid });
       return;
@@ -50,7 +50,7 @@ export const githubHandlers = {
       (as) =>
         void floor.github.comment(kind, n, body, as).then((r) => {
           ctx.sendTo(c, { t: 'gh.commented', kind, number: n, ...r });
-          if (r.comment) ctx.toastFloor(floor, `💬 ${who} commented on ${kind === 'pull' ? 'PR' : 'issue'} #${n}`);
+          if (r.comment) ctx.toastFloor(floor, `💬 ${who} yorum yaptı: ${kind === 'pull' ? 'PR' : 'konu'} #${n}`);
         }),
       (error) => ctx.sendTo(c, { t: 'gh.commented', kind, number: n, error }),
     );
@@ -68,10 +68,10 @@ export const githubHandlers = {
         void floor.github.close(kind, n, { comment: str(msg.comment, 20000).trim() || undefined, reason, deleteBranch: msg.deleteBranch === true }, as).then((error) => {
           ctx.sendTo(c, { t: 'gh.closed', kind, number: n, error });
           if (error) return;
-          if (kind === 'pull') return ctx.toastFloor(floor, `${who} closed PR #${n} without merging`);
+          if (kind === 'pull') return ctx.toastFloor(floor, `${who} birleştirmeden kapattı: PR #${n}`);
           // Nobody should be seated for an issue that's closed.
           const dropped = floor.queue.dropIssue(n);
-          ctx.toastFloor(floor, `${who} closed issue #${n}${reason === 'not planned' ? ' as not planned' : ''}${dropped ? ' and took it off the queue' : ''}`);
+          ctx.toastFloor(floor, `${who} konuyu kapattı: #${n}${reason === 'not planned' ? ' (planlanmadı)' : ''}${dropped ? ' ve sıradan çıkardı' : ''}`);
         }),
       (error) => ctx.sendTo(c, { t: 'gh.closed', kind, number: n, error }),
     );
@@ -86,7 +86,7 @@ export const githubHandlers = {
     const add = names(msg.add);
     const remove = names(msg.remove).filter((l) => !add.includes(l));
     if (!add.length && !remove.length) {
-      ctx.sendTo(c, { t: 'gh.labeled', kind, number: n, error: 'No labels to change' });
+      ctx.sendTo(c, { t: 'gh.labeled', kind, number: n, error: 'Değiştirilecek etiket yok' });
       return;
     }
     ctx.withGitHub(
@@ -94,7 +94,7 @@ export const githubHandlers = {
       (as) =>
         void floor.github.setLabels(kind, n, add, remove, as).then((r) => {
           ctx.sendTo(c, { t: 'gh.labeled', kind, number: n, ...r });
-          if (r.labels) ctx.toastFloor(floor, `🏷️ ${who} labeled ${kind === 'pull' ? 'PR' : 'issue'} #${n}: ${[...add.map((l) => `+${l}`), ...remove.map((l) => `−${l}`)].join(' ')}`);
+          if (r.labels) ctx.toastFloor(floor, `🏷️ ${who} etiketledi: ${kind === 'pull' ? 'PR' : 'konu'} #${n} — ${[...add.map((l) => `+${l}`), ...remove.map((l) => `−${l}`)].join(' ')}`);
         }),
       (error) => ctx.sendTo(c, { t: 'gh.labeled', kind, number: n, error }),
     );

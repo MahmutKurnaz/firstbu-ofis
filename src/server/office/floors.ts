@@ -50,8 +50,8 @@ export function floorHelpers(ctx: Ctx): FloorHelpers {
       if (c.peer.floor === floor.id || (!next && c.peer.floor === ROOF)) {
         if (next) ctx.goToFloor(c, next);
         else ctx.toLobby(c);
-        ctx.sendTo(c, { t: 'toast', text: next ? `🛗 ${who} took ${name} off the building, so you rode the elevator to ${next.def.name}` : `🛗 ${who} took ${name}, the last floor, off the building`, level: 'warn' });
-      } else ctx.sendTo(c, { t: 'toast', text: `🛗 ${who} took ${name} off the building`, level: 'info' });
+        ctx.sendTo(c, { t: 'toast', text: next ? `🛗 ${who}, ${name} katını binadan kaldırdı; asansörle ${next.def.name} katına çıktın` : `🛗 ${who}, son kat olan ${name} katını binadan kaldırdı`, level: 'warn' });
+      } else ctx.sendTo(c, { t: 'toast', text: `🛗 ${who}, ${name} katını binadan kaldırdı`, level: 'info' });
     }
     ctx.floors.delete(floor.id);
     floor.shutdown();
@@ -137,7 +137,7 @@ export async function openFloors(ctx: Ctx, hookPort: number): Promise<FloorsOpen
     }
   };
   // Started in a project: it's a floor too (the one it has always been).
-  if (cfg.project) ctx.building.ensureLocal(cfg.project, 'the office');
+  if (cfg.project) ctx.building.ensureLocal(cfg.project, 'ofis');
   for (const def of ctx.building.list()) openFloor(def);
   // Clones keep the elevator's progress up to date, and ones the last office left running carry on.
   ctx.building.watchClones(ctx.floorsChanged);
@@ -149,7 +149,7 @@ export async function openFloors(ctx: Ctx, hookPort: number): Promise<FloorsOpen
     }
     if (!openFloor(r)) return;
     console.log(`  the ${r.name} floor's clone finished (${r.dir})`);
-    ctx.toastAll(`🛗 New floor: ${r.name}, added by ${r.addedBy}`);
+    ctx.toastAll(`🛗 Yeni kat: ${r.name}, ekleyen: ${r.addedBy}`);
   });
   // Workers still running from the last office are back at their desks before anyone walks in.
   await Promise.all([...floors.values()].map((f) => f.ready));

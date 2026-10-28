@@ -18,7 +18,7 @@ export class Decor {
   }
 
   add(input: unknown, by: string): Decoration | string {
-    if (this.items.length >= MAX_DECOR) return `The walls are full (${MAX_DECOR} pictures). Take one down first.`;
+    if (this.items.length >= MAX_DECOR) return `Duvarlar dolu (${MAX_DECOR} resim). Önce birini indir.`;
     const p = sanitizePlacement(input);
     if (typeof p === 'string') return p;
     const d: Decoration = { ...p, id: randomBytes(5).toString('hex'), by, at: Date.now() };
@@ -30,7 +30,7 @@ export class Decor {
   /** Changes any part of a picture's placement; what the patch leaves out stays as it was. */
   update(id: string, patch: unknown): Decoration | string {
     const i = this.items.findIndex((d) => d.id === id);
-    if (i < 0) return 'Someone already took that picture down';
+    if (i < 0) return 'Biri bu resmi zaten indirmiş';
     const { id: _, by, at, ...placement } = this.items[i];
     const p = sanitizePlacement({ ...placement, ...(patch && typeof patch === 'object' ? patch : {}) });
     if (typeof p === 'string') return p;
@@ -136,21 +136,21 @@ export class ImageProxy {
       });
     } catch (err) {
       const e = err as Error & { cause?: { code?: string } };
-      if (e.name === 'TimeoutError') return { status: 504, error: `${host} took too long to answer` };
-      return { status: 502, error: `Couldn't reach ${host}${e.cause?.code ? ` (${e.cause.code})` : ''}` };
+      if (e.name === 'TimeoutError') return { status: 504, error: `${host} cevap vermekte çok gecikti` };
+      return { status: 502, error: `${host} adresine ulaşılamadı${e.cause?.code ? ` (${e.cause.code})` : ''}` };
     }
     if (!res.ok) {
       void res.body?.cancel().catch(() => {});
-      return { status: 502, error: `${host} answered ${res.status}${res.statusText ? ` ${res.statusText}` : ''}` };
+      return { status: 502, error: `${host} şu cevabı verdi: ${res.status}${res.statusText ? ` ${res.statusText}` : ''}` };
     }
     let type = (res.headers.get('content-type') ?? '').split(';')[0].trim().toLowerCase();
     if (type === 'text/html' || type === 'application/xhtml+xml') {
       void res.body?.cancel().catch(() => {});
-      return { status: 415, error: 'That link is a web page, not an image. Right-click the picture and choose “Copy image address”.' };
+      return { status: 415, error: 'Bu bağlantı bir web sayfası, resim değil. Resme sağ tıkla ve “Resim adresini kopyala”yı seç.' };
     }
     if (Number(res.headers.get('content-length')) > MAX_IMAGE_BYTES) {
       void res.body?.cancel().catch(() => {});
-      return { status: 413, error: 'That image is over 15 MB. Try a smaller one.' };
+      return { status: 413, error: 'Bu resim 15 MB’tan büyük. Daha küçük bir tane dene.' };
     }
     const chunks: Buffer[] = [];
     let size = 0;
@@ -162,17 +162,17 @@ export class ImageProxy {
         size += value.length;
         if (size > MAX_IMAGE_BYTES) {
           await reader.cancel().catch(() => {});
-          return { status: 413, error: 'That image is over 15 MB. Try a smaller one.' };
+          return { status: 413, error: 'Bu resim 15 MB’tan büyük. Daha küçük bir tane dene.' };
         }
         chunks.push(Buffer.from(value));
       }
     } catch {
-      return { status: 502, error: `${host} stopped sending the image halfway` };
+      return { status: 502, error: `${host} resmi yarıda göndermeyi bıraktı` };
     }
     const body = Buffer.concat(chunks);
     if (!type.startsWith('image/')) {
       const sniffed = sniff(body);
-      if (!sniffed) return { status: 415, error: `That link isn't an image${type ? ` (it's ${type})` : ''}` };
+      if (!sniffed) return { status: 415, error: `Bu bağlantı bir resim değil${type ? ` (${type})` : ''}` };
       type = sniffed;
     }
     const entry = { type, body, at: Date.now() };

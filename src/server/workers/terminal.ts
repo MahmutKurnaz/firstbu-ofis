@@ -134,6 +134,6 @@ export function screenText(term: HeadlessTerminal, from = 0): string {
 
 /** What a browser opening the terminal of a worker that isn't running sees. */
 export function offlineBanner(info: WorkerInfo): string {
-  const hint = info.kind === 'shell' ? ' Press R to restart it.' : info.sessionId ? ' Press R to resume the session.' : '';
-  return `\x1b[2m${info.name} is not running.${hint}\x1b[0m\r\n`;
+  const hint = info.kind === 'shell' ? ' Yeniden başlatmak için R’ye bas.' : info.sessionId ? ' Oturumu sürdürmek için R’ye bas.' : '';
+  return `\x1b[2m${info.name} çalışmıyor.${hint}\x1b[0m\r\n`;
 }

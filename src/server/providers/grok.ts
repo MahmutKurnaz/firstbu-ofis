@@ -41,7 +41,7 @@ export const grok: ProviderAdapter<undefined, GrokSetup> = {
     if (prompt) args.push('--', prompt);
     return { args, rotateToken: true, env: { GROK_HOME: setup.home, ...(setup.authPath ? { GROK_AUTH_PATH: setup.authPath } : {}) } };
   },
-  bootHint: 'Open the terminal: complete login if Grok asks',
+  bootHint: 'Terminali aç: Grok isterse girişi tamamla',
   titleNoise: /^grok( build)?$/i,
   hook: {
     strictJson: true,

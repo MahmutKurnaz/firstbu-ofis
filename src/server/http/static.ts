@@ -25,7 +25,7 @@ export function findPublicDir(): string {
   const here = path.dirname(path.dirname(fileURLToPath(import.meta.url)));
   const candidates = [path.resolve(here, '../../public'), path.resolve(here, '../../dist/public')];
   for (const c of candidates) if (existsSync(path.join(c, 'index.html'))) return c;
-  throw new Error(`Client bundle not found (looked in ${candidates.join(', ')}). Run \`npm run build\`.`);
+  throw new Error(`İstemci paketi bulunamadı (şuralara bakıldı: ${candidates.join(', ')}). \`npm run build\` çalıştır.`);
 }
 
 export function serveFile(res: http.ServerResponse, file: string, cache: boolean) {

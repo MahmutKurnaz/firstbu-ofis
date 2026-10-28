@@ -88,7 +88,7 @@ test("when both moved on, it starts from origin's and says what it left out", as
   const made = trees.create('rex-3');
   assert.ok(typeof made !== 'string', String(made));
   assert.equal(made.base, merged);
-  assert.match(made.note ?? '', /origin\/main.*2 commits on main/);
+  assert.match(made.note ?? '', /origin\/main.*main dalındaki ve origin’de olmayan 2 commit/);
 });
 
 test('without an origin, or offline, it branches from HEAD as before', async (t) => {

@@ -238,7 +238,7 @@ test('ordu.tell resumes a worker that is not running, with the text', () => {
   const floor = {
     workers: {
       get: (id: string) => (id === 'w1' ? w : undefined),
-      prompt: (...a: unknown[]) => (calls.push(['prompt', ...a]), 'Worker is not running'),
+      prompt: (...a: unknown[]) => (calls.push(['prompt', ...a]), 'Çalışan çalışmıyor'),
       resume: (...a: unknown[]) => (calls.push(['resume', ...a]), undefined),
     },
   };

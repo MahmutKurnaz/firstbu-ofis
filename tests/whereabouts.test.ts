@@ -19,7 +19,7 @@ test('up on the roof, the dance floor and the bar have their own words, and the 
   assert.equal(whereabouts(peer((DANCE_FLOOR.minX + DANCE_FLOOR.maxX) / 2, (DANCE_FLOOR.minZ + DANCE_FLOOR.maxZ) / 2, ROOF)), '🪩 on the dance floor');
   assert.equal(whereabouts(peer(11.5, 0, ROOF)), '🍸 at the bar');
   assert.equal(whereabouts(peer(0, 3, ROOF)), undefined);
-  assert.equal(whereabouts({ ...peer(12, 0, ROOF), seat: 'roof-stool-3:0' }), '🪑 on the bar stool');
+  assert.equal(whereabouts({ ...peer(12, 0, ROOF), seat: 'roof-stool-3:0' }), '🪑 on the bar taburesi');
 });
 
 test('someone on the 2D view is on the 2D view, unless they have something open', () => {

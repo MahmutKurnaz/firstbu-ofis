@@ -13,7 +13,7 @@ export const meetingHandlers = {
     const floor = here(ctx, c);
     if (!floor) return;
     if (msg.provider !== undefined && (!isAgentProvider(msg.provider) || !floor.project.agentProviders.includes(msg.provider))) {
-      ctx.warn(c, 'Unknown agent provider');
+      ctx.warn(c, 'Bilinmeyen ajan sağlayıcısı');
       return;
     }
     const count = (v: unknown) => (Number.isInteger(v) && (v as number) > 0 ? (v as number) : undefined);

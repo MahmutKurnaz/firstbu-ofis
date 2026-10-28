@@ -124,7 +124,7 @@ export class Building {
     let dir = this.defaultProjectsDir;
     if (text) {
       const typed = untildify(text);
-      if (!path.isAbsolute(typed)) return 'Use a full path, like ~/Workspace';
+      if (!path.isAbsolute(typed)) return 'Tam bir yol kullan, örneğin ~/Workspace';
       dir = path.resolve(typed);
     }
     if (dir !== this.defaultProjectsDir) {
@@ -132,7 +132,7 @@ export class Building {
       if (why) return why;
       // Cloning into a project would nest checkouts inside its git tree.
       const inside = this.defs.find((d) => within(dir, path.resolve(d.dir)));
-      if (inside) return `${tildify(dir)} is inside ${inside.name}'s checkout — pick a folder outside every project`;
+      if (inside) return `${tildify(dir)}, ${inside.name} projesinin checkout’unun içinde — hiçbir projenin içinde olmayan bir klasör seç`;
     }
     this.picked = dir === this.defaultProjectsDir ? undefined : { dir, by, at: Date.now() };
     try {
@@ -168,9 +168,9 @@ export class Building {
    */
   cancel(id: string, why: string, may: (owner: string | undefined) => boolean): string | undefined {
     const p = this.pendingFloor(id);
-    if (!p) return this.defs.some((d) => d.id === id) ? 'That floor is already there' : 'No such floor';
-    if (!may(p.owner)) return 'Only admins, or whoever added it, can stop a floor on its way';
-    if (!p.run) return "There's no clone to stop yet — try again in a moment";
+    if (!p) return this.defs.some((d) => d.id === id) ? 'Bu kat zaten var' : 'Böyle bir kat yok';
+    if (!may(p.owner)) return 'Yoldaki bir katı yalnızca yöneticiler ya da onu ekleyen durdurabilir';
+    if (!p.run) return 'Durdurulacak bir klonlama henüz yok — birazdan yeniden dene';
     p.run.stop(why);
     return undefined;
   }
@@ -193,7 +193,7 @@ export class Building {
       if (!run) {
         dropLog(s.log);
         if (checkoutAt(def.dir, repo, pending.empty) !== 'ok') {
-          done(`Cloning ${repo} stopped when the office restarted — add it again`);
+          done(`${repo} klonlaması, ofis yeniden başlayınca durdu — yeniden ekle`);
           continue;
         }
         this.defs.push(def);
@@ -221,7 +221,7 @@ export class Building {
   shutdown(keep: boolean) {
     for (const p of this.cloning.values()) {
       if (keep) p.run?.release();
-      else p.run?.stop('The office closed before the clone finished');
+      else p.run?.stop('Ofis, klonlama bitmeden kapandı');
     }
     if (keep) return;
     this.cloning.clear();
@@ -264,7 +264,7 @@ export class Building {
    */
   remove(id: string, by = '?'): FloorDef | string {
     const def = this.defs.find((d) => d.id === id);
-    if (!def) return this.pendingFloor(id) ? "That floor is still being cloned — stop it, or take it off once it's there" : 'No such floor';
+    if (!def) return this.pendingFloor(id) ? 'Bu kat hâlâ klonlanıyor — durdur ya da gelince kaldır' : 'Böyle bir kat yok';
     this.defs = this.defs.filter((d) => d !== def);
     if (this.isLocal(id)) {
       this.localId = undefined;
@@ -282,10 +282,10 @@ export class Building {
    */
   async add(input: string, by: string, started: (def: FloorDef) => void, account?: string): Promise<FloorDef | string> {
     const wanted = normalizeRepo(input);
-    if (!wanted) return 'Pick a repository, or type it as owner/name';
-    if (this.defs.some((d) => sameRepo(d.repo, wanted))) return `${wanted} already has a floor`;
-    if (this.cloning.has(wanted.toLowerCase())) return `${wanted} is already being cloned`;
-    if (this.defs.length + this.cloning.size >= MAX_FLOORS) return `The building is full (${MAX_FLOORS} floors)`;
+    if (!wanted) return 'Bir depo seç ya da owner/name olarak yaz';
+    if (this.defs.some((d) => sameRepo(d.repo, wanted))) return `${wanted} için zaten bir kat var`;
+    if (this.cloning.has(wanted.toLowerCase())) return `${wanted} zaten klonlanıyor`;
+    if (this.defs.length + this.cloning.size >= MAX_FLOORS) return `Bina dolu (${MAX_FLOORS} kat)`;
     // The office's own checkout, taken off before: it moves back in where it is, not into a second clone.
     const home = this.local;
     if (this.localOff && home && sameRepo(home.repo, wanted) && existsSync(home.dir)) {
@@ -305,14 +305,14 @@ export class Building {
       repo = normalizeRepo(view.nameWithOwner) ?? wanted;
       empty = view.isEmpty === true;
     } catch (err) {
-      return `Couldn't find ${wanted} on GitHub: ${(err as Error).message}`;
+      return `${wanted} GitHub’da bulunamadı: ${(err as Error).message}`;
     }
     const key = repo.toLowerCase();
-    if (this.defs.some((d) => sameRepo(d.repo, repo))) return `${repo} already has a floor`;
-    if (this.cloning.has(key)) return `${repo} is already being cloned`;
+    if (this.defs.some((d) => sameRepo(d.repo, repo))) return `${repo} için zaten bir kat var`;
+    if (this.cloning.has(key)) return `${repo} zaten klonlanıyor`;
     const [owner, name] = repo.split('/');
     const dest = path.join(this.projectsDir, owner, name);
-    if (this.defs.some((d) => path.resolve(d.dir) === dest)) return `${dest} is already a floor`;
+    if (this.defs.some((d) => path.resolve(d.dir) === dest)) return `${dest} zaten bir kat`;
     const def = this.newDef(name, repo, dest, by);
     const pending: Pending = { def, owner: account, empty };
     this.cloning.set(key, pending);
@@ -340,13 +340,13 @@ export class Building {
     try {
       mkdirSync(path.dirname(dest), { recursive: true });
     } catch (err) {
-      return `Couldn't make ${path.dirname(dest)}: ${(err as Error).message}`;
+      return `${path.dirname(dest)} oluşturulamadı: ${(err as Error).message}`;
     }
     if (this.opts.terminal) return cloneHere(repo, dest);
     try {
       mkdirSync(this.logsDir, { recursive: true, mode: 0o700 });
     } catch (err) {
-      return `Couldn't make ${this.logsDir}: ${(err as Error).message}`;
+      return `${this.logsDir} oluşturulamadı: ${(err as Error).message}`;
     }
     const run = await CloneRun.start(repo, dest, path.join(this.logsDir, `${repo.replace('/', '__')}.log`), { ...this.opts.clone, changed: () => this.cloneChanged?.() });
     if (typeof run === 'string') return run;
@@ -361,7 +361,7 @@ export class Building {
     if (end.stopped) return end.stopped;
     // Its exit code isn't the word on it (a clone an office before this one started has none): the checkout is.
     if (checkoutAt(p.def.dir, p.def.repo!, p.empty) === 'ok') return undefined;
-    return `Couldn't clone ${p.def.repo}: ${whyCloneFailed(end.output)}`;
+    return `${p.def.repo} klonlanamadı: ${whyCloneFailed(end.output)}`;
   }
 
   private pendingFloor(id: string): Pending | undefined {
@@ -502,10 +502,10 @@ function unwritable(dir: string): string | undefined {
   let at = dir;
   while (!existsSync(at) && path.dirname(at) !== at) at = path.dirname(at);
   try {
-    if (!statSync(at).isDirectory()) return `${tildify(at)} isn't a folder`;
+    if (!statSync(at).isDirectory()) return `${tildify(at)} bir klasör değil`;
     accessSync(at, constants.W_OK);
   } catch {
-    return `The office can't write in ${tildify(at)}`;
+    return `Ofis ${tildify(at)} içine yazamıyor`;
   }
   return undefined;
 }
@@ -526,10 +526,10 @@ export function originRepo(dir: string): string | undefined {
  */
 function checkoutAt(dest: string, repo: string, empty: boolean): 'none' | 'ok' | string {
   if (!existsSync(dest)) return 'none';
-  if (!statSync(dest).isDirectory()) return `${dest} is already there and isn't a folder`;
+  if (!statSync(dest).isDirectory()) return `${dest} zaten var ve bir klasör değil`;
   if (!readdirSync(dest).length) return 'none';
-  if (!sameRepo(originRepo(dest), repo)) return `${dest} already exists and isn't a checkout of ${repo} — move it out of the way first`;
-  if (!empty && !hasCommit(dest)) return `${dest} is a clone of ${repo} that didn't finish — delete that folder and add the floor again`;
+  if (!sameRepo(originRepo(dest), repo)) return `${dest} zaten var ve ${repo} deposunun checkout’u değil — önce onu yoldan çek`;
+  if (!empty && !hasCommit(dest)) return `${dest}, ${repo} deposunun yarım kalmış bir klonu — o klasörü sil ve katı yeniden ekle`;
   return 'ok';
 }
 
@@ -546,8 +546,8 @@ function hasCommit(dir: string): boolean {
 function cloneHere(repo: string, dest: string): Promise<string | undefined> {
   return new Promise((resolve) => {
     const child = spawn('gh', ['repo', 'clone', repo, dest], { cwd: path.dirname(dest), stdio: 'inherit' });
-    child.once('error', (err: NodeJS.ErrnoException) => resolve(err.code === 'ENOENT' ? "The GitHub CLI (gh) isn't installed on this machine" : `Couldn't run gh: ${err.message}`));
-    child.once('exit', (code, signal) => resolve(code === 0 ? undefined : `Couldn't clone ${repo}: gh ${signal ? `stopped (${signal})` : `failed (exit ${code})`}`));
+    child.once('error', (err: NodeJS.ErrnoException) => resolve(err.code === 'ENOENT' ? 'GitHub CLI (gh) bu makinede kurulu değil' : `gh çalıştırılamadı: ${err.message}`));
+    child.once('exit', (code, signal) => resolve(code === 0 ? undefined : `${repo} klonlanamadı: gh ${signal ? `durdu (${signal})` : `başarısız oldu (çıkış kodu ${code})`}`));
   });
 }
 

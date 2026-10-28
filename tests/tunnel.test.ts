@@ -113,7 +113,7 @@ test("it signs in with the office password and is told the workers' servers", as
     assert.equal(await t.office.up(), true);
     assert.deepEqual(await t.office.loginOptions(), { accounts: false, shared: true });
     assert.equal(await t.office.forwards(), 'signed-out');
-    assert.equal(await t.office.signIn('', 'wrong'), 'Wrong password');
+    assert.equal(await t.office.signIn('', 'wrong'), 'Parola yanlış');
     assert.equal(await t.office.signIn('', 'hunter2'), '');
     assert.deepEqual(await t.office.forwards(), { port: t.officePort, items: [{ port: t.port, title: 'Vite App', command: 'vite', worker: 'Byte', floor: 'acme' }] });
   } finally {
@@ -184,7 +184,7 @@ test("a request the client sends never gets the office's own pages", async () =>
     for (const p of ['/', '/api/services', '/api/health']) {
       const r = await get(stale, p);
       assert.equal(r.status, 503, p);
-      assert.match(r.body, /Not running/);
+      assert.match(r.body, /Çalışmıyor/);
     }
     // Nor does a worker's page that says the office relayed its request already.
     assert.equal((await get(stale, '/api/services', { 'x-agent-office-relay': '1' })).status, 503);
@@ -200,7 +200,7 @@ test("a request the client sends never gets the office's own pages", async () =>
     const before = t.seen.length;
     const r = await get(t.port, '/hello');
     assert.equal(r.status, 401);
-    assert.match(r.body, /Sign in to the office/);
+    assert.match(r.body, /Ofise giriş yap/);
     assert.equal(t.seen.length, before);
   } finally {
     t.close();

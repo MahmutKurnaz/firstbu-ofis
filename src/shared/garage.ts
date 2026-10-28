@@ -54,16 +54,16 @@ export interface CarDef {
 const BACK = B.minZ + WALL_T + 0.4 + CAR.length / 2;
 const FRONT = B.maxZ - 0.5 - CAR.length / 2;
 export const CARS: readonly CarDef[] = [
-  { kind: 'lambo', color: '#8ac926', name: 'Lime Lambo', x: -14.4, z: BACK, rotY: Math.PI },
-  { kind: 'lambo', color: '#ff7b00', name: 'Orange Lambo', x: -8, z: BACK, rotY: Math.PI },
-  { kind: 'lambo', color: '#ffd000', name: 'Yellow Lambo', x: 1.6, z: BACK, rotY: Math.PI },
-  { kind: 'lambo', color: '#7b2cbf', name: 'Purple Lambo', x: 11.2, z: BACK, rotY: Math.PI },
-  { kind: 'ferrari', color: '#d90429', name: 'Red Ferrari', x: -14.4, z: FRONT, rotY: 0 },
+  { kind: 'lambo', color: '#8ac926', name: 'Limon yeşili Lambo', x: -14.4, z: BACK, rotY: Math.PI },
+  { kind: 'lambo', color: '#ff7b00', name: 'Turuncu Lambo', x: -8, z: BACK, rotY: Math.PI },
+  { kind: 'lambo', color: '#ffd000', name: 'Sarı Lambo', x: 1.6, z: BACK, rotY: Math.PI },
+  { kind: 'lambo', color: '#7b2cbf', name: 'Mor Lambo', x: 11.2, z: BACK, rotY: Math.PI },
+  { kind: 'ferrari', color: '#d90429', name: 'Kırmızı Ferrari', x: -14.4, z: FRONT, rotY: 0 },
   { kind: 'ferrari', color: '#d90429', name: 'Rosso Ferrari', x: -4.8, z: FRONT, rotY: 0 },
   { kind: 'ferrari', color: '#ffc300', name: 'Giallo Ferrari', x: 4.8, z: FRONT, rotY: 0 },
-  { kind: 'ferrari', color: '#e5383b', name: 'Scarlet Ferrari', x: 14.4, z: FRONT, rotY: 0 },
+  { kind: 'ferrari', color: '#e5383b', name: 'Al Ferrari', x: 14.4, z: FRONT, rotY: 0 },
   // Left out front, for everyone upstairs to look at.
-  { kind: 'lambo', color: '#00b4d8', name: 'Blue Lambo', x: 9, z: 18.2, rotY: Math.PI / 2 },
+  { kind: 'lambo', color: '#00b4d8', name: 'Mavi Lambo', x: 9, z: 18.2, rotY: Math.PI / 2 },
 ];
 
 export type CarSeat = 'driver' | 'passenger';

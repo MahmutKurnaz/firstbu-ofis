@@ -80,10 +80,10 @@ export class Webhook {
       try {
         url = new URL(text);
       } catch {
-        return "That isn't a link. Paste the webhook URL from Slack or Discord.";
+        return 'Bu bir bağlantı değil. Slack ya da Discord’daki webhook adresini yapıştır.';
       }
-      if (url.protocol !== 'https:' && url.protocol !== 'http:') return 'The webhook has to be an http(s) link';
-      if (text.length > 2000) return 'That link is too long';
+      if (url.protocol !== 'https:' && url.protocol !== 'http:') return 'Webhook bir http(s) bağlantısı olmalı';
+      if (text.length > 2000) return 'Bu bağlantı çok uzun';
       this.saved = { url: url.toString(), by, at: Date.now() };
     }
     this.error = undefined;
@@ -119,8 +119,8 @@ export class Webhook {
 
   /** Posts a test message. Resolves to an error message if it didn't get through. */
   test(by: string): Promise<string | undefined> {
-    if (!this.saved) return Promise.resolve('No webhook is set');
-    return this.post({ kind: 'test', title: `🔔 ${by} connected ${this.project()} to this channel`, detail: 'Workers that need input or finish will show up here.' });
+    if (!this.saved) return Promise.resolve('Ayarlı bir webhook yok');
+    return this.post({ kind: 'test', title: `🔔 ${by}, ${this.project()} projesini bu kanala bağladı`, detail: 'Girdi bekleyen ya da işini bitiren çalışanlar burada görünecek.' });
   }
 
   stop() {
@@ -135,15 +135,15 @@ export class Webhook {
   }
 
   private alert(w: WorkerInfo, status: Alert) {
-    const what = status === 'needs_input' ? `🙋 ${w.name} needs input` : `✅ ${w.name} is done`;
+    const what = status === 'needs_input' ? `🙋 ${w.name} senden bir şey bekliyor` : `✅ ${w.name} bitirdi`;
     const task = w.task?.name ? ` — ${oneLine(w.task.name, 80)}` : '';
     const detail = alertDetail(w);
-    return this.post({ kind: status, title: `${what} in ${this.project(w.id)}${task}`, detail: detail ? oneLine(detail, 300) : undefined, worker: w });
+    return this.post({ kind: status, title: `${what} (${this.project(w.id)})${task}`, detail: detail ? oneLine(detail, 300) : undefined, worker: w });
   }
 
   private post(msg: { kind: Alert | 'test'; title: string; detail?: string; worker?: WorkerInfo }): Promise<string | undefined> {
-    if (!this.saved) return Promise.resolve('No webhook is set');
-    if (this.backlog >= MAX_BACKLOG) return Promise.resolve('Too many messages are waiting to be posted');
+    if (!this.saved) return Promise.resolve('Ayarlı bir webhook yok');
+    if (this.backlog >= MAX_BACKLOG) return Promise.resolve('Gönderilmeyi bekleyen çok fazla mesaj var');
     const saved = this.saved;
     this.backlog++;
     const run = this.chain.then(async () => {
@@ -187,11 +187,11 @@ export class Webhook {
       });
       if (!res.ok) {
         const why = oneLine((await res.text().catch(() => '')) || res.statusText, 120);
-        error = `The webhook answered ${res.status}${why ? `: ${why}` : ''}`;
+        error = `Webhook şu cevabı verdi: ${res.status}${why ? `: ${why}` : ''}`;
       }
     } catch (err) {
       const e = err as Error;
-      error = e.name === 'TimeoutError' ? 'The webhook did not answer in time' : `Couldn't reach the webhook: ${(e.cause as Error | undefined)?.message ?? e.message}`;
+      error = e.name === 'TimeoutError' ? 'Webhook zamanında cevap vermedi' : `Webhook’a ulaşılamadı: ${(e.cause as Error | undefined)?.message ?? e.message}`;
     }
     // The link was changed while this was on its way; its outcome says nothing about the new one.
     if (this.saved !== saved) return error;

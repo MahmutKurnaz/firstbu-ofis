@@ -24,16 +24,16 @@ export function providerCommand(provider: AgentProvider, agentCmd: string): stri
 
 export function validateWorkerModel(kind: 'agent' | 'shell', provider: AgentProvider | undefined, model: unknown): string | undefined {
   if (model === undefined) return undefined;
-  if (kind === 'shell') return 'Shell workers do not have an agent model';
+  if (kind === 'shell') return 'Shell çalışanların ajan modeli yoktur';
   const meta = providerMeta(provider);
-  if (!meta?.validModel) return `Models can only be selected for ${providerNames((m) => !!m.validModel)} workers`;
+  if (!meta?.validModel) return `Model yalnızca ${providerNames((m) => !!m.validModel)} çalışanları için seçilebilir`;
   return meta.validModel(model) ? undefined : meta.invalidModel;
 }
 
 /** A reasoning effort for a worker: a flag of its provider's CLI, an OpenCode model's variant, or DSH's reasoning_effort configuration option. */
 export function validateWorkerEffort(kind: 'agent' | 'shell', provider: AgentProvider | undefined, effort: unknown): string | undefined {
   if (effort === undefined) return undefined;
-  if (kind === 'shell') return 'Shell workers do not have a reasoning effort';
-  if (!providerMeta(provider)?.takesEffort) return `Reasoning effort can only be selected for ${providerNames((m) => !!m.takesEffort)} workers`;
-  return isAgentEffort(effort) ? undefined : 'Invalid effort (expected low, medium, high, xhigh or max)';
+  if (kind === 'shell') return 'Shell çalışanların akıl yürütme eforu yoktur';
+  if (!providerMeta(provider)?.takesEffort) return `Akıl yürütme eforu yalnızca ${providerNames((m) => !!m.takesEffort)} çalışanları için seçilebilir`;
+  return isAgentEffort(effort) ? undefined : 'Geçersiz efor (low, medium, high, xhigh ya da max olmalı)';
 }

@@ -43,7 +43,7 @@ function buildDesks(): DeskDef[] {
         [pod.front, 0],
       ] as const) {
         for (const dx of [-DESK_WIDTH / 2, DESK_WIDTH / 2]) {
-          desks.push({ id: `desk-${n}`, x: cx + dx, z, rotY, label: `Desk ${n}` });
+          desks.push({ id: `desk-${n}`, x: cx + dx, z, rotY, label: `Masa ${n}` });
           n++;
         }
       }
@@ -93,8 +93,8 @@ export const WING_DESKS: DeskDef[] = Array.from({ length: WING.rows }, (_, i) =>
   const x = (WING.minX + WING.maxX) / 2;
   const n = DESKS.length + 2 * i + 1;
   return [
-    { id: `desk-${n}`, x, z: z - DESK_DEPTH / 2, rotY: Math.PI, label: `Desk ${n}`, wing: i + 1 },
-    { id: `desk-${n + 1}`, x, z: z + DESK_DEPTH / 2, rotY: 0, label: `Desk ${n + 1}`, wing: i + 1 },
+    { id: `desk-${n}`, x, z: z - DESK_DEPTH / 2, rotY: Math.PI, label: `Masa ${n}`, wing: i + 1 },
+    { id: `desk-${n + 1}`, x, z: z + DESK_DEPTH / 2, rotY: 0, label: `Masa ${n + 1}`, wing: i + 1 },
   ];
 }).flat();
 
@@ -130,7 +130,7 @@ export const BEANBAGS: DeskDef[] = (
     [-12.6, 9.2, Math.PI / 2],
     [-5.4, -9.8, 0],
   ] as const
-).map(([x, z, rotY], i) => ({ id: `beanbag-${i + 1}`, x, z, rotY, label: `Bean bag ${i + 1}`, beanbag: true }));
+).map(([x, z, rotY], i) => ({ id: `beanbag-${i + 1}`, x, z, rotY, label: `Puf ${i + 1}`, beanbag: true }));
 
 /** Everywhere a worker can sit: the desks, the back office's once it's built out (see deskBuilt), then the bean bags. */
 export const SEATS: DeskDef[] = [...DESKS, ...WING_DESKS, ...BEANBAGS];
@@ -145,19 +145,19 @@ export type StationKind = 'issues' | 'pulls' | 'queue';
  */
 export const STATIONS: DeskDef[] = [
   // Between the plant in the north-west corner and the Issues board.
-  { id: 'station-issues', station: 'issues', x: -15.6, z: FLOOR.minZ + 1.3, rotY: Math.PI, label: 'Issues board' },
+  { id: 'station-issues', station: 'issues', x: -15.6, z: FLOOR.minZ + 1.3, rotY: Math.PI, label: 'Konular panosu' },
   // Between the task queue and the PR board.
-  { id: 'station-pulls', station: 'pulls', x: 0, z: FLOOR.minZ + 1.3, rotY: Math.PI, label: 'PR board' },
+  { id: 'station-pulls', station: 'pulls', x: 0, z: FLOOR.minZ + 1.3, rotY: Math.PI, label: 'PR panosu' },
   // Between the Issues board and the task queue.
-  { id: 'station-queue', station: 'queue', x: -7.8, z: FLOOR.minZ + 1.3, rotY: Math.PI, label: 'Task queue' },
+  { id: 'station-queue', station: 'queue', x: -7.8, z: FLOOR.minZ + 1.3, rotY: Math.PI, label: 'İş sırası' },
 ];
 /** A board agent's kiosk: its top, and how far behind its middle (toward the wall) the agent stands. */
 export const KIOSK = { width: 0.8, depth: 0.5, height: 0.55, stand: 0.55 } as const;
 /** Each board agent's name and its color, the same whenever it's hired. */
 export const STATION_AGENT: Record<StationKind, { name: string; color: string }> = {
-  issues: { name: 'Issues agent', color: '#ef476f' },
-  pulls: { name: 'PR agent', color: '#118ab2' },
-  queue: { name: 'Queue agent', color: '#06d6a0' },
+  issues: { name: 'Konular ajanı', color: '#ef476f' },
+  pulls: { name: 'PR ajanı', color: '#118ab2' },
+  queue: { name: 'Sıra ajanı', color: '#06d6a0' },
 };
 
 /** The upstairs office: a glass-walled loft on posts in the south-east corner, looking down on the desks. */
@@ -192,7 +192,7 @@ export const MEETING_SEATS: DeskDef[] = (
     [MEETING_TABLE.x + 1.15, MEETING_TABLE.z - MEETING_TABLE.depth / 2 + MEETING_LAPTOP.in, Math.PI],
     [MEETING_TABLE.x + 1.15, MEETING_TABLE.z + MEETING_TABLE.depth / 2 - MEETING_LAPTOP.in, 0],
   ] as const
-).map(([x, z, rotY], i) => ({ id: `meeting-${i + 1}`, x, z, rotY, label: i === 0 ? 'Head of the table' : `Meeting chair ${i + 1}`, room: true }));
+).map(([x, z, rotY], i) => ({ id: `meeting-${i + 1}`, x, z, rotY, label: i === 0 ? 'Masanın başı' : `Toplantı sandalyesi ${i + 1}`, room: true }));
 /** The board on the meeting room's back (south) wall that shows the meeting's output file as it's written. */
 export const MEETING_BOARD = { x: MEETING_TABLE.x, y: 1.95, z: FLOOR.maxZ - 0.08, width: 3.6, height: 1.2 } as const;
 
@@ -246,11 +246,11 @@ export const BOARDS = {
   // Side by side along the north wall, the way work goes: an issue goes on the task queue (the
   // whiteboard in the middle), and its worker's pull request comes out the other side. Each has its
   // board agent's kiosk just west of it (see STATIONS).
-  issues: { x: -11.7, y: 2.1, z: FLOOR.minZ + 0.08, rotY: 0, width: 6, height: 3, label: 'Issues' },
-  queue: { x: -3.9, y: 2.1, z: FLOOR.minZ + 0.08, rotY: 0, width: 6, height: 3, label: '📋 Task queue' },
-  pulls: { x: 3.9, y: 2.1, z: FLOOR.minZ + 0.08, rotY: 0, width: 6, height: 3, label: 'Pull Requests' },
+  issues: { x: -11.7, y: 2.1, z: FLOOR.minZ + 0.08, rotY: 0, width: 6, height: 3, label: 'Konular' },
+  queue: { x: -3.9, y: 2.1, z: FLOOR.minZ + 0.08, rotY: 0, width: 6, height: 3, label: '📋 İş sırası' },
+  pulls: { x: 3.9, y: 2.1, z: FLOOR.minZ + 0.08, rotY: 0, width: 6, height: 3, label: 'PR’lar' },
   // East wall, north of the lounge TV.
-  services: { x: FLOOR.maxX - 0.08, y: 2.1, z: -8.2, rotY: -Math.PI / 2, width: 6, height: 3, label: '🌐 Services' },
+  services: { x: FLOOR.maxX - 0.08, y: 2.1, z: -8.2, rotY: -Math.PI / 2, width: 6, height: 3, label: '🌐 Servisler' },
 } as const;
 
 /** The big TV on the east wall that shows whoever is screen sharing. */
@@ -458,25 +458,25 @@ export interface SeatDef {
  */
 export const SEATING: SeatDef[] = [
   // The lounge couch, its back to the room, facing the TV.
-  { id: 'couch', label: '🛋️ Couch', x: 10.5, y: 0, z: 0, rotY: Math.PI / 2, places: [-1.2, 0, 1.2], hips: 0.5, depth: -0.05, out: 0.9, tv: true },
+  { id: 'couch', label: '🛋️ Kanepe', x: 10.5, y: 0, z: 0, rotY: Math.PI / 2, places: [-1.2, 0, 1.2], hips: 0.5, depth: -0.05, out: 0.9, tv: true },
   // Beanbags either side of the lounge, turned to the TV.
-  { id: 'lounge-beanbag-1', label: '🫘 Beanbag', x: 12.5, y: 0, z: 3.5, rotY: Math.atan2(TV.x - 12.5, TV.z - 3.5), places: [0], hips: 0.42, depth: -0.1, out: 1.2 },
-  { id: 'lounge-beanbag-2', label: '🫘 Beanbag', x: 14.5, y: 0, z: -3.4, rotY: Math.atan2(TV.x - 14.5, TV.z + 3.4), places: [0], hips: 0.42, depth: -0.1, out: 1.2 },
+  { id: 'lounge-beanbag-1', label: '🫘 Puf', x: 12.5, y: 0, z: 3.5, rotY: Math.atan2(TV.x - 12.5, TV.z - 3.5), places: [0], hips: 0.42, depth: -0.1, out: 1.2 },
+  { id: 'lounge-beanbag-2', label: '🫘 Puf', x: 14.5, y: 0, z: -3.4, rotY: Math.atan2(TV.x - 14.5, TV.z + 3.4), places: [0], hips: 0.42, depth: -0.1, out: 1.2 },
   // Up in the boss office: the couch against the east wall, and the chair at the big desk, facing the glass.
-  { id: 'loft-couch', label: '🛋️ Couch', x: LOFT.maxX - 0.65, y: LOFT.y, z: (LOFT.minZ + LOFT.maxZ) / 2, rotY: -Math.PI / 2, places: [-0.5, 0.5], hips: 0.5, depth: -0.05, out: 0.9 },
-  { id: 'boss-chair', label: "🪑 Boss's chair", x: (LOFT.minX + LOFT.maxX) / 2 + 0.5, y: LOFT.y, z: (LOFT.minZ + LOFT.maxZ) / 2 + 0.7, rotY: Math.PI, places: [0], hips: 0.62, depth: -0.05, out: -0.8, game: true },
+  { id: 'loft-couch', label: '🛋️ Kanepe', x: LOFT.maxX - 0.65, y: LOFT.y, z: (LOFT.minZ + LOFT.maxZ) / 2, rotY: -Math.PI / 2, places: [-0.5, 0.5], hips: 0.5, depth: -0.05, out: 0.9 },
+  { id: 'boss-chair', label: '🪑 Patronun koltuğu', x: (LOFT.minX + LOFT.maxX) / 2 + 0.5, y: LOFT.y, z: (LOFT.minZ + LOFT.maxZ) / 2 + 0.7, rotY: Math.PI, places: [0], hips: 0.62, depth: -0.05, out: -0.8, game: true },
   // Out on the balcony: the bench under the window, looking out over the street, and a stool either side of the bistro table.
-  { id: 'bench', label: '🪑 Bench', x: -9, y: 0, z: BALCONY.minZ + 0.3, rotY: 0, places: [-0.5, 0.5], hips: 0.47, depth: 0, out: 0.8 },
-  { id: 'stool-1', label: '🪑 Stool', x: -0.6, y: 0, z: (BALCONY.minZ + BALCONY.maxZ) / 2 + 0.2, rotY: Math.PI / 2, places: [0], hips: 0.5, depth: 0, out: -0.7 },
-  { id: 'stool-2', label: '🪑 Stool', x: 1, y: 0, z: (BALCONY.minZ + BALCONY.maxZ) / 2 + 0.2, rotY: -Math.PI / 2, places: [0], hips: 0.5, depth: 0, out: -0.7 },
+  { id: 'bench', label: '🪑 Bank', x: -9, y: 0, z: BALCONY.minZ + 0.3, rotY: 0, places: [-0.5, 0.5], hips: 0.47, depth: 0, out: 0.8 },
+  { id: 'stool-1', label: '🪑 Tabure', x: -0.6, y: 0, z: (BALCONY.minZ + BALCONY.maxZ) / 2 + 0.2, rotY: Math.PI / 2, places: [0], hips: 0.5, depth: 0, out: -0.7 },
+  { id: 'stool-2', label: '🪑 Tabure', x: 1, y: 0, z: (BALCONY.minZ + BALCONY.maxZ) / 2 + 0.2, rotY: -Math.PI / 2, places: [0], hips: 0.5, depth: 0, out: -0.7 },
   // On the roof: bar stools along the counter, facing the bar…
-  ...[0, 1, 2, 3, 4, 5].map((i) => ({ id: `roof-stool-${i + 1}`, label: '🪑 Bar stool', x: ROOF_BAR.x - ROOF_BAR.depth / 2 - 0.45, y: 0, z: ROOF_BAR.minZ + 0.9 + i * 1.64, rotY: Math.PI / 2, places: [0], hips: 0.78, depth: 0, out: -0.75, roof: true, bar: true })),
+  ...[0, 1, 2, 3, 4, 5].map((i) => ({ id: `roof-stool-${i + 1}`, label: '🪑 Bar taburesi', x: ROOF_BAR.x - ROOF_BAR.depth / 2 - 0.45, y: 0, z: ROOF_BAR.minZ + 0.9 + i * 1.64, rotY: Math.PI / 2, places: [0], hips: 0.78, depth: 0, out: -0.75, roof: true, bar: true })),
   // …sofas round the fire pit, open to the view on the south…
-  { id: 'roof-sofa-1', label: '🛋️ Sofa', x: FIRE_PIT.x, y: 0, z: FIRE_PIT.z - 2.3, rotY: 0, places: [-1.1, 0, 1.1], hips: 0.5, depth: -0.05, out: 0.8, roof: true },
-  { id: 'roof-sofa-2', label: '🛋️ Sofa', x: FIRE_PIT.x - 2.9, y: 0, z: FIRE_PIT.z + 0.4, rotY: Math.PI / 2, places: [-0.6, 0.6], hips: 0.5, depth: -0.05, out: 0.8, roof: true },
-  { id: 'roof-sofa-3', label: '🛋️ Sofa', x: FIRE_PIT.x + 2.9, y: 0, z: FIRE_PIT.z + 0.4, rotY: -Math.PI / 2, places: [-0.6, 0.6], hips: 0.5, depth: -0.05, out: 0.8, roof: true },
+  { id: 'roof-sofa-1', label: '🛋️ Kanepe', x: FIRE_PIT.x, y: 0, z: FIRE_PIT.z - 2.3, rotY: 0, places: [-1.1, 0, 1.1], hips: 0.5, depth: -0.05, out: 0.8, roof: true },
+  { id: 'roof-sofa-2', label: '🛋️ Kanepe', x: FIRE_PIT.x - 2.9, y: 0, z: FIRE_PIT.z + 0.4, rotY: Math.PI / 2, places: [-0.6, 0.6], hips: 0.5, depth: -0.05, out: 0.8, roof: true },
+  { id: 'roof-sofa-3', label: '🛋️ Kanepe', x: FIRE_PIT.x + 2.9, y: 0, z: FIRE_PIT.z + 0.4, rotY: -Math.PI / 2, places: [-0.6, 0.6], hips: 0.5, depth: -0.05, out: 0.8, roof: true },
   // …and sun loungers facing out over the city.
-  ...LOUNGERS.map((x, i) => ({ id: `roof-lounger-${i + 1}`, label: '🏖️ Lounger', x, y: 0, z: FLOOR.maxZ - 1.5, rotY: 0, places: [0], hips: 0.42, depth: -0.2, out: -1, roof: true })),
+  ...LOUNGERS.map((x, i) => ({ id: `roof-lounger-${i + 1}`, label: '🏖️ Şezlong', x, y: 0, z: FLOOR.maxZ - 1.5, rotY: 0, places: [0], hips: 0.42, depth: -0.2, out: -1, roof: true })),
 ];
 export const SEATING_BY_ID = new Map(SEATING.map((s) => [s.id, s]));
 

@@ -114,12 +114,12 @@ export class Accounts {
     this.sync();
     this.dropExpired();
     const n = cleanName(name);
-    if (name && !n) return 'That name has no letters in it';
+    if (name && !n) return 'Bu adda hiç harf yok';
     if (n) {
       const taken = this.nameTaken(n);
       if (taken) return taken;
     }
-    if (this.data.invites.length >= MAX_INVITES) return 'Too many open invites — cancel some first';
+    if (this.data.invites.length >= MAX_INVITES) return 'Çok fazla açık davet var — önce bazılarını iptal et';
     const now = Date.now();
     const invite: AccountInvite = {
       id: randomBytes(5).toString('hex'),
@@ -156,17 +156,17 @@ export class Accounts {
   /** Uses up an invite: makes the account and returns it, or says what's wrong. */
   async join(token: string, name: string, password: string): Promise<Account | string> {
     const invite = this.findInvite(token);
-    if (!invite) return 'This invite link has expired or was already used. Ask for a new one.';
+    if (!invite) return 'Bu davet bağlantısının süresi dolmuş ya da zaten kullanılmış. Yenisini iste.';
     const n = invite.name ?? cleanName(name);
-    if (!n) return 'Pick a name';
-    if (password.length < PASSWORD_MIN) return `Pick a password of at least ${PASSWORD_MIN} characters`;
-    if (password.length > PASSWORD_MAX) return 'That password is too long';
+    if (!n) return 'Bir ad seç';
+    if (password.length < PASSWORD_MIN) return `En az ${PASSWORD_MIN} karakterlik bir parola seç`;
+    if (password.length > PASSWORD_MAX) return 'Bu parola çok uzun';
     const salt = randomBytes(16);
     const derived = await hash(password, salt);
     // Hashing took a moment: someone else may have used the link or taken the name meanwhile.
     this.sync();
     const i = this.data.invites.findIndex((v) => v.id === invite.id);
-    if (i < 0) return 'This invite link was just used. Ask for a new one.';
+    if (i < 0) return 'Bu davet bağlantısı az önce kullanıldı. Yenisini iste.';
     const taken = this.nameTaken(n, invite.id);
     if (taken) return taken;
     const account: Account = {
@@ -217,8 +217,8 @@ export class Accounts {
   }
 
   private nameTaken(n: string, exceptInvite?: string): string | undefined {
-    if (this.data.accounts.some((a) => sameName(a.name, n))) return `There's already an account called ${n}`;
-    if (this.data.invites.some((v) => v.id !== exceptInvite && v.name && sameName(v.name, n))) return `${n} already has an open invite`;
+    if (this.data.accounts.some((a) => sameName(a.name, n))) return `${n} adında bir hesap zaten var`;
+    if (this.data.invites.some((v) => v.id !== exceptInvite && v.name && sameName(v.name, n))) return `${n} için zaten açık bir davet var`;
     return undefined;
   }
 
@@ -348,7 +348,7 @@ export function accountsCommand(argv: string[]): number {
       return 0;
     }
     case 'invite': {
-      const v = accounts.invite('the terminal', admin ? 'admin' : 'member', arg);
+      const v = accounts.invite('terminal', admin ? 'admin' : 'member', arg);
       if (typeof v === 'string') return fail(v);
       console.log(`Invite ${v.name ? `for ${v.name} ` : ''}(${v.role}), single use, valid for 7 days:\n\n  /join#${v.token}\n`);
       console.log(`Open it on the office's own address, e.g. http://localhost:4600/join#${v.token}`);

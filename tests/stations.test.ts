@@ -20,7 +20,7 @@ test('every board agent reaches the queue with office-queue, not its own curl ca
 
 test('the queue agent only ever queues work, however small, and says what it queued', () => {
   const brief = stationBrief('queue');
-  assert.match(brief, /Queue agent/);
+  assert.match(brief, /Sıra ajanı/);
   assert.match(brief, /even a one-line fix/);
   assert.match(brief, /even when someone asks you to do it yourself/);
   assert.match(brief, /don't edit, create or delete files/);
@@ -33,10 +33,10 @@ test('the queue agent only ever queues work, however small, and says what it que
 
 test('the issues and PR agents keep their jobs, and may still be asked for something else', () => {
   const issues = stationBrief('issues');
-  assert.match(issues, /Issues agent/);
+  assert.match(issues, /Konular ajanı/);
   assert.match(issues, /GitHub issues with the gh CLI/);
   const pulls = stationBrief('pulls');
-  assert.match(pulls, /PR agent/);
+  assert.match(pulls, /PR ajanı/);
   assert.match(pulls, /gh pr diff/);
   for (const brief of [issues, pulls]) {
     assert.match(brief, /goes on the task queue, unless the person asks you for something else/);

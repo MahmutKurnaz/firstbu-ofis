@@ -88,15 +88,15 @@ export class TaskQueue {
   /** Queues a task; `owner` is the account adding it, whose sign-ins its worker will run on. */
   add(prompt: string, by: string, title?: string, issue?: number, provider?: AgentProvider, model?: string, effort?: AgentEffort, owner?: string): string | undefined {
     if (provider === undefined) ({ provider, model, effort } = this.workers.officeDefault ?? { provider: this.workers.defaultProvider });
-    if (!isAgentProvider(provider) || (provider === 'custom' && this.workers.defaultProvider !== 'custom')) return 'Unknown agent provider';
+    if (!isAgentProvider(provider) || (provider === 'custom' && this.workers.defaultProvider !== 'custom')) return 'Bilinmeyen ajan sağlayıcısı';
     const modelError = validateWorkerModel('agent', provider, model);
     if (modelError) return modelError;
     const effortError = validateWorkerEffort('agent', provider, effort);
     if (effortError) return effortError;
     const clean = prompt.replace(/\r\n?/g, '\n').trim();
-    if (!clean) return 'Empty task';
-    if (issue !== undefined && this.tasks.some((t) => t.issue === issue && t.status !== 'done')) return `Issue #${issue} is already on the queue`;
-    if (this.tasks.filter((t) => t.status !== 'done').length >= MAX_TASKS) return `The queue is full (${MAX_TASKS} tasks)`;
+    if (!clean) return 'Boş iş';
+    if (issue !== undefined && this.tasks.some((t) => t.issue === issue && t.status !== 'done')) return `#${issue} numaralı konu zaten sırada`;
+    if (this.tasks.filter((t) => t.status !== 'done').length >= MAX_TASKS) return `Sıra dolu (${MAX_TASKS} iş)`;
     const task: QueueTask = {
       id: randomBytes(6).toString('hex'),
       provider,
@@ -118,8 +118,8 @@ export class TaskQueue {
 
   remove(taskId: string): string | undefined {
     const t = this.tasks.find((x) => x.id === taskId);
-    if (!t) return 'No such task';
-    if (t.status === 'running') return `${t.workerName ?? 'Its worker'} is on it — send the worker home to stop it`;
+    if (!t) return 'Böyle bir iş yok';
+    if (t.status === 'running') return `${t.workerName ?? 'Çalışanı'} üzerinde çalışıyor — durdurmak için çalışanı eve gönder`;
     this.tasks.splice(this.tasks.indexOf(t), 1);
     this.changed();
     this.pump();
@@ -151,9 +151,9 @@ export class TaskQueue {
   /** Puts a finished task back at the end of the queue. */
   retry(taskId: string): string | undefined {
     const t = this.tasks.find((x) => x.id === taskId);
-    if (!t) return 'No such task';
-    if (t.status !== 'done') return 'That task is still on the queue';
-    if (t.issue !== undefined && this.tasks.some((x) => x !== t && x.issue === t.issue && x.status !== 'done')) return `Issue #${t.issue} is already on the queue`;
+    if (!t) return 'Böyle bir iş yok';
+    if (t.status !== 'done') return 'Bu iş hâlâ sırada';
+    if (t.issue !== undefined && this.tasks.some((x) => x !== t && x.issue === t.issue && x.status !== 'done')) return `#${t.issue} numaralı konu zaten sırada`;
     this.tasks.splice(this.tasks.indexOf(t), 1);
     const fresh: QueueTask = { id: t.id, provider: t.provider, model: t.model, effort: t.effort, issue: t.issue, title: t.title, prompt: t.prompt, addedBy: t.addedBy, owner: t.owner, addedAt: Date.now(), status: 'queued' };
     this.tasks.push(fresh);
@@ -261,12 +261,12 @@ export class TaskQueue {
     t.status = 'done';
     t.outcome = outcome;
     t.finishedAt = Date.now();
-    const who = t.workerName ?? 'Its worker';
+    const who = t.workerName ?? 'Çalışanı';
     if (outcome === 'done') {
-      this.events.toast(`📋 ${who} finished ${label(t)}`, 'info');
+      this.events.toast(`📋 ${who} bitirdi: ${label(t)}`, 'info');
       // The worker most likely just opened the PR; go and link it.
       this.events.refreshGitHub();
-    } else if (outcome === 'exited') this.events.toast(`📋 ${who} stopped before finishing ${label(t)} — requeue it from the queue board`, 'warn');
+    } else if (outcome === 'exited') this.events.toast(`📋 ${who} bitirmeden durdu: ${label(t)} — iş sırası panosundan yeniden sıraya al`, 'warn');
     return outcome === 'done';
   }
 
@@ -293,7 +293,7 @@ export class TaskQueue {
     const pick = this.recyclable();
     if (!pick) return undefined;
     const done = this.workers.kill(pick.w.id);
-    this.events.toast(`📋 ${pick.w.name} went home after ${label(pick.t)} to make room for the next task`, 'info');
+    this.events.toast(`📋 ${pick.w.name}, ${label(pick.t)} sonrası bir sonraki işe yer açmak için eve gitti`, 'info');
     void done.then(({ note, error }) => {
       if (note) this.events.toast(note, 'info');
       if (error) this.events.toast(error, 'warn');
@@ -334,14 +334,14 @@ export class TaskQueue {
       const desk = free ?? this.recycleDesk();
       if (!desk) break;
       const note = this.useWorktree ? this.events.worktreeNote?.() ?? PROMPTS['queue.worktree'].text : '';
-      const r = this.workers.spawn(desk, `${t.addedBy} (queue)`, note ? `${t.prompt}\n\n${note}` : t.prompt, this.useWorktree, 'agent', t.provider ?? this.workers.defaultProvider, t.model, t.effort, undefined, t.owner);
+      const r = this.workers.spawn(desk, `${t.addedBy} (sıra)`, note ? `${t.prompt}\n\n${note}` : t.prompt, this.useWorktree, 'agent', t.provider ?? this.workers.defaultProvider, t.model, t.effort, undefined, t.owner);
       changed = true;
       if (typeof r === 'string') {
         t.status = 'done';
         t.outcome = 'failed';
         t.error = r;
         t.finishedAt = Date.now();
-        this.events.toast(`📋 Couldn't start ${label(t)}: ${r}`, 'error');
+        this.events.toast(`📋 Başlatılamadı: ${label(t)} — ${r}`, 'error');
         continue;
       }
       t.status = 'running';
@@ -351,11 +351,11 @@ export class TaskQueue {
       t.startedAt = Date.now();
       t.error = undefined;
       this.lastStatus.set(r.id, r.status);
-      this.events.toast(`📋 ${r.name} sat down at ${DESK_BY_ID.get(desk)?.label ?? 'a desk'} to work on ${label(t)}`, 'info');
+      this.events.toast(`📋 ${r.name}, ${DESK_BY_ID.get(desk)?.label ?? 'bir masa'} masasında çalışmaya başladı: ${label(t)}`, 'info');
       if (t.issue !== undefined) {
         const issue = t.issue;
         void this.events.claimIssue(issue, t.owner).then((err) => {
-          if (err) this.events.toast(`Couldn't assign issue #${issue} on GitHub: ${err}`, 'warn');
+          if (err) this.events.toast(`GitHub’da #${issue} numaralı konu atanamadı: ${err}`, 'warn');
         });
       }
     }
@@ -409,7 +409,7 @@ export class TaskQueue {
           t.status = 'done';
           t.outcome = 'exited';
           t.finishedAt = Date.now();
-          t.error = 'The office restarted while it was running';
+          t.error = 'Ofis, iş sürerken yeniden başladı';
         }
         this.tasks.push(t);
       }

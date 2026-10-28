@@ -450,10 +450,10 @@ test('workers reject reasoning effort for providers without one and unknown leve
   t.after(() => f.close());
   const workers = manager(f, f.claude, []);
   t.after(() => workers.shutdown());
-  assert.match(workers.spawn('desk-1', 'test', 'bad', false, 'agent', 'claude', undefined, 'overdrive' as any) as string, /effort/i);
-  assert.match(workers.spawn('desk-2', 'test', 'bad', false, 'agent', 'custom', undefined, 'high' as any) as string, /effort can only be selected/i);
-  assert.match(workers.spawn('desk-2', 'test', 'bad', false, 'agent', 'opencode', undefined, 'overdrive' as any) as string, /Invalid effort/i);
-  assert.match(workers.spawn('desk-3', 'test', 'bad', false, 'shell', undefined, undefined, 'high' as any) as string, /shell|effort/i);
+  assert.match(workers.spawn('desk-1', 'test', 'bad', false, 'agent', 'claude', undefined, 'overdrive' as any) as string, /efor/i);
+  assert.match(workers.spawn('desk-2', 'test', 'bad', false, 'agent', 'custom', undefined, 'high' as any) as string, /efor.*seçilebilir/i);
+  assert.match(workers.spawn('desk-2', 'test', 'bad', false, 'agent', 'opencode', undefined, 'overdrive' as any) as string, /Geçersiz efor/i);
+  assert.match(workers.spawn('desk-3', 'test', 'bad', false, 'shell', undefined, undefined, 'high' as any) as string, /shell|efor/i);
 });
 
 test('an explicit Claude model/effort overrides --agent-args and persists across resume', async (t) => {
@@ -545,7 +545,7 @@ test('provider and hook boundaries reject invalid combinations', async (t) => {
   });
   const invalidProvider = workers.spawn('desk-3', 'test', undefined, false, 'agent', 'custom' as AgentProvider);
   assert.equal(typeof invalidProvider, 'string');
-  assert.match(invalidProvider as string, /configured|provider|executable/i);
+  assert.match(invalidProvider as string, /yapılandırılmış|sağlayıcı|executable/i);
   const claude = workers.spawn('desk-3', 'test', 'claude task');
   assert.equal(typeof claude, 'object');
   if (typeof claude === 'string') return;
@@ -878,8 +878,8 @@ test('Cursor workers keep their hooks in their folder, follow them, and resume t
   const book = ledger(f.data);
   const workers = new WorkerManager(f.root, f.data, f.claude, ['--claude-only'], { url: 'http://127.0.0.1:1', token: '' }, events([]), book);
   t.after(() => workers.shutdown());
-  assert.match(workers.spawn('desk-2', 'test', 'bad', false, 'agent', 'cursor', '--force') as string, /Invalid Cursor model/);
-  assert.match(workers.spawn('desk-2', 'test', 'bad', false, 'agent', 'cursor', 'gpt-5', 'high') as string, /effort/i);
+  assert.match(workers.spawn('desk-2', 'test', 'bad', false, 'agent', 'cursor', '--force') as string, /Geçersiz Cursor modeli/);
+  assert.match(workers.spawn('desk-2', 'test', 'bad', false, 'agent', 'cursor', 'gpt-5', 'high') as string, /efor/i);
   const worker = workers.spawn('desk-1', 'test', '- fix the login', false, 'agent', 'cursor', 'gpt-5');
   assert.notEqual(typeof worker, 'string'); if (typeof worker === 'string') return;
   // The provider is "cursor"; its executable is cursor-agent.
@@ -1026,8 +1026,8 @@ test('a board agent is hired with its brief on the first prompt, then prompted, 
   // Each start of the agent, not what it reads from its terminal afterwards.
   const launches = () => f.read().filter((r) => r.kind === 'claude' && r.args.includes('--settings') && r.stdin === undefined);
 
-  assert.match(workers.station('desk-1', 'test', 'file an issue') as string, /no agent/i);
-  assert.match(workers.station('station-issues', 'test', '   ') as string, /empty/i);
+  assert.match(workers.station('desk-1', 'test', 'file an issue') as string, /ajan yok/i);
+  assert.match(workers.station('station-issues', 'test', '   ') as string, /boş/i);
   assert.match(workers.spawn('station-issues', 'test', undefined, false, 'shell') as string, /shell/i);
 
   // Nobody there yet: it's hired, told what it's for, with the request after that.
@@ -1035,12 +1035,12 @@ test('a board agent is hired with its brief on the first prompt, then prompted, 
   assert.equal(typeof hired, 'object');
   if (typeof hired === 'string') return;
   assert.equal(hired.hired, true);
-  assert.equal(hired.info.name, 'Issues agent');
+  assert.equal(hired.info.name, 'Konular ajanı');
   assert.equal(hired.info.deskId, 'station-issues');
   assert.equal(hired.info.activity, 'File an issue about the dog');
   const [first] = await waitFor(launches, (l) => l.length === 1);
   const initial = first.args.at(-1)!;
-  assert.match(initial, /Issues agent/);
+  assert.match(initial, /Konular ajanı/);
   assert.match(initial, /office-queue add/);
   // Only the queue agent loses its file-editing tools.
   assert.equal(first.args.includes('--disallowedTools'), false);
@@ -1056,7 +1056,7 @@ test('a board agent is hired with its brief on the first prompt, then prompted, 
   assert.equal(workers.handleHook(id, first.env.hookToken!, 'SessionStart', { session_id: 'issues-session' }), true);
   assert.equal(workers.handleHook(id, first.env.hookToken!, 'PermissionRequest', { tool_name: 'Bash', tool_input: { command: 'gh issue create' } }), true);
   assert.equal(workers.get(id)?.status, 'needs_input');
-  assert.match(workers.station('station-issues', 'Ada', 'hello?') as string, /waiting on an answer/i);
+  assert.match(workers.station('station-issues', 'Ada', 'hello?') as string, /bir cevap bekliyor/i);
 
   // Its own token proves who it is; anyone else's doesn't.
   assert.equal(workers.authenticate(id, first.env.hookToken!)?.id, id);
@@ -1303,7 +1303,7 @@ test('a Claude worker that opens a pull request itself has it as its own', async
   assert.equal(pr(), undefined);
   hook('PostToolUse', { ...create, tool_response: { stdout: 'https://github.com/acme/app/pull/12\n', stderr: 'Creating pull request for fix-login into main in acme/app' } });
   assert.deepEqual(pr(), { number: 12, url: 'https://github.com/acme/app/pull/12' });
-  assert.deepEqual(toasts, [`${worker.name} opened PR #12`]);
+  assert.deepEqual(toasts, [`${worker.name} PR #12 açtı`]);
   assert.equal(JSON.parse(readFileSync(path.join(f.data, 'workers.json'), 'utf8')).find((w: { id: string }) => w.id === worker.id).pr.number, 12, 'kept across a restart');
   // A follow-up whose branch already had one: gh fails, and says which.
   hook('PostToolUseFailure', { ...create, error: 'Exit code 1\na pull request for branch "fix-more" into branch "main" already exists:\nhttps://github.com/acme/app/pull/14' });
@@ -1319,7 +1319,7 @@ test('a Claude worker that opens a pull request itself has it as its own', async
   assert.equal(workers.get(worker.id)?.pastPrs, undefined, 'said by someone: only that one');
   assert.equal(workers.linkPr(worker.id), undefined);
   assert.equal(pr(), undefined);
-  assert.equal(workers.linkPr('nobody', { number: 20, url: 'https://github.com/acme/app/pull/20' }), 'No such worker');
+  assert.equal(workers.linkPr('nobody', { number: 20, url: 'https://github.com/acme/app/pull/20' }), 'Böyle bir çalışan yok');
 });
 
 test('a worker is stamped with when it started waiting on someone, afresh each time', async (t) => {
@@ -1502,7 +1502,7 @@ test('a worktree worker that makes its own branch is followed there: O finds the
   // Sent home: the worktree goes, with its branch and the office's (which holds nothing fix-x lacks).
   const home = await workers.kill(worker.id, 'all');
   assert.equal(home.error, undefined);
-  assert.equal(home.note, `Deleted ${worker.name}'s worktree and branch fix-x`);
+  assert.equal(home.note, `${worker.name} adlı çalışanın worktree’si ve fix-x dalı silindi`);
   assert.equal(git(f.root, 'branch', '--list', 'fix-x', office), '');
   assert.ok(!existsSync(cwd));
   // One that checked out a branch from before it was hired leaves that branch be.
@@ -1511,7 +1511,7 @@ test('a worktree worker that makes its own branch is followed there: O finds the
   assert.notEqual(typeof other, 'string'); if (typeof other === 'string') return;
   git(path.join(f.root, other.worktree!.path), 'checkout', '-q', 'release');
   const left = await workers.kill(other.id, 'all');
-  assert.equal(left.note, `Deleted ${other.name}'s worktree and branch ${other.worktree!.branch}`);
+  assert.equal(left.note, `${other.name} adlı çalışanın worktree’si ve ${other.worktree!.branch} dalı silindi`);
   assert.equal(git(f.root, 'branch', '--list', '--format=%(refname:short)', 'release', other.worktree!.branch), 'release');
 });
 
@@ -1544,19 +1544,19 @@ test("the office's branch keeps a worker's commits once it has moved on: the dia
   // Deleting the worktree and branch anyway: release isn't the office's, and the office's has the commit.
   const sent = await workers.kill(a.w.id, 'all');
   assert.equal(sent.error, undefined);
-  assert.equal(sent.note, `Deleted ${a.w.name}'s worktree and kept branch ${a.office} — it has 1 unpushed commit`);
+  assert.equal(sent.note, `${a.w.name} adlı çalışanın worktree’si silindi ve ${a.office} dalı bırakıldı — 1 push edilmemiş commit`);
   assert.ok(!existsSync(a.cwd));
   assert.equal(tip(a.office), 'work at desk-1');
   assert.equal(tip('release'), 'init');
   // Sent home with no choice (the queue recycling its desk, leave-on-merge): nothing goes.
   const b = hire('desk-2', 'release');
-  assert.equal((await workers.kill(b.w.id)).note, `Kept ${b.w.name}'s worktree and branch release — it has 1 unpushed commit`);
+  assert.equal((await workers.kill(b.w.id)).note, `${b.w.name} adlı çalışanın worktree’si ve release dalı bırakıldı — 1 push edilmemiş commit`);
   assert.ok(existsSync(b.cwd));
   assert.equal(tip(b.office), 'work at desk-2');
   // A branch of its own, cut from main without that commit: it goes, the office's stays.
   const c = hire('desk-3', '-b', 'fix-z', 'main');
   const own = await workers.kill(c.w.id, 'all');
-  assert.equal(own.note, `Deleted ${c.w.name}'s worktree and branch fix-z, and kept branch ${c.office} — it has 1 unpushed commit`);
+  assert.equal(own.note, `${c.w.name} adlı çalışanın worktree’si ve fix-z dalı silindi, ${c.office} dalı bırakıldı — 1 push edilmemiş commit`);
   assert.equal(git(f.root, 'branch', '--list', 'fix-z'), '');
   assert.equal(tip(c.office), 'work at desk-3');
 });
@@ -1590,19 +1590,19 @@ test("a worker that renames the office's branch goes home with it; one that dele
   assert.equal(info.worktree!.made, undefined);
   const sent = await workers.kill(a.w.id, 'all');
   assert.equal(sent.error, undefined);
-  assert.equal(sent.note, `Deleted ${a.w.name}'s worktree and branch fix-x`);
+  assert.equal(sent.note, `${a.w.name} adlı çalışanın worktree’si ve fix-x dalı silindi`);
   assert.equal(git(f.root, 'branch', '--list', 'fix-x', a.office), '');
   assert.ok(!existsSync(a.cwd));
   // Renamed with nothing unpushed (its PR merged, say) and sent home before it came to rest: all of it goes.
   const b = hire('desk-2');
   git(b.cwd, 'branch', '-m', 'fix-y');
-  assert.deepEqual(await workers.kill(b.w.id), { note: `Deleted ${b.w.name}'s worktree and branch fix-y` });
+  assert.deepEqual(await workers.kill(b.w.id), { note: `${b.w.name} adlı çalışanın worktree’si ve fix-y dalı silindi` });
   assert.equal(git(f.root, 'branch', '--list', 'fix-y', b.office), '');
   // The office's branch deleted instead: git can't say whether the one it's on is its own, so it stays.
   const c = hire('desk-3');
   git(c.cwd, 'checkout', '-qb', 'fix-w');
   git(c.cwd, 'branch', '-D', c.office);
-  assert.deepEqual(await workers.kill(c.w.id, 'all'), { note: `Deleted ${c.w.name}'s worktree and kept branch fix-w` });
+  assert.deepEqual(await workers.kill(c.w.id, 'all'), { note: `${c.w.name} adlı çalışanın worktree’si silindi ve fix-w dalı bırakıldı` });
   assert.equal(git(f.root, 'branch', '--list', '--format=%(refname:short)', 'fix-w', c.office), 'fix-w');
   assert.ok(!existsSync(c.cwd));
 });
@@ -1683,7 +1683,7 @@ test("a worker whose worktree was deleted outside the office waits, marked lost,
   assert.deepEqual(after.get(kept.id)?.lost, { branch: 'here' });
   assert.deepEqual(after.get(gone.id)?.lost, { branch: 'gone' });
   assert.equal(after.get(kept.id)?.status, 'offline');
-  assert.match(after.resume(kept.id) ?? '', /worktree .* was deleted outside agent-office/);
+  assert.match(after.resume(kept.id) ?? '', /worktree’si .* agent-office dışında silinmiş/);
   assert.equal(launches(f).length, launched);
 
   // Put back on its own branch, work and all, and it carries on its conversation.
@@ -1697,7 +1697,7 @@ test("a worker whose worktree was deleted outside the office waits, marked lost,
   // Its branch gone too: made again from where it started.
   const again = await after.rebuild(gone.id);
   assert.equal(again.rebuilt, true);
-  assert.match(again.note ?? '', /was deleted too/);
+  assert.match(again.note ?? '', /de silinmişti/);
   assert.equal(git(path.join(f.root, gone.worktree!.path), 'rev-parse', 'HEAD'), gone.worktree!.base);
   assert.equal(after.get(gone.id)?.lost, undefined);
   assert.deepEqual(toasts, []);

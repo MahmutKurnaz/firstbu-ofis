@@ -29,7 +29,7 @@ export const muse: ProviderAdapter<undefined, MuseHome> = {
     }
     return { args, rotateToken: true, env: { XDG_CONFIG_HOME: setup.configHome, XDG_DATA_HOME: setup.dataHome, XDG_STATE_HOME: setup.stateHome } };
   },
-  bootHint: 'Open the terminal: complete login if Muse asks',
+  bootHint: 'Terminali aç: Muse isterse girişi tamamla',
   titleNoise: /^muse( code)?$/i,
   hook: {
     strictJson: true,

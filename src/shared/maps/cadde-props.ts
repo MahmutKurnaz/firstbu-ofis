@@ -13,27 +13,27 @@ import type { PropConfig } from './types.js';
 
 export const CADDE_PROP_KINDS = {
   /** A glass office, `width` across its front and `length` deep, `height` tall, its door facing `rotY`. */
-  office: "A team's glass office, its door in the middle of its front",
+  office: 'Bir ekibin cam ofisi, kapısı cephesinin ortasında',
   /** A street tree in a round bed. */
-  tree: 'A street tree',
+  tree: 'Bir sokak ağacı',
   /** A street lamp; `light` ones light the street for real at night. */
-  lamp: 'A street lamp',
+  lamp: 'Bir sokak lambası',
   /** A long planter, `width` long. */
-  planter: 'A planter of shrubs',
+  planter: 'Çalılık bir saksılık',
   /** A park bench along `rotY`. */
-  bench: 'A park bench',
+  bench: 'Bir park bankı',
   /** A café table under a parasol. */
-  parasol: 'A café table under a parasol',
+  parasol: 'Şemsiyenin altında bir kafe masası',
   /** The café's counter, `width` long: E for a coffee, like the office's machine. */
-  counter: 'The café counter (the coffee)',
+  counter: 'Kafe tezgâhı (kahve)',
   /** A model from the office's own .glb files, `model` by name, `width` by `length` of ground. */
-  glb: 'A model from a .glb file',
+  glb: 'Bir .glb dosyasından model',
   /** The gong a merged pull request rings (one per map). */
-  gong: 'The merge gong',
+  gong: 'Merge gongu',
   /** A coffee machine on a stand: E for a cup. */
-  dispenser: 'A coffee machine',
+  dispenser: 'Bir kahve makinesi',
   /** A table with nothing to sit at, `width` by `length`. */
-  table: 'A table without seats',
+  table: 'Oturağı olmayan bir masa',
 } as const;
 export type CaddePropKind = keyof typeof CADDE_PROP_KINDS;
 

@@ -309,7 +309,7 @@ export class Ledger {
   /** Why a new agent can't be hired right now, when it can't. */
   get hiringPaused(): string | undefined {
     if (!this.opts.pauseHiring || !this.overBudget) return undefined;
-    return `Today's ${fmtUsd(this.opts.budget!)} budget is spent — no new hires until tomorrow`;
+    return `Bugünün ${fmtUsd(this.opts.budget!)} bütçesi bitti — yarına kadar yeni işe alım yok`;
   }
 
   add(delta: Usage) {
@@ -323,7 +323,7 @@ export class Ledger {
     if (this.opts.budget !== undefined && this.overBudget && this.warnedDay !== day) {
       this.warnedDay = day;
       const spent = fmtUsd(this.days[day].cost);
-      this.toast(`💸 Today's spend passed the ${fmtUsd(this.opts.budget)} budget (${spent})${this.opts.pauseHiring ? ' — no new hires until tomorrow' : ''}`, 'warn');
+      this.toast(`💸 Bugünkü harcama ${fmtUsd(this.opts.budget)} bütçesini aştı (${spent})${this.opts.pauseHiring ? ' — yarına kadar yeni işe alım yok' : ''}`, 'warn');
     }
   }
 

@@ -15,8 +15,8 @@ export function gates(ctx: Ctx): Gates {
   const takeIssue = (c: Client, floor: Floor, n: number) => {
     floor.queue.dropIssue(n);
     const as = c.accountId ? ctx.signins.ghAs(c.accountId) : undefined;
-    if (typeof as === 'string') return ctx.warn(c, `Couldn't assign issue #${n} on GitHub: ${as}`);
-    void floor.github.claim(n, as).then((err) => ctx.warn(c, err && `Couldn't assign issue #${n} on GitHub: ${err}`));
+    if (typeof as === 'string') return ctx.warn(c, `GitHub’da #${n} numaralı konu atanamadı: ${as}`);
+    void floor.github.claim(n, as).then((err) => ctx.warn(c, err && `GitHub’da #${n} numaralı konu atanamadı: ${err}`));
   };
 
   /**

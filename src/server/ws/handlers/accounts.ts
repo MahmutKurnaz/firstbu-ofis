@@ -8,7 +8,7 @@ import type { HandlerMap } from './types.js';
 /** Whether `c` may manage accounts; if not, they're told so. */
 const admin = (ctx: Ctx, c: Client): boolean => {
   if (ctx.meOf(c.accountId).admin) return true;
-  ctx.warn(c, 'Only admins can manage accounts');
+  ctx.warn(c, 'Hesapları yalnızca yöneticiler yönetebilir');
   return false;
 };
 
@@ -33,11 +33,11 @@ export const accountsHandlers = {
     const who = c.peer.name;
     if (!admin(ctx, c)) return;
     const id = str(msg.accountId, 32);
-    if (id === c.accountId) return ctx.warn(c, "You can't revoke your own account");
+    if (id === c.accountId) return ctx.warn(c, 'Kendi hesabını iptal edemezsin');
     const a = ctx.accounts.revoke(id);
     if (!a) return;
     console.log(`  ${who} revoked ${a.name}'s account`);
-    ctx.toastAll(`${who} revoked ${a.name}'s account`);
+    ctx.toastAll(`${who}, ${a.name} adlı hesabı iptal etti`);
     ctx.accountsChanged(); // signs them out everywhere
     ctx.signins.forget(a.id); // and their Claude and GitHub sign-ins go with the account
     ctx.accountLimits.get(a.id)?.reader.close();
@@ -47,10 +47,10 @@ export const accountsHandlers = {
     const who = c.peer.name;
     if (!admin(ctx, c)) return;
     const id = str(msg.accountId, 32);
-    if (id === c.accountId) return ctx.warn(c, "You can't change your own role");
+    if (id === c.accountId) return ctx.warn(c, 'Kendi rolünü değiştiremezsin');
     const a = ctx.accounts.setRole(id, msg.role === 'admin' ? 'admin' : 'member');
     if (!a) return;
-    ctx.toastAll(a.role === 'admin' ? `${who} made ${a.name} an admin` : `${a.name} is no longer an admin`);
+    ctx.toastAll(a.role === 'admin' ? `${who}, ${a.name} adlı hesabı yönetici yaptı` : `${a.name} artık yönetici değil`);
     ctx.accountsChanged();
     // Only admins may use the office's own sign-ins: a demoted one is back on their own.
     void ctx.signins.look(a.id, true);
@@ -60,10 +60,10 @@ export const accountsHandlers = {
     if (!admin(ctx, c)) return;
     if (msg.on === ctx.accounts.sharedPassword) return;
     // Only someone who can still get in without it may switch it off.
-    if (!msg.on && !c.accountId) return ctx.warn(c, 'Sign in with an admin account of your own first, or nobody could get back in');
+    if (!msg.on && !c.accountId) return ctx.warn(c, 'Önce kendi yönetici hesabınla giriş yap, yoksa kimse geri giremez');
     ctx.accounts.setSharedPassword(!!msg.on);
     console.log(`  ${who} switched the shared office password ${msg.on ? 'on' : 'off'}`);
-    ctx.toastAll(msg.on ? `${who} switched the shared office password back on` : `🔑 ${who} switched off the shared office password — everyone signs in with their own account now`);
+    ctx.toastAll(msg.on ? `${who} ortak ofis parolasını yeniden açtı` : `🔑 ${who} ortak ofis parolasını kapattı — artık herkes kendi hesabıyla giriş yapıyor`);
     ctx.accountsChanged(); // signs out whoever came in with it
   },
 } satisfies HandlerMap<AccountsClientMsg>;

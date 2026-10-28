@@ -28,7 +28,7 @@ test('no limit until one is set; then hiring past it is refused, across restarts
   assert.equal(m.full(), undefined);
   assert.equal(m.room(), Infinity);
   assert.equal(m.setLimit(5, 'Ada'), undefined);
-  assert.match(m.full() ?? '', /limit of 5 workers/);
+  assert.match(m.full() ?? '', /5 çalışan sınırında/);
   assert.equal(m.room(), 0);
   assert.deepEqual(f.told.at(-1)?.set?.limit, 5);
   // Kept on disk.

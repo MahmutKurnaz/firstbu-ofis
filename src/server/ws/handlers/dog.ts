@@ -16,17 +16,17 @@ export const dogHandlers = {
     const floor = here(ctx, c);
     if (!floor) return;
     const name = floor.dog.rename(str(msg.name, 200));
-    ctx.toastFloor(floor, `🐶 ${who} named the dog ${name}`);
+    ctx.toastFloor(floor, `🐶 ${who} köpeğe ${name} adını verdi`);
   },
   'dog.breed'(ctx, c, msg) {
     const floor = here(ctx, c);
     if (!floor) return;
     const breed = floor.dog.setBreed(msg.breed);
-    if (breed) ctx.toastFloor(floor, `🐶 ${c.peer.name} made ${floor.dog.dogName} a ${DOG_BREED_NAMES[breed].replace(/^\S+ /, '')}`);
+    if (breed) ctx.toastFloor(floor, `🐶 ${c.peer.name}, ${floor.dog.dogName} cinsini değiştirdi: ${DOG_BREED_NAMES[breed].replace(/^\S+ /, '')}`);
   },
   'dog.coat'(ctx, c, msg) {
     const floor = here(ctx, c);
     if (!floor) return;
-    if (floor.dog.setCoat(msg.coat)) ctx.toastFloor(floor, `🐶 ${c.peer.name} gave ${floor.dog.dogName} a ${(DOG_COAT_NAMES[msg.coat] ?? '').toLowerCase()} coat`);
+    if (floor.dog.setCoat(msg.coat)) ctx.toastFloor(floor, `🐶 ${c.peer.name}, ${floor.dog.dogName} tüy rengini değiştirdi: ${(DOG_COAT_NAMES[msg.coat] ?? '').toLocaleLowerCase('tr')}`);
   },
 } satisfies HandlerMap<DogClientMsg>;

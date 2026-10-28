@@ -1,8 +1,8 @@
 {
   "id": "my-station",
-  "name": "My station",
+  "name": "Benim istasyonum",
   "icon": "🚀",
-  "description": "A copy of the space station, to make your own.",
+  "description": "Uzay istasyonu haritasının bir kopyası: kendi haritanı yapmak için.",
   "style": "station",
   "hall": {
     "width": 30,
@@ -28,16 +28,16 @@
       "height": 0.6,
       "steps": 2
     },
-    "label": "🚀 Captain’s chair"
+    "label": "🚀 Kaptan koltuğu"
   },
   "herald": {
     "x": 3.2,
     "z": -23.2,
     "rotY": -0.35,
-    "name": "First Officer",
-    "says": "Speak to me to bring a new worker aboard",
-    "ask": "What’s their mission, Captain?",
-    "button": "Make it so 🚀"
+    "name": "Birinci Subay",
+    "says": "Yeni bir çalışanı gemiye almak için benimle konuş",
+    "ask": "Görevi ne, Kaptan?",
+    "button": "Uygulansın 🚀"
   },
   "lineup": {
     "x": 0,
@@ -79,7 +79,7 @@
       "rotY": 1.5708,
       "width": 4.4,
       "height": 2.6,
-      "label": "📡 Incoming signals"
+      "label": "📡 Gelen sinyaller"
     },
     "queue": {
       "x": -14.92,
@@ -88,7 +88,7 @@
       "rotY": 1.5708,
       "width": 4.4,
       "height": 2.6,
-      "label": "📋 Mission queue"
+      "label": "📋 Görev sırası"
     },
     "pulls": {
       "x": 14.92,
@@ -97,7 +97,7 @@
       "rotY": -1.5708,
       "width": 4.4,
       "height": 2.6,
-      "label": "🔀 Docking requests"
+      "label": "🔀 Kenetlenme istekleri"
     },
     "services": {
       "x": 14.92,
@@ -106,7 +106,7 @@
       "rotY": -1.5708,
       "width": 4.4,
       "height": 2.6,
-      "label": "🌐 Subsystems"
+      "label": "🌐 Alt sistemler"
     }
   },
   "agents": {
@@ -126,7 +126,7 @@
   },
   "sendHome": {
     "escort": {
-      "name": "Security",
+      "name": "Güvenlik",
       "post": {
         "x": 13.3,
         "z": 15.3,
@@ -142,10 +142,10 @@
         "do": "say",
         "who": "escort",
         "text": [
-          "Captain’s orders. You’re off the crew.",
-          "On your feet. Your shift ends at the airlock.",
-          "You’ve been reassigned. To space.",
-          "Come quietly. Mind the vacuum."
+          "Kaptanın emri. Mürettebattan çıkarıldın.",
+          "Ayağa kalk. Vardiyan hava kilidinde bitiyor.",
+          "Yeniden görevlendirildin. Uzaya.",
+          "Sessizce yürü. Boşluğa dikkat."
         ]
       },
       {
@@ -154,11 +154,11 @@
       {
         "do": "say",
         "text": [
-          "😨 Not the airlock!",
-          "😰 But my pull request…",
-          "😭 I was nearly done!",
-          "🥺 Just one more commit!",
-          "🫠 I didn’t pack a suit…",
+          "😨 Hava kilidi olmaz!",
+          "😰 Ama pull request’im…",
+          "😭 Neredeyse bitirmiştim!",
+          "🥺 Bir commit daha!",
+          "🫠 Uzay giysimi almadım…",
           "😶 …"
         ]
       },
@@ -173,10 +173,10 @@
         "do": "say",
         "who": "escort",
         "text": [
-          "🚀 Bon voyage.",
-          "🫡 Thank you for your service.",
-          "🌌 Mind the gap.",
-          "👋 Should have shipped it."
+          "🚀 İyi yolculuklar.",
+          "🫡 Hizmetin için teşekkürler.",
+          "🌌 Boşluğa dikkat.",
+          "👋 Yayına almalıydın."
         ]
       },
       {
@@ -187,10 +187,10 @@
     "rotHours": 12
   },
   "tables": [
-    {"name":"Port forward bench","x":-7.6,"z":-8,"length":10,"seats":4},
-    {"name":"Starboard forward bench","x":7.6,"z":-8,"length":10,"seats":4},
-    {"name":"Port aft bench","x":-7.6,"z":6,"length":10,"seats":4},
-    {"name":"Starboard aft bench","x":7.6,"z":6,"length":10,"seats":4}
+    {"name":"Sol ön bank","x":-7.6,"z":-8,"length":10,"seats":4},
+    {"name":"Sağ ön bank","x":7.6,"z":-8,"length":10,"seats":4},
+    {"name":"Sol arka bank","x":-7.6,"z":6,"length":10,"seats":4},
+    {"name":"Sağ arka bank","x":7.6,"z":6,"length":10,"seats":4}
   ],
   "props": [
     {"kind":"rib","x":0,"z":-26},

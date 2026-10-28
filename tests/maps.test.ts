@@ -85,13 +85,13 @@ test("a map that can't be used says why, and the building stays on the office", 
     { file: 'low.json', json: { id: 'low', name: 'Low', extends: 'castle', hall: { height: 9 } } },
   ]);
   const why = Object.fromEntries(checked.map((m) => [m.file, m.error ?? '']));
-  assert.match(why['office.json'], /office is built in code/);
-  assert.match(why['small.json'], /seat 4, and a map needs 32/);
-  assert.match(why['far.json'], /outside the hall/);
+  assert.match(why['office.json'], /ofis kodla kurulur/);
+  assert.match(why['small.json'], /4 koltuk var, haritanın 32 koltuğa/);
+  assert.match(why['far.json'], /salonun dışında/);
   assert.match(why['thing.json'], /spaceship/);
-  assert.match(why['dupe.json'], /built-in map/);
-  assert.match(why['loop.json'], /extends itself/);
-  assert.match(why['low.json'], /\(a banner\) reaches 11\.2 m up, over the hall's 9 m walls/);
+  assert.match(why['dupe.json'], /yerleşik bir harita/);
+  assert.match(why['loop.json'], /kendini genişletiyor/);
+  assert.match(why['low.json'], /\(bir banner\) 11\.2 m yüksekliğe çıkıyor, salonun duvarları 9 m/);
   assert.equal(planOf('small', checked), OFFICE_PLAN);
   assert.equal(planOf('nowhere'), OFFICE_PLAN);
 });
@@ -110,15 +110,15 @@ test("a custom map can't ask a browser to build what would hang it, and says why
     { file: 'line.json', json: { id: 'line', name: 'Line', extends: 'castle', lineup: { x: 6.8, z: -12 } } },
   ]);
   const why = Object.fromEntries(checked.map((m) => [m.file, m.error ?? '']));
-  assert.match(why['thin.json'], /props\[\d+\]\.width should be between/);
-  assert.match(why['steps.json'], /throne\.dais\.steps should be between 0 and 10/);
-  assert.match(why['many.json'], /5000 props, and a map can have 400/);
-  assert.match(why['crowd.json'], /seats should be between 1 and 12/);
-  assert.match(why['word.json'], /\.y should be a number/);
-  assert.match(why['spaced.json'], /id should be up to 40 lowercase/);
-  assert.match(why['sides.json'], /sides should be "both", "inner" or "outer"/);
-  assert.match(why['pillar.json'], /the herald \(-10\.4, -18\.0\) is inside something/);
-  assert.match(why['line.json'], /lineup spot 1 \(6\.8, -12\.0\) is inside something/);
+  assert.match(why['thin.json'], /props\[\d+\]\.width .* arasında olmalı/);
+  assert.match(why['steps.json'], /throne\.dais\.steps 0 ile 10 arasında olmalı/);
+  assert.match(why['many.json'], /5000 eşyası var, bir haritada en çok 400/);
+  assert.match(why['crowd.json'], /seats 1 ile 12 arasında olmalı/);
+  assert.match(why['word.json'], /\.y bir sayı olmalı/);
+  assert.match(why['spaced.json'], /id en çok 40 küçük harf/);
+  assert.match(why['sides.json'], /sides "both", "inner" ya da "outer" olmalı/);
+  assert.match(why['pillar.json'], /haberci \(-10\.4, -18\.0\) bir şeyin içinde/);
+  assert.match(why['line.json'], /sıradaki 1\. yer \(6\.8, -12\.0\) bir şeyin içinde/);
 });
 
 test('a custom map takes away what it extends with null, and merges no prototype keys', () => {
@@ -166,15 +166,15 @@ function rounded(v: unknown): unknown {
 
 /** A built-in map as a map of your own: its own id, one table or prop a line. */
 function mapJson(map: MapConfig, id: string, name: string): string {
-  const { tables, props, ...rest } = rounded({ ...map, id, name, description: `A copy of the ${map.name.toLowerCase()}, to make your own.` }) as MapConfig;
+  const { tables, props, ...rest } = rounded({ ...map, id, name, description: `${map.name} haritasının bir kopyası: kendi haritanı yapmak için.` }) as MapConfig;
   const list = (xs: unknown[]) => `[\n${xs.map((x) => `    ${JSON.stringify(x)}`).join(',\n')}\n  ]`;
   return `${JSON.stringify({ ...rest, tables: '@tables', props: '@props' }, null, 2).replace('"@tables"', list(tables)).replace('"@props"', list(props ?? []))}\n`;
 }
 
 for (const [map, id, name] of [
-  [CASTLE, 'my-castle', 'My castle'],
-  [STATION, 'my-station', 'My station'],
-  [CADDE, 'my-cadde', 'My street'],
+  [CASTLE, 'my-castle', 'Benim kalem'],
+  [STATION, 'my-station', 'Benim istasyonum'],
+  [CADDE, 'my-cadde', 'Benim caddem'],
 ] as const) {
   test(`docs/maps/${map.id}.json is the ${map.name.toLowerCase()}, ready to copy into .agent-office/maps/ and change`, () => {
     const file = path.join(import.meta.dirname, '..', 'docs', 'maps', `${map.id}.json`);
