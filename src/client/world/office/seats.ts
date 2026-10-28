@@ -74,7 +74,8 @@ export function buildDesk(def: DeskDef, index: number, trimMat: THREE.Material):
 
   const laptopAnchor = new THREE.Object3D();
   laptopAnchor.position.set(0, height, -0.06);
-  laptopAnchor.scale.setScalar(1.3);
+  // A 16 inch laptop, 0.36 m across the screen (its model is 0.72): blender/furniture.json.
+  laptopAnchor.scale.setScalar(0.5);
   group.add(laptopAnchor);
 
   // On the chair, facing the desk.
@@ -139,7 +140,7 @@ export function buildBeanbag(def: DeskDef, index: number): DeskView {
 
   const laptopAnchor = new THREE.Object3D();
   laptopAnchor.position.set(0, 0.445, -0.8);
-  laptopAnchor.scale.setScalar(1.05);
+  laptopAnchor.scale.setScalar(0.5);
   group.add(laptopAnchor);
 
   // Sunk into the bag, facing the lap desk.

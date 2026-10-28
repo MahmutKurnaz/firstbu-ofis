@@ -196,7 +196,7 @@ function briefingChair(kit: Kit, def: DeskDef): DeskView {
   g.add(chair);
   const laptopAnchor = new THREE.Object3D();
   laptopAnchor.position.set(0, COUNCIL.height, COUNCIL.tome.z);
-  laptopAnchor.scale.setScalar(COUNCIL.tome.scale);
+  laptopAnchor.scale.setScalar(0.5);
   g.add(laptopAnchor);
   const seatAnchor = new THREE.Object3D();
   seatAnchor.position.set(0, 0.46, 0.85);

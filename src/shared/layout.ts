@@ -178,7 +178,7 @@ export const MEETING_TABLE = { x: 13.7, z: 10.5, width: 4.2, depth: 1.7, height:
  * from the place (x, z) it's at. With the place this far in from the table's edge, two open laptops
  * facing each other across the table have room between the backs of their lids.
  */
-export const MEETING_LAPTOP = { scale: 1, z: 0.07, in: 0.45 } as const;
+export const MEETING_LAPTOP = { scale: 0.5, z: 0.07, in: 0.45 } as const;
 /**
  * The chairs round the meeting table, in the order a meeting fills them: the head of the table at its
  * west end (whoever leads or writes the meeting up), then two down each side. (x, z) is its place at
