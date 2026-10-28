@@ -85,3 +85,10 @@ Onay: Mahmut, 2026-10-28 ("Evet, 265 kredi"). Betik: `blender/scripts/meshy_char
 Toplam 250 (onaylanan 265'in altında). Bakiye 4.285 → 4.035. Modeller: `src/client/models/{kizil-panda,susamuru,kaplan,tavsan,geyik}.glb` (1,5-1,8 MB), yalnızca bir ajan giyince yüklenir.
 
 Mobilya ve yapı ölçüleri ve kaynakları: `docs/mobilya-olculeri.md` (`blender/furniture.json`).
+
+## Aşama 1-3: sokak eşyaları, NPC'ler ve kalan karakterler (Meshy, doğrudan)
+
+Onay: Mahmut, 2026-10-28 ("Hepsi, ~1.860"). Betikler: `blender/scripts/meshy_props.py` (eşyalar), `meshy_characters.py` (karakterler), `meshy_concepts.py` (karşılayıcı konsepti), `build_meshy_props.py` (paketleme).
+- **14 sokak eşyası** (agac-genis, agac-ince, cali, cop-kutusu, hidrant, kafe-koltuk, kiosk, gong, kapi, konsey-masasi, kursu, pano-cercevesi, buzdolabi, menu-sehpasi): 14 × 2 görsel = 168, 14 × 3D = 420 → 588 kredi. Ağaçlar 30k/24k üçgenle istendi, pakette 15k/12k.
+- **24 karakter** (8 rol, 10 yedek hayvan, 6 NPC) + karşılayıcı ördek: 3D 24 × 30 + konsept 12 + iskelet 25 × 5 + klipler (8 × 5, 10 × 4, 7 × 3 klip × 3 kredi) → yaklaşık 1.150 kredi.
+- Bakiye 4.035 → 2.257. Kullanılmayan: gong (animasyonlu kod gong'u yerinde kaldı), kürsü ve pano çerçevesi (üretildi, yerleştirilmedi).

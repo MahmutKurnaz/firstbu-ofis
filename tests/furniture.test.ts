@@ -92,10 +92,10 @@ test('all seat heights are 0.43-0.55 m and seated pieces are lower than their he
   }
 });
 
-test('no piece is taller or wider than 5 m', () => {
+test('no piece is taller or wider than 5 m (the street gateway, 7 m between its posts, is the one wide thing)', () => {
   for (const [k, p] of pieces) {
     assert.ok(p.h <= 5, `${k} h ${p.h}`);
-    assert.ok(p.w <= 5, `${k} w ${p.w}`);
+    assert.ok(p.w <= (k === 'kapi' ? 8 : 5), `${k} w ${p.w}`);
   }
 });
 
@@ -147,16 +147,14 @@ test('docs/mobilya-olculeri.md mentions every piece key and its w × d × h', ()
 });
 
 // (5) the meeting table
-test('the suite builds the 3.8 x 1.4 table with ten chairs, and the spec seats them', () => {
-  const suite = text('src/client/world/cadde/suite.ts');
-  const mt = spec.constants.meetingTable;
-  assert.ok(/roundedBox\(\s*3\.8\s*,[^)]*,\s*1\.4\b/.test(suite) || /solid\([^)]*3\.8\s*,\s*1\.4/.test(suite), 'no 3.8 x 1.4 table in suite.ts');
-  assert.equal(mt.w, 3.8);
-  assert.equal(mt.d, 1.4);
-  assert.equal(mt.seats, 10);
-  assert.ok(mt.perPerson * 5 <= mt.w, `${mt.perPerson} * 5 > ${mt.w}`);
-  const m = /for \(let i = 0; i < 5; i\+\+\) \{([\s\S]*?)\n  \}/.exec(suite);
-  assert.ok(m, 'no 5-iteration chair loop');
-  const puts = [...m[1]!.matchAll(/put\('toplanti-sandalye'/g)].length;
-  assert.equal(puts * 5, mt.seats, `loop places ${puts * 5} chairs`);
+test('the meeting table is the round council one in the suite meeting room, 2.2 m across and 76 cm high', () => {
+  const cadde = text('src/shared/maps/cadde.ts');
+  assert.ok(/council:\s*\{\s*x: 19,\s*z: -33\.2/.test(cadde), 'the council is in the suite meeting room');
+  const t = spec.pieces['konsey-masasi']!;
+  assert.equal(t.w, 2.2);
+  assert.equal(t.d, 2.2);
+  assert.equal(t.h, spec.constants.tableTop);
+  assert.ok(/height: 0\.76/.test(text('src/shared/maps/index.ts')), 'COUNCIL.height is the desk height');
+  // The 10-seat table is the spec's for when the meeting grows to ten (the live one seats five).
+  assert.equal(spec.constants.meetingTable.seats, 10);
 });

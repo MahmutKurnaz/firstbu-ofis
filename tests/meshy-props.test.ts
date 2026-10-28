@@ -46,14 +46,15 @@ test('every MESHY_KEY is a named node with a mesh, and there are exactly that ma
   assert.equal(meshNodes.length, keys.length);
 });
 
-test('each prop stays under 6000 triangles', () => {
+test('each prop stays under its triangle budget (5000 by default, a tree\'s more)', () => {
   for (const n of meshNodes) {
     let tris = 0;
     for (const p of pack.meshes[n.mesh!]!.primitives) {
       assert.ok(p.indices !== undefined, `${n.name} has a non-indexed primitive`);
       tris += pack.accessors[p.indices]!.count / 3;
     }
-    assert.ok(tris < 6000, `${n.name} has ${tris} triangles`);
+    const budget = (JSON.parse(readFileSync(new URL('blender/furniture.json', root), 'utf8')).pieces[n.name!]?.tris ?? 5000) + 1000;
+    assert.ok(tris < budget, `${n.name} has ${tris} triangles, its budget ${budget}`);
   }
 });
 
@@ -62,8 +63,8 @@ test('every image in the pack is a JPEG', () => {
   for (const i of pack.images ?? []) assert.equal(i.mimeType, 'image/jpeg');
 });
 
-test('the pack file is under 12 MB', () => {
-  assert.ok(statSync(new URL(PACK, root)).size < 12 * 1024 * 1024);
+test('the pack file is under 20 MB', () => {
+  assert.ok(statSync(new URL(PACK, root)).size < 20 * 1024 * 1024);
 });
 
 test('TEAM_COLORS are the first team color of each yazilim office, in order', () => {

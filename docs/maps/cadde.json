@@ -23,6 +23,7 @@
     "z": -6.6,
     "rotY": 0,
     "dais": null,
+    "hips": 0.62,
     "label": "☕ Senin koltuğun"
   },
   "herald": {
@@ -62,9 +63,9 @@
     }
   },
   "council": {
-    "x": 0,
-    "z": 14.5,
-    "rotY": 3.1416
+    "x": 19,
+    "z": -33.2,
+    "rotY": 0
   },
   "boards": {
     "issues": {
@@ -162,6 +163,8 @@
     {"kind":"counter","x":-4.2,"z":-9.4,"width":4,"rotY":0},
     {"kind":"dispenser","x":4.2,"z":-9.6,"rotY":0},
     {"kind":"gong","x":6.6,"z":-6.4,"rotY":-1.5708},
+    {"kind":"parasol","x":-3.6,"z":14.5},
+    {"kind":"parasol","x":3.6,"z":14.5},
     {"kind":"bench","x":-7.8,"z":18.5,"rotY":1.5708},
     {"kind":"bench","x":7.8,"z":18.5,"rotY":1.5708},
     {"kind":"planter","x":-4.6,"z":30,"width":3.2},

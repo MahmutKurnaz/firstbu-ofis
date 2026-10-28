@@ -46,6 +46,20 @@ Kaynaklar: [desk-din](https://yaasa.com/en/blogs/yaasa-blog/schreibtisch-masse),
 | `kitaplik` | ofis | 0.90 × 0.33 × 1.83 | — | Office bookcase: 1.83 m (72 in, five shelves), 76-107 cm wide, 30-38 cm (12-15 in) deep. | [bookcase-of2go](https://www.officefurniture2go.com/answers/bookcases-shelving/what-are-the-standard-sizes-for-an-office-bookcase.html) | kaynaklı |
 | `fikus` | ofis | 0.90 × 0.90 × 1.50 | — | Indoor fiddle-leaf fig: 1.2-1.8 m. (Common practice.) | — | kısmen |
 | `toplanti-sandalye` | ofis | 0.60 × 0.60 × 0.92 | oturak 46 cm | Meeting chair: seat 43-53 cm, back to about 0.9 m. | [chair-branch](https://branchfurniture.com/cdn/shop/files/specs-open-box-task-chair.pdf), [chair-zoro](https://www.zoro.com/i/G6706161/) | kaynaklı |
+| `agac-genis` | cadde | 3.00 × 3.00 × 4.50 | — | Broad street tree, 4.5 m (planted stock 3-3.6 m, grows on); its bed a little wider than a 1.5 m pit. | [tree-honolulu](https://www.honolulu.gov/dpp/street-tree-standards/), [tree-sydney](https://meetings.cityofsydney.nsw.gov.au/documents/s67913/Attachment), [tree-stock](https://iris.londoncouncils.gov.uk/viewer/tree-caliper-size-chart.html) | kaynaklı |
+| `agac-ince` | cadde | 1.60 × 1.60 × 4.80 | — | Columnar street tree, 4.8 m and slim, for the narrow edges. | [tree-honolulu](https://www.honolulu.gov/dpp/street-tree-standards/), [tree-sydney](https://meetings.cityofsydney.nsw.gov.au/documents/s67913/Attachment), [tree-stock](https://iris.londoncouncils.gov.uk/viewer/tree-caliper-size-chart.html) | kaynaklı |
+| `cali` | cadde | 0.90 × 0.90 × 1.00 | — | Boxwood ball in a small stone planter, 1.0 m. (Common practice.) | [planter-pots](https://potsplantersandmore.com/buying-guides/commercial-planter-sizing/) | kısmen |
+| `cop-kutusu` | cadde | 0.50 × 0.50 × 0.95 | — | Street litter bin, about 0.9-1.0 m high, 0.4-0.5 m across. (Common practice.) | — | kısmen |
+| `hidrant` | cadde | 0.45 × 0.40 × 0.80 | — | Fire hydrant, about 0.75-0.9 m above the pavement. (Common practice.) | — | kısmen |
+| `kafe-koltuk` | cadde | 0.80 × 0.80 × 0.82 | oturak 46 cm | Café armchair: seat 43-48 cm, 0.8 m across. | [sofa-castlery](https://www.castlery.com/us/blog/sofa-sizes-and-dimensions), [chair-branch](https://branchfurniture.com/cdn/shop/files/specs-open-box-task-chair.pdf) | kaynaklı |
+| `kiosk` | cadde | 0.90 × 0.70 × 1.85 | — | Self-service drinks kiosk, like a vending cabinet, 1.85 m. (No standard found.) | [machine-ggm](https://www.ggmgastro.com/en-gb-eur/commercial-bean-to-cup-coffee-machine-16-drink-options-5-touchscreen-kvacb) | kısmen |
+| `gong` | cadde | 2.00 × 0.70 × 2.20 | — | Ceremonial gong on its frame: a 2.2 m frame, a disc 0.9 m across. (No standard: common practice.) | — | kısmen |
+| `kapi` | cadde | 7.00 × 0.60 × 4.60 | — | Street gateway: 7 m between its posts, 4.6 m high, clear of vehicles (4.5 m). (Common practice.) | — | kısmen |
+| `konsey-masasi` | cadde | 2.20 × 2.20 × 0.76 | üst 76 cm | Round meeting table for five or six: 2.2 m across, 76 cm high. | [conference-of2go](https://www.officefurniture2go.com/answers/conference-tables/what-size-conference-table-for-10-people.html), [desk-din](https://yaasa.com/en/blogs/yaasa-blog/schreibtisch-masse) | kaynaklı |
+| `kursu` | cadde | 0.60 × 0.50 × 1.10 | — | Standing lectern / kiosk top: 1.0-1.2 m. (Common practice.) | — | kısmen |
+| `pano-cercevesi` | cadde | 3.30 × 0.12 × 2.10 | — | Wall information board: 3.3 x 2.1 m, the street boards (shared/maps/cadde.ts). | — | kısmen |
+| `buzdolabi` | cadde | 0.70 × 0.70 × 1.90 | — | Glass-door beverage fridge: 1.8-2.0 m. (Common practice.) | — | kısmen |
+| `menu-sehpasi` | cadde | 0.60 × 0.70 × 1.00 | — | Sidewalk A-frame menu board: about 1.0 m. (Common practice.) | — | kısmen |
 
 "Kaynaklı": ölçü, listelenen sayfalardaki aralıktan seçildi. "Kısmen": bir standart bulunamadı, yaygın bir ölçü alındı (sayfada belirtildi).
 
