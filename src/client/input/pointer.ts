@@ -177,7 +177,7 @@ export function installPointer(ctx: Ctx, core: CoreState, parts: PointerParts) {
     const aim = aimedAt(ndc, 2.5);
     if (!aim) return;
     if (!aim.near) {
-      toast('Walk closer to that first');
+      toast('Önce ona biraz yaklaş');
       return;
     }
     use(aim.it, 'E', noteUnder(aim));

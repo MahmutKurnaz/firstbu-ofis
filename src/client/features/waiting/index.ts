@@ -34,12 +34,12 @@ export function installWaiting(ctx: Ctx, core: CoreState, parts: Pick<Parts, 'wo
     nextToast?.remove();
     if (!w || !goToWorker(w.id)) {
       const other = store.floors.find((f) => f.id !== store.floor && f.waiting > 0);
-      nextToast = toast(other ? `🛗 Nobody's waiting on this floor. ${other.waiting} on the ${other.name} floor: take the elevator` : '👍 Nobody is waiting on you');
+      nextToast = toast(other ? `🛗 Bu katta kimse beklemiyor. ${other.name} katında ${other.waiting} kişi var: asansöre bin` : '👍 Seni bekleyen yok');
       return;
     }
     const waiting = waitingInOrder(store.workers.values());
-    const of = waiting.length > 1 ? ` (${waiting.findIndex((x) => x.id === w.id) + 1} of ${waiting.length})` : '';
-    nextToast = toast(`${w.status === 'needs_input' ? `🙋 ${w.name} needs you` : `✅ ${w.name} is done`}${of}. E opens its terminal`);
+    const of = waiting.length > 1 ? ` (${waiting.findIndex((x) => x.id === w.id) + 1}/${waiting.length})` : '';
+    nextToast = toast(`${w.status === 'needs_input' ? `🙋 ${w.name} seni bekliyor` : `✅ ${w.name} bitirdi`}${of}. Terminali için E`);
   }
 
   /** Puts you behind worker `id`, looking over its shoulder, with any window closed. False when there's no getting there (you're between floors, or it's gone). */

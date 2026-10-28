@@ -54,7 +54,7 @@ export function installTelescope(ctx: Ctx, deps: TelescopeDeps): TelescopeView {
   });
   ctx.interactions.define('telescope', {
     reach: 3.5,
-    hint: () => ({ k: '', parts: [hintTitle('🔭 Office telescope'), aside('overlooks the worker floor'), key('E', 'Look through')] }),
+    hint: () => ({ k: '', parts: [hintTitle('🔭 Ofis teleskobu'), aside('çalışma katına bakar'), key('E', 'Bak')] }),
     use: onE(() => telescope.enter()),
   });
   // Looking through it, the view is the telescope's (once you've moved and the camera's followed), and

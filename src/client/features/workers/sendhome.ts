@@ -37,7 +37,7 @@ const FEET = 0.07;
 const BEHIND = 0.8;
 /** The most escorts out at once: anyone else sent home meanwhile waits for one. */
 const GUARDS = 4;
-const FAREWELLS = ['😢 bye, everyone', '🥲 it was fun', '📦 welp', '😞 cleaning out my desk', '🥺 but my PR…'];
+const FAREWELLS = ['😢 hoşça kalın', '🥲 eğlenceliydi', '📦 eh işte', '😞 masamı boşaltıyorum', '🥺 ama PR’ım…'];
 
 export class Sendoffs {
   private list: Sendoff[] = [];

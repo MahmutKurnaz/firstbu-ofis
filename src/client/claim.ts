@@ -11,23 +11,23 @@ function fail(msg: string) {
 }
 
 async function claim() {
-  if (!token) return fail('This link is missing its claim token.');
+  if (!token) return fail('Bu bağlantıda talep kodu eksik.');
   try {
     const res = await fetch('/api/claim', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ token }) });
     const body = await res.json().catch(() => ({}));
-    if (!res.ok) return fail(body.error ?? 'Could not unlock the office.');
-    $('sub').textContent = 'One last thing before you walk in:';
+    if (!res.ok) return fail(body.error ?? 'Ofisin kilidi açılamadı.');
+    $('sub').textContent = 'İçeri girmeden önce son bir şey:';
     $('pw').textContent = body.password;
     $('reveal').hidden = false;
   } catch {
-    fail('Server unreachable.');
+    fail('Sunucuya ulaşılamıyor.');
   }
 }
 
 $('copy').addEventListener('click', async () => {
   try {
     await navigator.clipboard.writeText($('pw').textContent ?? '');
-    $('copy').textContent = 'Copied ✓';
+    $('copy').textContent = 'Kopyalandı ✓';
   } catch {
     getSelection()?.selectAllChildren($('pw'));
   }

@@ -19,8 +19,8 @@ const EJECT = { open: 0.5, step: 0.6, seal: 0.5, wait: 1.8, part: 0.22, blow: 5.
 /** A worker's middle is this far above its feet (see adrift.ts). */
 const MIDDLE = 0.45;
 
-const PLEAS = ['😨 Wait, wait, wait!', '🥺 Let’s talk about this!', '😰 I’ll fix the tests!', '🙏 One more chance!', '😳 Is this thing on?', '🚪 Hello? The door?'];
-const CRIES = ['😱 AAAAAAH!', '😵 NOOOoooo…', '🫨 WHOAAAA!', '😭 I regret nothiiing!', '🚀 Wheeeee!', '🫠 Tell my PR I loved it!'];
+const PLEAS = ['😨 Dur, dur, dur!', '🥺 Konuşalım şunu!', '😰 Testleri düzeltirim!', '🙏 Bir şans daha!', '😳 Bu şey açık mı?', '🚪 Alo? Kapı?'];
+const CRIES = ['😱 AAAAAAH!', '😵 HAYIIIIR…', '🫨 VAAAAY!', '😭 Hiçbir şeye pişman değiliiim!', '🚀 Yuhuuuu!', '🫠 PR’ıma onu sevdiğimi söyleyin!'];
 
 /** Whose turn it is in each airlock: one at a time. */
 const using = new WeakMap<AirlockView, string>();

@@ -32,17 +32,17 @@ export function openLabels(kind: 'issue' | 'pull', it: GhIssue | GhPull, net: Ne
   /** Each row and the text the filter looks in. */
   const rows = new Map<HTMLElement, string>();
 
-  const filter = h('input', { type: 'text', placeholder: 'Filter labels…', 'aria-label': 'Filter labels' }) as HTMLInputElement;
+  const filter = h('input', { type: 'text', placeholder: 'Etiketleri filtrele…', 'aria-label': 'Etiketleri filtrele' }) as HTMLInputElement;
   const list = h('ul.gh-labels');
   const none = h('p.gh-quiet.hidden');
   const result = h('div.gh-merge-result.hidden');
   const summary = h('span.grow');
-  const cancel = h('button.btn', { type: 'button' }, 'Cancel');
-  const save = h('button.btn.primary', { type: 'button' }, '🏷️ Save labels');
+  const cancel = h('button.btn', { type: 'button' }, 'Vazgeç');
+  const save = h('button.btn.primary', { type: 'button' }, '🏷️ Etiketleri kaydet');
   const el = h(
     'div.modal.gh-merge.gh-labeler',
-    { role: 'dialog', 'aria-label': `Labels on ${noun} #${it.number}` },
-    h('header', {}, h('h2', {}, `🏷️ Labels on ${noun} #${it.number}`)),
+    { role: 'dialog', 'aria-label': `${noun} #${it.number} etiketleri` },
+    h('header', {}, h('h2', {}, `🏷️ ${noun} #${it.number} etiketleri`)),
     h('div.body', {}, h('p.gh-merge-title', {}, it.title), filter, list, none, result),
     h('footer', {}, summary, cancel, save),
   );
@@ -51,8 +51,8 @@ export function openLabels(kind: 'issue' | 'pull', it: GhIssue | GhPull, net: Ne
   const sync = () => {
     const { add, remove } = changes();
     save.disabled = busy || (!add.length && !remove.length);
-    save.textContent = busy ? 'Saving…' : '🏷️ Save labels';
-    summary.textContent = add.length || remove.length ? [...add.map((l) => `+${l}`), ...remove.map((l) => `−${l}`)].join('  ') : `${on.size} label${on.size === 1 ? '' : 's'} on it`;
+    save.textContent = busy ? 'Kaydediliyor…' : '🏷️ Etiketleri kaydet';
+    summary.textContent = add.length || remove.length ? [...add.map((l) => `+${l}`), ...remove.map((l) => `−${l}`)].join('  ') : `${on.size} etiket var`;
     for (const box of list.querySelectorAll('input')) box.disabled = busy;
   };
   const applyFilter = () => {
@@ -66,7 +66,7 @@ export function openLabels(kind: 'issue' | 'pull', it: GhIssue | GhPull, net: Ne
     const empty = !!repo && !shown;
     none.classList.toggle('hidden', !empty);
     if (empty)
-      none.replaceChildren(q ? `No labels match “${filter.value.trim()}”. ` : 'This repository has no labels yet. ', h('a', { href: manage, target: '_blank', rel: 'noopener noreferrer' }, 'Make one on GitHub ↗'));
+      none.replaceChildren(q ? `“${filter.value.trim()}” ile eşleşen etiket yok. ` : 'Bu depoda henüz etiket yok. ', h('a', { href: manage, target: '_blank', rel: 'noopener noreferrer' }, 'GitHub\'da oluştur ↗'));
   };
   const row = (l: GhLabel) => {
     const box = h('input', { type: 'checkbox' }) as HTMLInputElement;
@@ -89,7 +89,7 @@ export function openLabels(kind: 'issue' | 'pull', it: GhIssue | GhPull, net: Ne
     const rest = (repo ?? []).filter((l) => !had.has(l.name)).sort(byName);
     list.replaceChildren(...[...mine, ...rest].map(row));
     if (error) list.append(h('li', {}, errorBox(error, load)));
-    else if (!repo) list.append(h('li', {}, spinnerRow("Loading the repo's labels…")));
+    else if (!repo) list.append(h('li', {}, spinnerRow('Deponun etiketleri yükleniyor…')));
     applyFilter();
     sync();
   };
@@ -117,18 +117,18 @@ export function openLabels(kind: 'issue' | 'pull', it: GhIssue | GhPull, net: Ne
     if (busy || (!add.length && !remove.length)) return;
     busy = true;
     result.className = 'gh-merge-result';
-    result.replaceChildren(h('span.spinner'), 'Saving the labels on GitHub…');
+    result.replaceChildren(h('span.spinner'), 'Etiketler GitHub\'da kaydediliyor…');
     sync();
     labelWaiters.set(key, (msg) => {
       settle();
-      if (!msg.labels) return fail(msg.error ?? 'GitHub did not take the labels');
+      if (!msg.labels) return fail(msg.error ?? 'GitHub etiketleri almadı');
       modal.close();
       onSaved?.(msg.labels);
     });
     // The office drops messages while it's disconnected, and then no answer comes.
     timer = window.setTimeout(() => {
       settle();
-      fail('No answer from the office. Look at the board to see whether the labels changed before saving again.');
+      fail('Ofisten yanıt gelmedi. Tekrar kaydetmeden önce etiketlerin değişip değişmediğine panodan bak.');
     }, 45_000);
     net.send({ t: 'gh.labels', kind, number: it.number, add, remove });
   };
@@ -152,5 +152,5 @@ export function openLabels(kind: 'issue' | 'pull', it: GhIssue | GhPull, net: Ne
 /** The button that opens the label picker, after an issue's or PR's labels. */
 export function labelButton(kind: 'issue' | 'pull', it: () => GhIssue | GhPull, net: Net, onSaved: (labels: GhLabel[]) => void) {
   const has = it().labels.length > 0;
-  return h('button.btn.gh-label-edit', { type: 'button', title: 'Change the labels', 'aria-label': 'Change the labels', onclick: () => openLabels(kind, it(), net, onSaved) }, has ? '🏷️ Edit' : '🏷️ Add labels');
+  return h('button.btn.gh-label-edit', { type: 'button', title: 'Etiketleri değiştir', 'aria-label': 'Etiketleri değiştir', onclick: () => openLabels(kind, it(), net, onSaved) }, has ? '🏷️ Düzenle' : '🏷️ Etiket ekle');
 }

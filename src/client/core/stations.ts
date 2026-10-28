@@ -7,9 +7,9 @@ import { noOutline } from './outline';
 
 /** What each board agent is for: its board's icon, what it offers on the card over its head, and an example ask. */
 export const STATION_INFO: Record<StationKind, { icon: string; offer: string; does: string; example: string }> = {
-  issues: { icon: '📌', offer: 'Ask me about issues', does: 'I file, find, triage, label and close them', example: 'File an issue: the dog walks straight through the jukebox' },
-  pulls: { icon: '🔀', offer: 'Ask me about PRs', does: 'I sum up, review, comment on and merge them', example: 'Review the newest PR and tell me if it’s ready to merge' },
-  queue: { icon: '📋', offer: 'Ask me to queue work', does: 'I turn it into tasks for fresh workers', example: 'Queue every open bug issue, most important first' },
+  issues: { icon: '📌', offer: 'Bana issue’ları sor', does: 'Açarım, bulurum, ayıklarım, etiketlerim, kapatırım', example: 'Bir issue aç: köpek müzik kutusunun içinden geçip gidiyor' },
+  pulls: { icon: '🔀', offer: 'Bana PR’ları sor', does: 'Özetlerim, incelerim, yorum yapar, birleştiririm', example: 'En yeni PR’ı incele, birleştirmeye hazır mı söyle' },
+  queue: { icon: '📋', offer: 'Bana iş kuyruğa attır', does: 'Onu yeni çalışanlara görev yaparım', example: 'Açık her bug issue’sunu kuyruğa al, en önemlisi başta' },
 };
 
 /** A board agent waiting by its board before anyone has asked it anything (see buildKiosk), and where. */

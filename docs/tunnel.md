@@ -46,7 +46,7 @@ curl -fsSL https://raw.githubusercontent.com/AgentSystemLabs/agent-office/main/i
 $env:AGENT_OFFICE_INSTALL_ONLY = 1; irm https://raw.githubusercontent.com/AgentSystemLabs/agent-office/main/install.ps1 | iex
 ```
 
-The office it talks to has to be new enough to list its workers' servers. If it isn't, the command says so: upgrade the office (**⬆️ Upgrade the office** in the **☰** menu, or the deploy script's `update`).
+The office it talks to has to be new enough to list its workers' servers. If it isn't, the command says so: upgrade the office (**⬆️ Ofisi yükselt** in the **☰** menu, or the deploy script's `update`).
 
 ## Signing in
 

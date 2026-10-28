@@ -138,7 +138,7 @@ export class Jukebox {
     a.src = url;
     a.addEventListener('loadedmetadata', () => this.seekStream(a));
     a.addEventListener('error', () => {
-      if (this.stream === a) this.onError("📻 The jukebox can't play that stream in your browser");
+      if (this.stream === a) this.onError("📻 Jukebox o yayını tarayıcında çalamıyor");
     });
     this.stream = a;
     this.hearStream();

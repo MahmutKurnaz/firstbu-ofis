@@ -35,8 +35,8 @@ export function installMeeting(ctx: Ctx, parts: Pick<Parts, 'waiting' | 'actions
     hint: () => {
       const m = store.meeting.current;
       const p = m && MEETING_PATTERNS[m.pattern];
-      const what = !m || !p ? 'free' : m.status === 'running' ? `${p.icon} ${p.label} · ${meetingStage(m)}` : `${p.icon} ${p.label} ${m.status === 'done' ? 'done ✅' : 'stopped ⛔'}`;
-      return { k: what, parts: [hintTitle('🤝 Meeting room'), aside(clip(what, 50)), key('E', m?.status === 'running' ? 'See how it’s going' : m ? 'See it / call a meeting' : 'Call a meeting')] };
+      const what = !m || !p ? 'boş' : m.status === 'running' ? `${p.icon} ${p.label} · ${meetingStage(m)}` : `${p.icon} ${p.label} ${m.status === 'done' ? 'bitti ✅' : 'durdu ⛔'}`;
+      return { k: what, parts: [hintTitle('🤝 Toplantı odası'), aside(clip(what, 50)), key('E', m?.status === 'running' ? 'Nasıl gidiyor, gör' : m ? 'Gör / toplantı çağır' : 'Toplantı çağır')] };
     },
     use: onE(() => showMeeting()),
   });

@@ -40,7 +40,7 @@ function elsewhere(s: ServicesState): boolean {
 
 function describe(svc: ServiceInfo): { who: string; color: string; branch?: string } {
   const w = store.workers.get(svc.workerId);
-  return { who: w?.name ?? 'A worker', color: w?.color ?? '#8d99ae', branch: w?.worktree?.branch };
+  return { who: w?.name ?? 'Bir çalışan', color: w?.color ?? '#8d99ae', branch: w?.worktree?.branch };
 }
 
 export function openServices() {
@@ -48,13 +48,13 @@ export function openServices() {
   let picked: number | null = null;
   let copied: number | null = null;
   const body = h('div.body.team.services');
-  const close = h('button.btn.close', { 'aria-label': 'Close' }, '✕');
+  const close = h('button.btn.close', { 'aria-label': 'Kapat' }, '✕');
   const tabs = h('div.os-tabs');
-  const footer = h('footer', {}, h('span.grow', {}, 'Tunnels go through the office, so the office password still guards every page. Keep the terminal open while you look.'));
+  const footer = h('footer', {}, h('span.grow', {}, 'Tüneller ofisten geçer, yani ofis parolası her sayfayı hâlâ korur. Bakarken terminali açık tut.'));
   const el = h(
     'div.modal',
-    { role: 'dialog', 'aria-label': 'Services', style: 'width:min(760px,100%)' },
-    h('header', {}, h('h2', {}, '🌐 Services'), tabs, close),
+    { role: 'dialog', 'aria-label': 'Servisler', style: 'width:min(760px,100%)' },
+    h('header', {}, h('h2', {}, '🌐 Servisler'), tabs, close),
     body,
     footer,
   );
@@ -75,15 +75,15 @@ export function openServices() {
       ),
     );
     footer.firstElementChild!.textContent = direct
-      ? 'Every link goes through the office, so the office sign-in still guards every page.'
-      : 'Tunnels go through the office, so the office password still guards every page. Keep the terminal open while you look.';
+      ? 'Her link ofisten geçer, yani ofis girişi her sayfayı hâlâ korur.'
+      : 'Tüneller ofisten geçer, yani ofis parolası her sayfayı hâlâ korur. Bakarken terminali açık tut.';
     body.replaceChildren(
       h(
         'p.note',
         { style: 'margin:0 0 12px' },
         direct
-          ? 'Web servers the workers are running. Each has its own link on your Tailscale network: open it, or click the row to copy it for someone else on the network.'
-          : 'Web servers the workers are running. Click one to copy a command that opens it on your computer — run it in a terminal and the page opens by itself.',
+          ? 'Çalışanların çalıştırdığı web sunucuları. Her birinin Tailscale ağında kendi linki var: aç ya da satıra tıklayıp ağdaki başka biri için kopyala.'
+          : 'Çalışanların çalıştırdığı web sunucuları. Birine tıkla, onu kendi bilgisayarında açan bir komut kopyalansın — terminalde çalıştır, sayfa kendiliğinden açılır.',
       ),
     );
     if (!direct && elsewhere(s)) {
@@ -91,17 +91,17 @@ export function openServices() {
         h(
           'div.svc-auto',
           {},
-          h('p', {}, '⚡ Open them all, by themselves'),
+          h('p', {}, '⚡ Hepsini kendiliğinden aç'),
           h(
             'p.note',
             {},
-            'Run this on your computer and leave it running. Every server a worker starts opens on the same port there (',
+            'Bunu bilgisayarında çalıştır ve açık bırak. Bir çalışanın başlattığı her sunucu orada aynı portta açılır (',
             h('code', {}, 'localhost:5173'),
-            ' is the worker’s), and closes when the worker stops it. It needs the ',
+            ' çalışanınki), çalışan durdurunca da kapanır. Bilgisayarında ',
             h('code', {}, 'agent-office'),
-            ' command on your computer: the install line in the README.',
+            ' komutu olmalı: README\'deki kurulum satırı.',
           ),
-          h('div.cmd', {}, h('pre', {}, autoTunnel()), copyButton('Copy', () => autoTunnel())),
+          h('div.cmd', {}, h('pre', {}, autoTunnel()), copyButton('Kopyala', () => autoTunnel())),
         ),
       );
     }
@@ -110,8 +110,8 @@ export function openServices() {
         h(
           'div.svc-empty',
           {},
-          h('p', {}, 'Nothing running yet.'),
-          h('p.note', {}, 'When a worker starts a web server — ', h('code', {}, 'npm run dev'), ', a preview build, ', h('code', {}, 'python -m http.server'), ' — it shows up here within a few seconds. Try prompting: “start the dev server in the background so we can review it”.'),
+          h('p', {}, 'Henüz çalışan bir şey yok.'),
+          h('p.note', {}, 'Bir çalışan web sunucusu başlattığında — ', h('code', {}, 'npm run dev'), ', a preview build, ', h('code', {}, 'python -m http.server'), ' — birkaç saniye içinde burada görünür. Şunu dene: “dev sunucusunu arka planda başlat, inceleyelim”.'),
         ),
       );
       return;
@@ -120,18 +120,18 @@ export function openServices() {
     for (const svc of s.items) {
       const { who, color, branch } = describe(svc);
       const on = picked === svc.port;
-      const title = direct ? `Open ${serviceUrl(svc.port)}` : `Open ${serviceUrl(svc.port)} (needs the tunnel, unless the office runs on this computer)`;
-      const open = h('a.btn', { href: serviceUrl(svc.port), target: '_blank', rel: 'noopener', title }, 'Open ↗');
+      const title = direct ? `${serviceUrl(svc.port)} adresini aç` : `${serviceUrl(svc.port)} adresini aç (ofis bu bilgisayarda çalışmıyorsa tünel gerekir)`;
+      const open = h('a.btn', { href: serviceUrl(svc.port), target: '_blank', rel: 'noopener', title }, 'Aç ↗');
       open.addEventListener('click', (e) => e.stopPropagation());
       const li = h(
         'li',
-        { class: on ? 'on' : '', tabindex: 0, role: 'button', title: direct ? 'Copy the link' : 'Copy the tunnel command' },
+        { class: on ? 'on' : '', tabindex: 0, role: 'button', title: direct ? 'Linki kopyala' : 'Tünel komutunu kopyala' },
         h('span.dot', { style: `background:${color}` }),
         h(
           'div.svc-main',
           {},
           h('div.svc-title', {}, svc.title || svc.command),
-          h('div.svc-meta', {}, [who, branch ? `🌿 ${branch}` : '', svc.title ? svc.command : '', `started ${timeAgo(svc.since)}`].filter(Boolean).join(' · ')),
+          h('div.svc-meta', {}, [who, branch ? `🌿 ${branch}` : '', svc.title ? svc.command : '', `başladı: ${timeAgo(svc.since)}`].filter(Boolean).join(' · ')),
         ),
         h('span.svc-port', {}, `:${svc.port}`),
         open,
@@ -151,25 +151,25 @@ export function openServices() {
     if (svc && direct) {
       body.append(
         copied === svc.port
-          ? h('p.team-status.ok', {}, `✅ Copied ${serviceUrl(svc.port)}. Anyone on the network who's signed in to the office can open it.`)
-          : h('p.team-status', {}, `The link for :${svc.port}: ${serviceUrl(svc.port)}`),
+          ? h('p.team-status.ok', {}, `✅ ${serviceUrl(svc.port)} kopyalandı. Ağda ofise giriş yapmış herkes açabilir.`)
+          : h('p.team-status', {}, `:${svc.port} için link: ${serviceUrl(svc.port)}`),
       );
     } else if (svc) {
       const cmd = serviceTunnel(s, svc.port, os);
       body.append(
         copied === svc.port
-          ? h('p.team-status.ok', {}, `✅ Copied. Paste it in a terminal: it opens ${serviceUrl(svc.port)} once the tunnel is up.`)
-          : h('p.team-status', {}, `The command for :${svc.port} — run it in a terminal, and it opens ${serviceUrl(svc.port)}.`),
-        h('div.cmd', {}, h('pre', {}, cmd), copyButton('Copy', () => cmd)),
+          ? h('p.team-status.ok', {}, `✅ Kopyalandı. Terminale yapıştır: tünel açılınca ${serviceUrl(svc.port)} adresini açar.`)
+          : h('p.team-status', {}, `:${svc.port} için komut — terminalde çalıştır, ${serviceUrl(svc.port)} adresini açar.`),
+        h('div.cmd', {}, h('pre', {}, cmd), copyButton('Kopyala', () => cmd)),
       );
     } else if (picked !== null) {
-      body.append(h('p.team-status.error', {}, `The server on :${picked} stopped.`));
+      body.append(h('p.team-status.error', {}, `:${picked} üzerindeki sunucu durdu.`));
     }
     if (direct) return;
     body.append(
       s.ssh
-        ? h('p.note', {}, 'It uses the same SSH access as the office. Not invited yourself (you set the office up)? Run ', h('code', {}, `${s.deploy ?? 'deploy/aws.sh'} service <port>`), ' instead.')
-        : h('p.note', {}, 'Replace ', h('code', {}, 'you@your-server'), ' with how you SSH to the office\'s machine. If the office runs on this computer, just click Open.'),
+        ? h('p.note', {}, 'Ofisle aynı SSH erişimini kullanır. Kendin davetli değil misin (ofisi sen kurdun)? Şunu çalıştır: ', h('code', {}, `${s.deploy ?? 'deploy/aws.sh'} service <port>`), '.')
+        : h('p.note', {}, 'Şunu değiştir: ', h('code', {}, 'you@your-server'), ' — ofisin makinesine nasıl SSH yaptığınla. Ofis bu bilgisayarda çalışıyorsa Aç\'a tıklaman yeter.'),
     );
   };
 
@@ -177,7 +177,7 @@ export function openServices() {
   // Keeps "up 5m" fresh.
   const tick = setInterval(render, 30_000);
   const modal = openModal(el, {
-    doing: '🌐 at the services board',
+    doing: '🌐 servis panosunda',
     onClose: () => {
       unsubs.forEach((u) => u());
       clearInterval(tick);

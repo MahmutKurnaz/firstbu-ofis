@@ -16,7 +16,7 @@ import { mesh, toon } from '../../world/toon';
 /** How often (s) how far gone they are is worked out again: it changes over hours. */
 const REFRESH = 2;
 /** What they mutter, now and then, while you're down there with them. */
-const MUTTERS = ['🍞 …bread?', '💧 water…', '🙏 let me out', '😩 I can fix it, I swear', '🐀 hello, rat', '🥶 so cold…', '📜 I’ll write the tests!', '😵 …', '🎵 99 bugs in the code…', '🕯️ is it day?', '😢 I miss my desk', '🔑 psst… the key?'];
+const MUTTERS = ['🍞 …ekmek?', '💧 su…', '🙏 çıkarın beni', '😩 düzeltirim, yemin ederim', '🐀 merhaba, fare', '🥶 çok soğuk…', '📜 testleri yazarım!', '😵 …', '🎵 kodda 99 bug…', '🕯️ gündüz mü oldu?', '😢 masamı özledim', '🔑 psst… anahtar?'];
 /** How close (m) you have to be to hear one. */
 const EARSHOT = 9;
 

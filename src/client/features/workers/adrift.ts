@@ -20,7 +20,7 @@ const MIDDLE = 0.45;
 /** How big they are: as they were at their seats. */
 export const ADRIFT_SCALE = 0.82;
 /** What they say, now and then, while there's breath in them and you're near enough to see. */
-const MUTTERS = ['🥶 so cold…', '👋 hello? anyone?', '🫁 …air?', '🌍 nice view, though', '😩 I can fix it, I swear', '📡 mayday… mayday…', '🧑‍🚀 should’ve worn a suit', '😵 …', '🎵 ground control to…', '📜 I’ll write the tests!'];
+const MUTTERS = ['🥶 çok soğuk…', '👋 alo? kimse var mı?', '🫁 …hava?', '🌍 manzara güzelmiş ama', '😩 düzeltirim, yemin ederim', '📡 mayday… mayday…', '🧑‍🚀 kıyafet giymeliydim', '😵 …', '🎵 yer kontrol, ben…', '📜 testleri yazarım!'];
 const EARSHOT = 34;
 
 const turn = new THREE.Euler();

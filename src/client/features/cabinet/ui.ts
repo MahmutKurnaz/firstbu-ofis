@@ -187,9 +187,9 @@ export class Cabinet {
   private open(mode: 'play' | 'watch') {
     this.mode = mode;
     this.watching = mode === 'watch' ? (store.cabinet.player?.name ?? '') : '';
-    const board = h('canvas', { 'aria-label': mode === 'play' ? GAME : `${this.watching} playing ${GAME}` });
-    const stop = h('button.btn', { type: 'button' }, mode === 'play' ? '✕ Stop playing' : '✕ Stop watching');
-    const tip = mode === 'play' ? '← → move · ↑ turn · ↓ faster · Space drop · C hold · P pause' : `👀 Watching ${this.watching}`;
+    const board = h('canvas', { 'aria-label': mode === 'play' ? GAME : `${this.watching} oynuyor: ${GAME}` });
+    const stop = h('button.btn', { type: 'button' }, mode === 'play' ? '✕ Oyunu bırak' : '✕ İzlemeyi bırak');
+    const tip = mode === 'play' ? '← → hareket · ↑ döndür · ↓ hızlan · Space bırak · C tut · P duraklat' : `👀 İzliyor: ${this.watching}`;
     const call = h('div.cabinet-call.hidden', { role: 'status' });
     const box = h(
       'div.arcade.cabinet',
@@ -300,13 +300,13 @@ export class Cabinet {
         // It can't follow the old game on from where it was, so a new one for the new game it started.
         if (lostGame(this.asked, p.game)) {
           this.newGame();
-          toast("🕹️ The office lost track of your game, so here's a new one");
+          toast("🕹️ Ofis oyununu kaybetti, bu yüzden yeni bir oyun başladı");
         }
         this.asked = '';
         this.game.id = p.game;
       }
     } else if (this.mode === 'watch' && (!p || p.id === store.you || p.name !== this.watching)) {
-      if (!p) toast(`${this.watching} stepped away from the arcade`);
+      if (!p) toast(`${this.watching} atariden ayrıldı`);
       this.modal?.close();
     }
     this.dirty = true;
@@ -338,14 +338,14 @@ export class Cabinet {
     const w = this.waiting;
     el.classList.toggle('hidden', !w);
     if (!w) return el.replaceChildren();
-    const go = h('button.btn.primary', { type: 'button' }, '💬 Open its terminal');
-    const back = h('button.btn', { type: 'button' }, '▶ Carry on');
+    const go = h('button.btn.primary', { type: 'button' }, '💬 Terminalini aç');
+    const back = h('button.btn', { type: 'button' }, '▶ Devam et');
     go.addEventListener('click', () => {
       this.modal?.close();
       this.opts.openTerminal(w.id);
     });
     back.addEventListener('click', () => this.resume());
-    el.replaceChildren(h('span', {}, `🙋 ${w.name} needs input${deskOf(w)}`), go, back);
+    el.replaceChildren(h('span', {}, `🙋 ${w.name} yardım bekliyor${deskOf(w)}`), go, back);
   }
 
   /** Nobody's game on the screen, just the high scores. */
@@ -365,16 +365,16 @@ export class Cabinet {
         player: store.profile.name,
         scores: c.scores,
         mine: g.id,
-        note: this.waiting ? `${this.waiting.name} needs you${deskOf(this.waiting)}` : 'P to carry on',
-        prompt: rank ? `🏆 #${rank} on the table! Enter: again` : 'Enter to play again',
+        note: this.waiting ? `${this.waiting.name} seni bekliyor${deskOf(this.waiting)}` : 'Devam için P',
+        prompt: rank ? `🏆 Tabloda #${rank}! Enter: tekrar` : 'Tekrar için Enter',
         t,
       };
     }
     if (c.player && c.player.id !== store.you) {
-      return { frame: store.cabinetFrame, player: c.player.name, scores: c.scores, mine: c.player.game, note: 'Back in a moment', prompt: store.cabinetFrame ? undefined : `▶ ${c.player.name.toUpperCase()}`, t };
+      return { frame: store.cabinetFrame, player: c.player.name, scores: c.scores, mine: c.player.game, note: 'Birazdan döner', prompt: store.cabinetFrame ? undefined : `▶ ${c.player.name.toUpperCase()}`, t };
     }
     const left = this.leftAt !== null;
-    return { frame: null, scores: c.scores, mine: g?.id, prompt: left ? 'PRESS E TO CARRY ON' : 'PRESS E TO PLAY', t };
+    return { frame: null, scores: c.scores, mine: g?.id, prompt: left ? 'DEVAM İÇİN E’YE BAS' : 'OYNAMAK İÇİN E’YE BAS', t };
   }
 
   /** Draws the screen up close while you play or watch, and on the cabinet otherwise (the close one covers it). */
@@ -401,5 +401,5 @@ export function lostGame(asked: string, id: string): boolean {
 /** " at Desk 3", or nothing when it's not at a desk here. */
 function deskOf(w: WorkerInfo): string {
   const d = store.plan().byId.get(w.deskId);
-  return d ? ` at ${d.station ? `the ${d.label}` : d.label}` : '';
+  return d ? ` · ${d.label}` : '';
 }

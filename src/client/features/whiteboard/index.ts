@@ -20,7 +20,7 @@ export function installWhiteboard(ctx: Ctx) {
     reach: 7,
     hint: () => {
       const names = store.drawing.flatMap((id) => (id === store.you ? [] : (store.peers.get(id)?.name ?? []))).join(', ');
-      return { k: names, parts: [hintTitle('📝 Whiteboard'), aside(names ? `✏️ ${clip(names, 40)} drawing` : 'draw together, live'), key('E', names ? 'Join in' : 'Draw')] };
+      return { k: names, parts: [hintTitle('📝 Beyaz tahta'), aside(names ? `✏️ ${clip(names, 40)} çiziyor` : 'birlikte, canlı çiz'), key('E', names ? 'Katıl' : 'Çiz')] };
     },
     use: onE(() => openWhiteboard(ctx.net)),
   });

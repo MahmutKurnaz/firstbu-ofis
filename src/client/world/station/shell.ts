@@ -168,7 +168,7 @@ export function buildShell(kit: Kit, pal: { hull: string; deck: string }): { doo
   band.position.set(0, h + 0.15, -0.16);
   band.rotation.y = Math.PI;
   frame.add(band);
-  const sign = textPlane('🚀 Docking port', { bg: '#0f1a26', color: '#cfeeff', border: '#3a5a78', size: 56 });
+  const sign = textPlane('🚀 Kenetlenme kapısı', { bg: '#0f1a26', color: '#cfeeff', border: '#3a5a78', size: 56 });
   sign.scale.multiplyScalar(0.9);
   sign.position.set(0, h + 0.75, -0.06);
   sign.rotation.y = Math.PI;

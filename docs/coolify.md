@@ -78,7 +78,7 @@ deploy/coolify.sh reset-password       # new password, shown once; signs everyon
 deploy/coolify.sh ssh | logs           # a shell in the container / follow the office's logs
 ```
 
-**Updating.** Pull the latest agent-office into your clone (or commit your own changes), push, and run `deploy/coolify.sh update`. It pins the application to the new HEAD, and Coolify builds it (or, when it has that commit's image already, just starts it again). **⬆️ Upgrade the office** in the **☰** menu is for servers set up with `deploy/provision.sh`: a container's code comes from its image. Automatic deploys on push are off, since the script pins the commit. Coolify's own **Redeploy** and **Restart** buttons work too, for the pinned commit.
+**Updating.** Pull the latest agent-office into your clone (or commit your own changes), push, and run `deploy/coolify.sh update`. It pins the application to the new HEAD, and Coolify builds it (or, when it has that commit's image already, just starts it again). **⬆️ Ofisi yükselt** in the **☰** menu is for servers set up with `deploy/provision.sh`: a container's code comes from its image. Automatic deploys on push are off, since the script pins the commit. Coolify's own **Redeploy** and **Restart** buttons work too, for the pinned commit.
 
 **Claude sign-in.** Pass `--claude-token "$(claude setup-token)"` (your Claude subscription) or `--anthropic-api-key <key>`; either becomes a runtime environment variable of the application. Or pass neither, and run `/login` in the first worker's terminal: that sign-in is kept on the volume.
 

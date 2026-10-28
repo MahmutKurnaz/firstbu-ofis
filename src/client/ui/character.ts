@@ -133,13 +133,13 @@ class Preview {
  */
 export function openCharacter(first: boolean, onSave: (p: Profile) => void) {
   const pick: Profile = { ...store.profile, look: { ...store.profile.look } };
-  const canvas = h('canvas', { 'aria-label': 'Your character, drag to spin' }) as HTMLCanvasElement;
+  const canvas = h('canvas', { 'aria-label': 'Karakterin, döndürmek için sürükle' }) as HTMLCanvasElement;
   const preview = new Preview(canvas, pick);
 
   // Leave the name blank (or skip this) and you go by the made-up one in the box; 🎲 deals another.
   // Guest is what you were before you picked one, so it isn't a name to keep.
-  const input = h('input', { type: 'text', maxlength: 24, value: pick.name === 'Guest' ? '' : pick.name, placeholder: randomName(), 'aria-label': 'Your name' }) as HTMLInputElement;
-  const reroll = h('button.btn', { type: 'button', title: 'Random name', 'aria-label': 'Random name' }, '🎲');
+  const input = h('input', { type: 'text', maxlength: 24, value: pick.name === 'Guest' ? '' : pick.name, placeholder: randomName(), 'aria-label': 'Adın' }) as HTMLInputElement;
+  const reroll = h('button.btn', { type: 'button', title: 'Rastgele ad', 'aria-label': 'Rastgele ad' }, '🎲');
   reroll.addEventListener('click', () => {
     let name = randomName();
     while (name === input.value || name === input.placeholder) name = randomName();
@@ -152,13 +152,13 @@ export function openCharacter(first: boolean, onSave: (p: Profile) => void) {
   if (account) {
     input.value = account.name;
     input.readOnly = true;
-    input.title = 'Your account name';
+    input.title = 'Hesap adın';
   }
 
-  const skinRow = h('div.swatches', { role: 'radiogroup', 'aria-label': 'Skin tone' });
-  const styleRow = h('div.seg', { role: 'radiogroup', 'aria-label': 'Hair style' });
-  const hairRow = h('div.swatches', { role: 'radiogroup', 'aria-label': 'Hair color' });
-  const shirtRow = h('div.swatches', { role: 'radiogroup', 'aria-label': 'Shirt color' });
+  const skinRow = h('div.swatches', { role: 'radiogroup', 'aria-label': 'Ten rengi' });
+  const styleRow = h('div.seg', { role: 'radiogroup', 'aria-label': 'Saç stili' });
+  const hairRow = h('div.swatches', { role: 'radiogroup', 'aria-label': 'Saç rengi' });
+  const shirtRow = h('div.swatches', { role: 'radiogroup', 'aria-label': 'Tişört rengi' });
 
   const swatch = (color: string, label: string, on: boolean, choose: () => void) =>
     h('button.swatch', { type: 'button', role: 'radio', 'aria-checked': String(on), style: `background:${color}`, class: on ? 'sel' : '', 'aria-label': label, title: label, onclick: choose });
@@ -174,43 +174,43 @@ export function openCharacter(first: boolean, onSave: (p: Profile) => void) {
 
   const paint = () => {
     const { skin, hair, style } = pick.look;
-    skinRow.replaceChildren(...SKIN_TONES.map((c, i) => swatch(c, `Skin tone ${i + 1} of ${SKIN_TONES.length}`, i === skin, () => change({ skin: i }))));
+    skinRow.replaceChildren(...SKIN_TONES.map((c, i) => swatch(c, `Ten rengi ${i + 1} / ${SKIN_TONES.length}`, i === skin, () => change({ skin: i }))));
     styleRow.replaceChildren(
       ...HAIR_STYLES.map((name, i) =>
         h('button.btn', { type: 'button', role: 'radio', 'aria-checked': String(i === style), class: i === style ? 'on' : '', onclick: () => change({ style: i }) }, name),
       ),
     );
     hairRow.replaceChildren(...HAIR_COLORS.map((c, i) => swatch(c, HAIR_COLOR_NAMES[i], i === hair, () => change({ hair: i }))));
-    shirtRow.replaceChildren(...AVATAR_COLORS.map((c) => swatch(c, `Shirt ${c}`, c === pick.color, () => change({}, c))));
+    shirtRow.replaceChildren(...AVATAR_COLORS.map((c) => swatch(c, `Tişört ${c}`, c === pick.color, () => change({}, c))));
   };
   paint();
 
-  const surprise = h('button.btn', { type: 'button', title: 'Random look' }, '🎲 Surprise me');
+  const surprise = h('button.btn', { type: 'button', title: 'Rastgele görünüm' }, '🎲 Şaşırt beni');
   surprise.addEventListener('click', () => change(randomLook(), AVATAR_COLORS[Math.floor(Math.random() * AVATAR_COLORS.length)]));
-  const save = h('button.btn.primary', { type: 'submit' }, first ? 'Enter the office 🚪' : 'Save');
-  const close = h('button.btn.close', { type: 'button', 'aria-label': 'Close', title: first ? 'Skip: go in with this look (Esc)' : 'Close (Esc)' }, '✕');
+  const save = h('button.btn.primary', { type: 'submit' }, first ? 'Ofise gir 🚪' : 'Kaydet');
+  const close = h('button.btn.close', { type: 'button', 'aria-label': 'Kapat', title: first ? 'Atla: bu görünümle gir (Esc)' : 'Kapat (Esc)' }, '✕');
 
   const form = h(
     'form.modal.charsel',
-    { role: 'dialog', 'aria-label': 'Pick your character' },
-    h('header', {}, h('h2', {}, first ? '👋 Pick your character' : '🧍 Your character'), close),
+    { role: 'dialog', 'aria-label': 'Karakterini seç' },
+    h('header', {}, h('h2', {}, first ? '👋 Karakterini seç' : '🧍 Karakterin'), close),
     h(
       'div.body',
       {},
-      h('div.charsel-stage', {}, canvas, h('span.tip', {}, 'Drag to spin')),
+      h('div.charsel-stage', {}, canvas, h('span.tip', {}, 'Döndürmek için sürükle')),
       h(
         'div.charsel-opts',
         {},
-        h('label', {}, 'Your name'),
+        h('label', {}, 'Adın'),
         account ? input : h('div.webhook', {}, input, reroll),
-        account ? h('p.setting-note', {}, `🔑 Signed in as ${account.name}, so that's your name here.`) : null,
-        h('label', {}, 'Skin tone'),
+        account ? h('p.setting-note', {}, `🔑 ${account.name} olarak giriş yaptın, burada adın bu.`) : null,
+        h('label', {}, 'Ten rengi'),
         skinRow,
-        h('label', {}, 'Hair'),
+        h('label', {}, 'Saç'),
         styleRow,
-        h('label', {}, 'Hair color'),
+        h('label', {}, 'Saç rengi'),
         hairRow,
-        h('label', {}, 'Shirt'),
+        h('label', {}, 'Tişört'),
         shirtRow,
       ),
     ),
@@ -228,7 +228,7 @@ export function openCharacter(first: boolean, onSave: (p: Profile) => void) {
   const modal = openModal(form, {
     // A stray click shouldn't skip the first one; ✕ and Esc still do.
     backdropCloses: !first,
-    doing: '🪞 picking a new look',
+    doing: '🪞 yeni görünüm seçiyor',
     onClose: () => {
       preview.dispose();
       // The office only lets you in with a character: skipping it goes in with this one, and the name in the box.

@@ -176,13 +176,13 @@ test('a recognizer that fails says why, once, and is not started again', () => {
   denied.rec.onend?.();
   assert.deepEqual(denied.rec.calls, ['start']);
   assert.equal(denied.log.length, 1);
-  assert.match(denied.log[0], /^end: Dictation needs the microphone/);
+  assert.match(denied.log[0], /^end: Dikte için mikrofon gerekli/);
 
   // A browser with the API but no speech service behind it (Brave) fails as soon as it starts.
   const dead = listening();
   dead.rec.onerror?.({ error: 'network' });
   dead.rec.onend?.();
-  assert.match(dead.log[0], /speech service didn't answer/);
+  assert.match(dead.log[0], /konuşma servisi yanıt vermedi/);
 
   // Cut off by something else listening: it just ends.
   const cut = listening();
@@ -194,7 +194,7 @@ test('a recognizer that fails says why, once, and is not started again', () => {
   FakeRec.failStart = true;
   try {
     const stuck = listening();
-    assert.match(stuck.log[0], /^end: Dictation couldn't start: already started/);
+    assert.match(stuck.log[0], /^end: Dikte başlatılamadı: already started/);
     assert.equal(stuck.log.length, 1);
   } finally {
     FakeRec.failStart = false;
@@ -218,5 +218,5 @@ test('without a recognizer, listening ends at once and says so', () => {
   const log: string[] = [];
   listen({ interim: () => undefined, said: () => undefined, end: (p) => log.push(p ?? '') }, { Ctor: undefined });
   assert.equal(log.length, 1);
-  assert.match(log[0], /no speech recognition/);
+  assert.match(log[0], /yerleşik konuşma tanıma yok/);
 });

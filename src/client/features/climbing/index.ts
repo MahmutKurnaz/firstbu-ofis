@@ -53,7 +53,7 @@ export function installClimbing(ctx: Ctx, deps: ClimbingDeps) {
       else if (kind === 'twirl') sound.twirl();
       else if (kind === 'bonk') {
         sound.bonk();
-        toast(`🔝 ${store.currentFloor()?.name ?? 'This'} is the top floor — the hatch won't budge`);
+        toast(`🔝 ${store.currentFloor()?.name ?? 'Burası'} en üst kat — kapak yerinden oynamıyor`);
       } else if (kind === 'land') {
         sound.poleLanding(speed);
         landed(speed);
@@ -88,7 +88,7 @@ export function installClimbing(ctx: Ctx, deps: ClimbingDeps) {
       ctx.smoke.exhale(at, dir.set(Math.sin(a), 0.15, Math.cos(a)).normalize());
     }
     const f = store.currentFloor();
-    toast(`🚒 Wheee! Down to ${f?.name ?? 'the floor below'}`);
+    toast(`🚒 Vıııy! ${f?.name ?? 'Alt kat'} katına iniyorsun`);
   }
   office.stack.onHatch = (where, open) => ctx.sound.hatch({ x: LADDER.x + 0.3, y: where === 'floor' ? 0 : WALL_HEIGHT, z: LADDER.z }, open);
   // Speed lines round the edge of the screen, sliding down a pole.
@@ -98,7 +98,7 @@ export function installClimbing(ctx: Ctx, deps: ClimbingDeps) {
   /** E at the ladder: onto it, facing the wall. */
   function grabLadder() {
     if (ctx.trip() || climber.active) return;
-    if (!floorThere(1) && !floorThere(-1)) return toast('No other floors yet — add a project in the elevator', 'warn');
+    if (!floorThere(1) && !floorThere(-1)) return toast('Henüz başka kat yok — asansörden bir proje ekle', 'warn');
     if (ctx.player.seat) deps.standUp();
     ctx.activities.stopAll('start');
     deps.stopWalking();
@@ -129,7 +129,7 @@ export function installClimbing(ctx: Ctx, deps: ClimbingDeps) {
       const up = floorThere(1)?.name;
       const down = floorThere(-1)?.name;
       const where = [up && `⬆ ${up}`, down && `⬇ ${down}`].filter(Boolean).join(' · ');
-      return { k: where, parts: [hintTitle('🪜 Ladder'), aside(where || 'no other floors yet'), key('E', 'Climb on')] };
+      return { k: where, parts: [hintTitle('🪜 Merdiven'), aside(where || 'başka kat yok'), key('E', 'Tırman')] };
     },
     use: onE(() => grabLadder()),
   });
@@ -137,11 +137,11 @@ export function installClimbing(ctx: Ctx, deps: ClimbingDeps) {
     reach: 4,
     hint: () => {
       if (office.stack.polesGoDown()) {
-        const down = floorThere(-1)?.name ?? 'the floor below';
-        return { k: `down|${down}`, parts: [hintTitle('🚒 Fire pole'), aside(`down to ${down}`), key('E', 'Slide down!')] };
+        const down = floorThere(-1)?.name ?? 'alt kat';
+        return { k: `down|${down}`, parts: [hintTitle('🚒 İtfaiye direği'), aside(`${down} katına iner`), key('E', 'Kay!')] };
       }
-      const up = floorThere(1)?.name ?? 'upstairs';
-      return { k: `landing|${up}`, parts: [hintTitle('🚒 Fire pole'), aside(`comes down from ${up}`), key('E', 'Twirl')] };
+      const up = floorThere(1)?.name ?? 'üst kat';
+      return { k: `landing|${up}`, parts: [hintTitle('🚒 İtfaiye direği'), aside(`${up} katından iner`), key('E', 'Dön')] };
     },
     use: onE((it) => {
       if (it.pole !== undefined) usePole(it.pole);
@@ -161,12 +161,12 @@ export function installClimbing(ctx: Ctx, deps: ClimbingDeps) {
       const busy = l.waiting || l.auto;
       k = `ladder|${up}|${down}|${atFloor}|${busy}`;
       parts = busy
-        ? [title('🪜 Climbing…')]
-        : [title('🪜 On the ladder'), up ? key('W', `Up to ${up}`) : aside('top floor'), key('S', down ? `Down to ${down}` : atFloor ? 'Step off' : 'Down'), key('E', atFloor ? 'Step off' : 'Let go')];
+        ? [title('🪜 Tırmanıyor…')]
+        : [title('🪜 Merdivende'), up ? key('W', `${up} katına çık`) : aside('en üst kat'), key('S', down ? `${down} katına in` : atFloor ? 'İn' : 'Aşağı'), key('E', atFloor ? 'İn' : 'Bırak')];
     } else {
       const how = climber.sliding;
       k = `pole|${how}`;
-      parts = [title(how === 'twirl' ? '🚒 Wheee!' : '🚒 Wheeeeeee!')];
+      parts = [title(how === 'twirl' ? '🚒 Vıııy!' : '🚒 Vıııııııy!')];
     }
     ctx.hint.draw(el, k, () => parts);
   }

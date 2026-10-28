@@ -148,7 +148,7 @@ export class Reviewed {
 
 // ---- Drawing a file's diff ------------------------------------------------------------------------
 
-export const STATUS_WORD: Record<DiffFile['status'], string> = { A: 'added', D: 'deleted', M: 'modified', R: 'renamed' };
+export const STATUS_WORD: Record<DiffFile['status'], string> = { A: 'eklendi', D: 'silindi', M: 'değişti', R: 'yeniden adlandırıldı' };
 
 /** Lock files and build output: collapsed until asked for, like GitHub does. */
 export function looksGenerated(path: string): boolean {
@@ -193,11 +193,11 @@ export function repliesOf(comments: GhReviewComment[]): Map<number, GhReviewComm
 export function renderFileDiff(f: DiffFile, comments: GhReviewComment[], itemUrl: string): HTMLElement {
   const out = h('div.pd-lines');
   if (f.binary) {
-    out.append(h('div.pd-note', {}, 'Binary file — not shown.'));
+    out.append(h('div.pd-note', {}, 'İkili dosya — gösterilmez.'));
     return out;
   }
   if (!f.lines.length) {
-    out.append(h('div.pd-note', {}, f.status === 'R' ? 'Renamed without changes.' : 'No changes to show (file mode or empty file).'));
+    out.append(h('div.pd-note', {}, f.status === 'R' ? 'Değişiklik olmadan yeniden adlandırıldı.' : 'Gösterilecek değişiklik yok (dosya modu ya da boş dosya).'));
     return out;
   }
   const threads = threadsByLine(comments, f.path);

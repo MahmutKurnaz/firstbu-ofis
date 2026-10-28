@@ -35,8 +35,8 @@ test('the banner names whoever has waited longest, what it asks and for how long
   const now = 10 * 60_000;
   const a = worker('Byte', 'needs_input', { activity: 'Wants permission: Bash: npm test', waitingSince: now - 4 * 60_000 });
   const b = worker('Pixel', 'needs_input', { activity: 'Which one?', waitingSince: now - 30_000 });
-  assert.deepEqual(bannerText([a], now), { id: 'Byte', title: 'Byte needs you', detail: 'Wants permission: Bash: npm test · 4 min', more: '', key: 'Byte|Byte needs you|Wants permission: Bash: npm test · 4 min|' });
-  assert.equal(bannerText([a, b], now)?.more, '+1 more');
+  assert.deepEqual(bannerText([a], now), { id: 'Byte', title: 'Byte sana ihtiyaç duyuyor', detail: 'Wants permission: Bash: npm test · 4 dk', more: '', key: 'Byte|Byte sana ihtiyaç duyuyor|Wants permission: Bash: npm test · 4 dk|' });
+  assert.equal(bannerText([a, b], now)?.more, '+1 daha');
   // In its first minute there's no time to give, and with nothing known of what it asks, just its name.
   assert.equal(bannerText([b], now)?.detail, 'Which one?');
   assert.equal(bannerText([worker('Nib', 'needs_input')], now)?.detail, '');
@@ -52,9 +52,9 @@ test('the banner names whoever has waited longest, what it asks and for how long
 test('how long a worker has waited', () => {
   assert.equal(waited(undefined, 5_000), '');
   assert.equal(waited(0, 59_000), '');
-  assert.equal(waited(0, 60_000), '1 min');
-  assert.equal(waited(0, 59 * 60_000 + 59_000), '59 min');
-  assert.equal(waited(0, 65 * 60_000), '1 h 05 min');
+  assert.equal(waited(0, 60_000), '1 dk');
+  assert.equal(waited(0, 59 * 60_000 + 59_000), '59 dk');
+  assert.equal(waited(0, 65 * 60_000), '1 sa 05 dk');
 });
 
 test('each wait of a worker has a key of its own, so a banner put away comes back when it asks again', () => {

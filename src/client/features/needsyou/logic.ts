@@ -18,7 +18,7 @@ export const unattended = (w: WorkerInfo) => w.viewers.length === 0;
 export function waited(since: number | undefined, now: number): string {
   const min = since === undefined ? 0 : Math.floor((now - since) / 60_000);
   if (min < 1) return '';
-  return min < 60 ? `${min} min` : `${Math.floor(min / 60)} h ${String(min % 60).padStart(2, '0')} min`;
+  return min < 60 ? `${min} dk` : `${Math.floor(min / 60)} sa ${String(min % 60).padStart(2, '0')} dk`;
 }
 
 export interface BannerText {
@@ -39,8 +39,8 @@ export function bannerText(asking: readonly WorkerInfo[], now: number): BannerTe
   if (!w) return null;
   const ask = alertDetail(w)?.replace(/\s+/g, ' ').trim();
   const detail = [ask && (ask.length > 90 ? `${ask.slice(0, 89)}…` : ask), waited(w.waitingSince, now)].filter(Boolean).join(' · ');
-  const more = asking.length > 1 ? `+${asking.length - 1} more` : '';
-  const title = `${w.name} needs you`;
+  const more = asking.length > 1 ? `+${asking.length - 1} daha` : '';
+  const title = `${w.name} sana ihtiyaç duyuyor`;
   return { id: w.id, title, detail, more, key: `${w.id}|${title}|${detail}|${more}` };
 }
 

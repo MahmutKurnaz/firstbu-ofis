@@ -51,7 +51,7 @@ export function installSeating(ctx: Ctx, deps: SeatingDeps) {
 
   /** Someone else's screen is up on the TV. */
   function tvShowing(): boolean {
-    return deps.shares().some(([who]) => who !== 'You');
+    return deps.shares().some(([who]) => who !== 'Sen');
   }
 
   /** E at a seat: sit down on it. Sitting there already, get up, or on the couch facing the TV, watch it. */
@@ -68,7 +68,7 @@ export function installSeating(ctx: Ctx, deps: SeatingDeps) {
     }
     const place = freePlace(seat);
     if (!place) {
-      toast(`No room on that ${seat.label.replace(/^\S+ /, '').toLowerCase()} right now`, 'warn');
+      toast(`Şu an o ${seat.label.replace(/^\S+ /, '').toLowerCase()} üzerinde yer yok`, 'warn');
       return;
     }
     player.sit(place);
@@ -88,7 +88,7 @@ export function installSeating(ctx: Ctx, deps: SeatingDeps) {
       ctx.player.stand();
       // On your feet as far as everyone's concerned (the office still has you where you sat before).
       gotUp();
-      toast(`${msg.by} got there first`, 'warn');
+      toast(`${msg.by} önce davrandı`, 'warn');
     }
   });
 
@@ -112,11 +112,11 @@ export function installSeating(ctx: Ctx, deps: SeatingDeps) {
       if (!seat) return { k: '', parts: [] };
       if (ctx.player.seat?.seatId === seat.id) {
         const tv = !!seat.tv && tvShowing();
-        const use = tv ? 'Watch the TV' : seat.game ? 'Play Minesweeper' : seat.bar ? 'Order a drink' : '';
-        return { k: `${seat.id}|sitting|${tv}`, parts: [hintTitle(seat.label), aside('sitting'), ...(use ? [key('E', use), key('W A S D', 'Get up')] : [key('E', 'Get up')])] };
+        const use = tv ? 'TV izle' : seat.game ? 'Mayın Tarlası oyna' : seat.bar ? 'İçecek söyle' : '';
+        return { k: `${seat.id}|sitting|${tv}`, parts: [hintTitle(seat.label), aside('oturuyor'), ...(use ? [key('E', use), key('W A S D', 'Kalk')] : [key('E', 'Kalk')])] };
       }
       const full = !freePlace(seat);
-      return { k: `${seat.id}|${full}`, parts: [hintTitle(seat.label), seat.game ? aside('💣 Minesweeper on the monitor') : '', full ? aside('no room') : key('E', 'Sit down')] };
+      return { k: `${seat.id}|${full}`, parts: [hintTitle(seat.label), seat.game ? aside('💣 Monitörde Mayın Tarlası') : '', full ? aside('yer yok') : key('E', 'Otur')] };
     },
     use: onE((it) => {
       if (it.seatId) useSeat(it.seatId);
