@@ -53,6 +53,10 @@ export function installAvatar(ctx: Ctx) {
     },
   });
 
+  // How fast you're going, from where you were a moment ago (smoothed, so a stop or a start doesn't flick the clip).
+  let speed = 0;
+  let lastX = 0;
+  let lastZ = 0;
   let started = false;
   ctx.ticks.add('me', ({ dt }) => {
     // The view you left off in (or the three-quarter one the first time), once the page is up.
@@ -60,17 +64,29 @@ export function installAvatar(ctx: Ctx) {
       started = true;
       apply(preset, false);
     }
-    if (!avatar) return;
     const p = ctx.player;
+    if (!avatar) {
+      lastX = p.pos.x;
+      lastZ = p.pos.z;
+      return;
+    }
     // Yours where you stand, in third person; the little Person for everything that poses it (a seat,
     // a car, the tee, the ladder) or when the camera's right in your face.
     const use = p.view === 'third' && !p.seat && !ctx.activities.any('takesCamera') && !ctx.activities.any('hidesHands') && !ctx.view.grip() && ctx.me.root.visible;
     avatar.root.visible = use;
-    if (!use) return;
+    if (!use) {
+      lastX = p.pos.x;
+      lastZ = p.pos.z;
+      return;
+    }
     ctx.me.root.visible = false;
     avatar.root.position.copy(p.pos);
     avatar.root.position.y += p.stepOffset;
     avatar.root.rotation.y = p.facing;
-    avatar.update(dt, { moving: p.moving, running: p.running, grounded: p.grounded });
+    const v = dt > 0 ? Math.hypot(p.pos.x - lastX, p.pos.z - lastZ) / dt : 0;
+    speed += (Math.min(v, 12) - speed) * Math.min(1, dt * 12);
+    lastX = p.pos.x;
+    lastZ = p.pos.z;
+    avatar.update(dt, speed, p.grounded);
   });
 }

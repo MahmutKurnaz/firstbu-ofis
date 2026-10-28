@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import type { Model } from '../../world/models';
-import { AVATAR_HEIGHT, clipFor, clipOf, type Clip, type MoveState } from './logic';
+import { AVATAR_HEIGHT, clipOf, gaitFor, type Clip } from './logic';
 
 /** How long one clip takes to blend into the next (s). */
 const BLEND = 0.2;
@@ -63,8 +63,9 @@ export class PlayerAvatar {
     }
   }
 
-  update(dt: number, s: MoveState) {
-    const want = clipFor(s);
+  /** `speed` is how fast you're moving over the ground (m/s), `grounded` whether your feet are on it. */
+  update(dt: number, speed: number, grounded: boolean) {
+    const { clip: want, rate } = gaitFor(speed, grounded);
     const next = this.actions.has(want) ? want : this.actions.has('idle') ? 'idle' : null;
     if (next && next !== this.playing) {
       const to = this.actions.get(next)!;
@@ -73,6 +74,7 @@ export class PlayerAvatar {
       if (from) to.crossFadeFrom(from, BLEND, false);
       this.playing = next;
     }
+    if (this.playing) this.actions.get(this.playing)!.timeScale = rate;
     this.mixer.update(dt);
   }
 

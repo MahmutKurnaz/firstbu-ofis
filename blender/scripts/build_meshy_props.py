@@ -4,12 +4,18 @@ src/client/models/meshy-props.glb. Each piece is a root of its own, named by its
 standing on the floor at the origin, centred, its front toward +z, sized in meters as in SIZE below.
 Those names are a contract with world/cadde/meshy.ts and tests/meshy-props.test.ts.
 
+Each piece's ambient occlusion (the soft dark where things meet: legs on the floor, cushions, leaves, drawers)
+is baked in Cycles, against a floor under it, and multiplied into its colour texture, so the street's
+toon lighting keeps a depth it can't make for itself.
+
     blender --background --factory-startup --python blender/scripts/build_meshy_props.py -- --src <dir with the <key>.glb files>
 """
 import os
 import sys
+import tempfile
 
 import bpy
+import numpy as np
 
 sys.path.insert(0, os.path.dirname(__file__))
 import aokit  # noqa: E402
@@ -33,8 +39,12 @@ SIZE = {
     "fikus": ("h", 1.6),
     "toplanti-sandalye": ("h", 0.95),
 }
-TRIS = 3000
-TEX = 512
+TRIS = 5000
+TEX = 1024
+# How far the occlusion reaches (m), and how much of the colour it can take away.
+AO_DIST = 0.5
+AO_MIN = 0.4
+AO_SAMPLES = 64
 
 
 def piece(path, key):
@@ -81,14 +91,57 @@ def piece(path, key):
     return ob
 
 
+def bake_occlusion(ob, floor):
+    """Multiplies the baked ambient occlusion of `ob` (standing on `floor`) into its colour texture."""
+    mat = ob.data.materials[0]
+    nt = mat.node_tree
+    tex = next(n for n in nt.nodes if n.type == 'TEX_IMAGE' and n.image)
+    base = tex.image
+    if tuple(base.size) != (TEX, TEX):
+        base.scale(TEX, TEX)
+    ao = bpy.data.images.new("ao_" + ob.name, TEX, TEX)
+    node = nt.nodes.new('ShaderNodeTexImage')
+    node.image = ao
+    nt.nodes.active = node
+    bpy.ops.object.select_all(action='DESELECT')
+    ob.select_set(True)
+    bpy.context.view_layer.objects.active = ob
+    floor.hide_render = False
+    bpy.ops.object.bake(type='AO', margin=8)
+    nt.nodes.remove(node)
+    px = np.array(base.pixels[:], dtype=np.float32).reshape(-1, 4)
+    a = np.array(ao.pixels[:], dtype=np.float32).reshape(-1, 4)[:, 0]
+    px[:, :3] *= (AO_MIN + (1 - AO_MIN) * a)[:, None]
+    base.pixels = px.ravel()
+    # Written out as a JPEG and loaded back from that, so the file keeps it small (the exporter keeps a file image's own bytes).
+    path = os.path.join(tempfile.gettempdir(), f"meshy_{ob.name}.jpg")
+    base.filepath_raw = path
+    base.file_format = 'JPEG'
+    base.save()
+    tex.image = bpy.data.images.load(path)
+    tex.image.pack()
+    bpy.data.images.remove(ao)
+
+
 def main():
     a = aokit.args()
     src = a[a.index("--src") + 1] if "--src" in a else None
     if not src:
         raise SystemExit("--src <dir with the Meshy props>")
     aokit.clear()
-    for key in SIZE:
-        piece(os.path.join(src, key + ".glb"), key)
+    sc = bpy.context.scene
+    sc.render.engine = 'CYCLES'
+    sc.cycles.device = 'CPU'
+    sc.cycles.samples = AO_SAMPLES
+    sc.cycles.use_denoising = False
+    sc.world = bpy.data.worlds.new("w")
+    sc.world.light_settings.distance = AO_DIST
+    bpy.ops.mesh.primitive_plane_add(size=30, location=(0, 0, -0.002))
+    floor = bpy.context.active_object
+    pieces = [piece(os.path.join(src, key + ".glb"), key) for key in SIZE]
+    for ob in pieces:
+        bake_occlusion(ob, floor)
+    bpy.data.objects.remove(floor, do_unlink=True)
     print("  ->", aokit.export("meshy-props", uvs=True))
 
 

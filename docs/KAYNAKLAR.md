@@ -59,3 +59,15 @@ Karakterler ve istemler: `docs/karakterler.md` ve `blender/scripts/meshy_concept
 | 2026-10-28 | 13 rol + 10 yedek hayvan + 6 NPC için 58 konsept görsel | 348 |
 
 Bakiye: 5.411 → 5.063.
+
+## Dünyanın eşyaları ve Mahmut'un karakteri (Meshy, doğrudan)
+
+Onay: Mahmut, 2026-10-28 ("16 varlık × 2 öneri, 672 kredi"; karakter için "beni yürüten karakteri tasarla"). Betikler: `blender/scripts/meshy_props.py` (eşyalar), `blender/scripts/build_meshy_props.py` (Blender'da küçültme, ortam kararması pişirme, tek dosya: `models/meshy-props.glb`).
+Eşyalar: sokak ağacı, lamba, bank, kafe masası, kahve tezgâhı, kahve makinesi, saksı, ofis masası ve sandalyesi, yönetici masası ve koltuğu, kanepe, kitaplık, fikus, çiçek saksısı, toplantı sandalyesi. Karakter: `models/mahmut.glb` (6 fotoğraftan, gerçekçi, iskelet ve 6 klip).
+
+| Tarih | Ne | Kredi |
+| --- | --- | --- |
+| 2026-10-28 | 16 eşya × 2 görsel (12'si yinelenen, ağ hatasında tekrar gönderilen) | 204 |
+| 2026-10-28 | 16 eşya, seçilen görselden dokulu 3D | 480 |
+| 2026-10-28 | Mahmut'un konseptleri | 36 |
+| 2026-10-28 | Mahmut 3D, iskelet, 6 klip | 58 |

@@ -4,6 +4,7 @@
  */
 import * as THREE from 'three';
 import { OutlineEffect } from 'three/examples/jsm/effects/OutlineEffect.js';
+import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { store } from '../state';
 import { Holiday } from '../world/holiday';
 import { buildOffice } from '../world/office';
@@ -54,8 +55,11 @@ export function noWebGL(): Promise<never> {
 export function createScene(canvas: HTMLCanvasElement, renderer: THREE.WebGLRenderer): Stage {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFShadowMap;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
+  // Filmic highlights, so a bright sky and a lit window roll off like a photo's rather than clipping.
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.05;
   const effect = new OutlineEffect(renderer, { defaultThickness: 0.0032, defaultColor: [0.17, 0.18, 0.26] });
 
   const scene = new THREE.Scene();
@@ -63,6 +67,9 @@ export function createScene(canvas: HTMLCanvasElement, renderer: THREE.WebGLRend
   scene.background = new THREE.Color('#bfe3ff');
   scene.fog = new THREE.Fog('#bfe3ff', 40, 90);
   const camera = new THREE.PerspectiveCamera(FOV, 1, 0.1, FAR);
+  // A soft room's worth of light all round, which only the physical materials (your character, the street's own furniture) take: they pick up the sky's tint and a little shine, as in a photo.
+  scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
+  scene.environmentIntensity = 0.45;
 
   const hemi = new THREE.HemisphereLight('#fff5e6', '#c9a27a', 1.5);
   const ambient = new THREE.AmbientLight('#ffffff', 0.5);
@@ -71,7 +78,7 @@ export function createScene(canvas: HTMLCanvasElement, renderer: THREE.WebGLRend
   const sun = new THREE.DirectionalLight('#fff1d6', 2.2);
   sun.position.set(-8, 18, 10);
   sun.castShadow = true;
-  sun.shadow.mapSize.set(2048, 2048);
+  sun.shadow.mapSize.set(4096, 4096);
   // Wide enough for the office, the garage under it and the balcony and lot out front, from wherever the sun is.
   Object.assign(sun.shadow.camera, { left: -32, right: 32, top: 30, bottom: -30, near: 1, far: 100 });
   sun.shadow.bias = -0.0008;

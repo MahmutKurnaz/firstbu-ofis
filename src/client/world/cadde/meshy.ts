@@ -1,6 +1,5 @@
 import * as THREE from 'three';
 import { loadModel } from '../models';
-import { toon } from '../toon';
 
 // The street's own furniture and things, made with Meshy (blender/scripts/build_meshy_props.py packs them
 // into models/meshy-props.glb): a tree in its bed, a lamp, a bench, a café table under its parasol, the
@@ -42,12 +41,16 @@ function root(): Promise<THREE.Object3D | null> {
   return pack;
 }
 
-/** The toon look of a piece's own material: its texture and color kept. */
-function toonOf(m: THREE.Material): THREE.Material {
+/**
+ * The look of a piece's own material: its texture (with the occlusion baked into it) on a physical material, so it's
+ * lit softly and takes a little shine from the sky rather than the street's toon bands, and with no outline.
+ */
+function lookOf(m: THREE.Material): THREE.Material {
   let t = toons.get(m);
   if (!t) {
     const src = m as THREE.MeshStandardMaterial;
-    t = new THREE.MeshToonMaterial({ map: src.map ?? null, color: src.color ?? new THREE.Color('#ffffff'), gradientMap: (toon('#fff') as THREE.MeshToonMaterial).gradientMap });
+    t = new THREE.MeshStandardMaterial({ map: src.map ?? null, color: src.color ?? new THREE.Color('#ffffff'), roughness: 0.72, metalness: 0.04 });
+    t.userData.outlineParameters = { visible: false };
     toons.set(m, t);
   }
   return t;
@@ -79,7 +82,7 @@ export function meshy(parent: THREE.Object3D, key: MeshyKey, o: MeshyOptions = {
     copy.traverse((m) => {
       const mesh = m as THREE.Mesh;
       if (!mesh.isMesh) return;
-      mesh.material = Array.isArray(mesh.material) ? mesh.material.map(toonOf) : toonOf(mesh.material);
+      mesh.material = Array.isArray(mesh.material) ? mesh.material.map(lookOf) : lookOf(mesh.material);
       mesh.castShadow = mesh.receiveShadow = true;
       // Its geometry and materials are every copy's: the street's dispose leaves them be.
       mesh.userData.shared = true;
