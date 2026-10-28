@@ -8,6 +8,9 @@ import dogPugUrl from '../models/dog-pug.glb?url';
 import dogPupUrl from '../models/dog-pup.glb?url';
 import dogPomeranianUrl from '../models/dog-pomeranian.glb?url';
 import dogShibaUrl from '../models/dog-shiba.glb?url';
+import kaykitCafeUrl from '../models/kaykit-cafe.glb?url';
+import kaykitCityUrl from '../models/kaykit-city.glb?url';
+import kaykitFurnitureUrl from '../models/kaykit-furniture.glb?url';
 import kitchenUrl from '../models/kitchen.glb?url';
 import loungeUrl from '../models/lounge.glb?url';
 import plantsUrl from '../models/plants.glb?url';
@@ -26,6 +29,10 @@ const MODELS = {
   'dog-pomeranian': { url: dogPomeranianUrl, preload: false },
   desk_props: { url: deskPropsUrl, preload: true },
   kitchen: { url: kitchenUrl, preload: true },
+  // The street's CC0 drafts (KayKit, see blender/scripts/build_kaykit.py): only the street loads them.
+  'kaykit-city': { url: kaykitCityUrl, preload: false },
+  'kaykit-furniture': { url: kaykitFurnitureUrl, preload: false },
+  'kaykit-cafe': { url: kaykitCafeUrl, preload: false },
   lounge: { url: loungeUrl, preload: true },
   plants: { url: plantsUrl, preload: true },
 } satisfies Record<string, { url: string; preload: boolean }>;

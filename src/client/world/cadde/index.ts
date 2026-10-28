@@ -11,6 +11,7 @@ import { mergeByMaterial } from '../toon';
 import type { World } from '../world';
 import { buildBoards } from '../station/boards';
 import { agentConsole, buildBenches, buildBriefing, placeSetting } from '../station/seats';
+import { dress, furnish, skyline } from './kaykit';
 import { caddeKit } from './kit';
 import { paintOffice, type OfficeView } from './offices';
 import { PROPS } from './props';
@@ -39,6 +40,11 @@ export function buildCadde(plan: MapPlan): World {
   const shell = buildShell(kit);
   let offices = 0;
   for (const p of c.props ?? []) PROPS[p.kind as CaddePropKind](kit, p, p.kind === 'office' ? offices++ : 0);
+  // The CC0 drafts, which come in once they've loaded.
+  const officeProps = (c.props ?? []).filter((p) => p.kind === 'office');
+  officeProps.forEach((p, i) => furnish(kit, p, i));
+  dress(kit, c.props ?? []);
+  skyline(kit, shell.near);
   buildArmchair(kit);
   buildBenches(kit);
   const overflow = new Map<string, Interactable>();
@@ -144,6 +150,7 @@ export function buildCadde(plan: MapPlan): World {
       const freed = new Set<THREE.Material>();
       group.traverse((o) => {
         const m = o as THREE.Mesh;
+        if (m.userData.shared) return;
         m.geometry?.dispose();
         for (const mat of Array.isArray(m.material) ? m.material : m.material ? [m.material] : []) {
           const map = (mat as THREE.MeshBasicMaterial).map;

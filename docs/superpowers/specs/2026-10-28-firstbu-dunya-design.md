@@ -345,3 +345,10 @@ verir. Bir masaya tıklayıp o terminalde doğrudan yazar. Tüm bunlar için tek
 - Ofis kapısında **E** → Ekipler panelinde o ofis öne gelir ve yanıp söner. Panel gizliyse açılır.
 - İşini bitiren ajanlar kafedeki koltuğunun önünde sıraya giriyor (kalenin "sıra" davranışı). F3'ün temeli hazır.
 - Testleri yine ayrı bir Sonnet 5.5 ajanı yazdı: 17 yeni test ve `docs/maps/cadde.json` anlık görüntüsü.
+- **CC0 taslaklar (sonradan):** Kenney otomatik indirmeyi engellediği için KayKit'in resmi GitHub depolarından
+  City Builder, Furniture ve Restaurant Bits (CC0) alındı. Blender betiği (`build_kaykit.py`) seçilen parçaları
+  üç GLB'de topluyor (toplam ~1,2 MB, yalnızca caddede yükleniyor): çevre binaları, ofis içi oturma köşeleri,
+  tablolar, raflar, kapı çalıları, kafe buzdolabı ve menü.
+- **Lider akışı uçtan uca doğrulandı:** Aslan Lider'e görev verildi. Lider `hire_worker role=scout-fe` ile Mirket FE'yi
+  işe aldı ve Mirket FE kendi ofisine (Keşif, desk-4) oturdu. Mirket FE `.claude/agents` altındaki dosyaları sayıp
+  `tell_worker` ile lidere bildirdi, lider de sonucu yazdı: 14, doğru. FirstBU dosyalarına dokunulmadı.

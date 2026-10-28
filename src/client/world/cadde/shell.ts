@@ -65,10 +65,10 @@ function towerFaces(floors: number, bays: number, wall: string): { map: THREE.Ca
 const WALLS = ['#d9cfc0', '#b9c0c9', '#e3d6c4', '#9aa7b5', '#cbb8a2'];
 
 /**
- * Puts up the street. Returns where the way in is and which way is out through it, and how to put
- * the project's name over the gateway.
+ * Puts up the street. Returns where the way in is and which way is out through it, where the city's
+ * nearer row of buildings goes (kaykit.ts puts them up), and how to put the project's name over the gateway.
  */
-export function buildShell(kit: CaddeKit): { doorAt: THREE.Vector3; out: Pt; christen(name: string): void } {
+export function buildShell(kit: CaddeKit): { doorAt: THREE.Vector3; out: Pt; near: { x: number; z: number; rotY: number; scale: number }[]; christen(name: string): void } {
   const b = kit.plan.bounds;
   const W = b.maxX - b.minX;
   const L = b.maxZ - b.minZ;
@@ -95,7 +95,7 @@ export function buildShell(kit: CaddeKit): { doorAt: THREE.Vector3; out: Pt; chr
   fence(b.minX - 1, b.maxX + 1, b.minZ - 1, b.minZ);
   fence(b.minX - 1, b.maxX + 1, b.maxZ, b.maxZ + 1);
 
-  // The city round it: towers in a ring outside the edges, taller the further out.
+  // The city round it: a row of buildings just outside the edges, towers behind them.
   const city = new THREE.Group();
   let k = 0;
   const tower = (x: number, z: number, w: number, d: number, h: number) => {
@@ -116,16 +116,23 @@ export function buildShell(kit: CaddeKit): { doorAt: THREE.Vector3; out: Pt; chr
     city.add(mesh(box(w + 0.4, 0.4, d + 0.4), toon('#f4efe6'), x, h + 0.2, z, false));
   };
   const rand = (i: number) => ((Math.sin(i * 12.9898) * 43758.5453) % 1 + 1) % 1;
-  for (let ring = 0; ring < 2; ring++) {
-    const gap = 4 + ring * 14;
-    const tall = (i: number) => 12 + ring * 18 + rand(i + ring * 100) * (14 + ring * 26);
-    for (let x = b.minX - 6; x <= b.maxX + 6; x += 13) {
-      tower(x, b.minZ - gap - 6, 11, 10, tall(x));
-      // The way in is at the south end: leave the gateway's view down the road clear.
-      if (Math.abs(x) > 12) tower(x, b.maxZ + gap + 6, 11, 10, tall(x + 50));
-    }
-    for (let z = b.minZ + 4; z <= b.maxZ - 4; z += 13) for (const sx of [-1, 1]) tower(sx * (b.maxX + gap + 6), z, 10, 11, tall(z * sx + 7));
+  // The nearer row is KayKit's buildings (see kaykit.ts), facing the street far enough out that the
+  // biggest's front (0.8 of it at 5 × 1.9) stays behind the edge; behind them, towers.
+  const near: { x: number; z: number; rotY: number; scale: number }[] = [];
+  for (let x = b.minX + 4; x <= b.maxX - 4; x += 17) {
+    near.push({ x, z: b.minZ - 9, rotY: 0, scale: 1.5 + rand(x) * 0.4 });
+    // The way in is at the south end: leave the gateway's view down the road clear.
+    if (Math.abs(x) > 12) near.push({ x, z: b.maxZ + 9, rotY: Math.PI, scale: 1.5 + rand(x + 9) * 0.4 });
   }
+  for (let z = b.minZ + 6; z <= b.maxZ - 6; z += 17)
+    for (const sx of [-1, 1]) near.push({ x: sx * (b.maxX + 9), z, rotY: -sx * (Math.PI / 2), scale: 1.5 + rand(z * sx) * 0.4 });
+  const gap = 24;
+  const tall = (i: number) => 34 + rand(i + 100) * 40;
+  for (let x = b.minX - 6; x <= b.maxX + 6; x += 13) {
+    tower(x, b.minZ - gap - 6, 11, 10, tall(x));
+    if (Math.abs(x) > 12) tower(x, b.maxZ + gap + 6, 11, 10, tall(x + 50));
+  }
+  for (let z = b.minZ + 4; z <= b.maxZ - 4; z += 13) for (const sx of [-1, 1]) tower(sx * (b.maxX + gap + 6), z, 10, 11, tall(z * sx + 7));
   kit.group.add(city);
 
   // The gateway: two pillars and a beam over the way in, the project's name on it.
@@ -151,5 +158,5 @@ export function buildShell(kit: CaddeKit): { doorAt: THREE.Vector3; out: Pt; chr
     gate.add(sign);
   };
   christen('');
-  return { doorAt, out: [0, 1], christen };
+  return { doorAt, out: [0, 1], near, christen };
 }
