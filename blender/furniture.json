@@ -411,6 +411,72 @@
       "range": "Sidewalk A-frame menu board: about 1.0 m. (Common practice.)",
       "src": [],
       "verified": "partly"
+    },
+    "sehpa": {
+      "w": 1.0,
+      "d": 0.5,
+      "h": 0.42,
+      "kind": "office",
+      "range": "Coffee table: 0.4-0.46 m high, 0.9-1.2 m long.",
+      "src": [
+        "sofa-castlery"
+      ],
+      "verified": "sources"
+    },
+    "ayakli-lamba": {
+      "w": 0.45,
+      "d": 0.45,
+      "h": 1.6,
+      "kind": "office",
+      "range": "Standing floor lamp: 1.4-1.7 m. (Common practice.)",
+      "src": [],
+      "verified": "partly"
+    },
+    "puf": {
+      "w": 0.55,
+      "d": 0.55,
+      "h": 0.46,
+      "kind": "office",
+      "range": "Pouf: 0.4-0.46 m high, 0.5-0.6 m across; the cushion top 0.43.",
+      "src": [],
+      "verified": "partly",
+      "seat": 0.43
+    },
+    "kafe-tabure": {
+      "w": 0.38,
+      "d": 0.38,
+      "h": 0.46,
+      "seat": 0.46,
+      "kind": "street",
+      "range": "Bistro stool seat 43-48 cm (a 71-76 cm table).",
+      "src": [
+        "cafe-bbqguys"
+      ],
+      "verified": "sources"
+    },
+    "kafe-masasi-yuvarlak": {
+      "w": 0.75,
+      "d": 0.75,
+      "h": 0.74,
+      "top": 0.74,
+      "kind": "street",
+      "range": "Bistro table 71-76 cm, 0.6-0.8 m across.",
+      "src": [
+        "cafe-bbqguys"
+      ],
+      "verified": "sources"
+    },
+    "semsiye": {
+      "w": 2.7,
+      "d": 2.7,
+      "h": 2.4,
+      "kind": "street",
+      "range": "9 ft (2.7 m) market umbrella: 2.3-2.45 m overall.",
+      "src": [
+        "umbrella-jeco",
+        "umbrella-golden"
+      ],
+      "verified": "sources"
     }
   }
 }

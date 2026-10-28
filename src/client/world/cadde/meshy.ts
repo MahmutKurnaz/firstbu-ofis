@@ -39,6 +39,12 @@ export const MESHY_KEYS = [
   'pano-cercevesi',
   'buzdolabi',
   'menu-sehpasi',
+  'sehpa',
+  'ayakli-lamba',
+  'puf',
+  'kafe-tabure',
+  'kafe-masasi-yuvarlak',
+  'semsiye',
 ] as const;
 export type MeshyKey = (typeof MESHY_KEYS)[number];
 

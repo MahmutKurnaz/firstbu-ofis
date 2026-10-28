@@ -96,9 +96,13 @@ export function furnish(kit: CaddeKit, p: PropConfig, index: number) {
   const lo = hl - 2.6;
   put('kaykit-furniture', 'rug_rectangle_stripes_A', ls, lo, Math.PI / 2, 0.9);
   // The sofa along the side wall, facing across the office; the table in front of it.
-  put('kaykit-furniture', 'couch_pillows', s * (hw - 0.6), lo, -s * (Math.PI / 2));
-  put('kaykit-furniture', 'table_low', ls + -s * 0.4, lo, Math.PI / 2, 0.8);
-  put('kaykit-furniture', 'lamp_standing', s * (hw - 0.6), lo - 1.6);
+  // (the street's own: a cognac leather sofa 2 m long, a walnut coffee table 1 m long and 42 cm high, a brass floor lamp)
+  const [sx, sz] = at(s * (hw - 0.6), lo);
+  standMeshy(kit, 'kanepe', sx, sz, o.rotY - s * (Math.PI / 2));
+  const [tx, tz] = at(ls + -s * 0.4, lo);
+  standMeshy(kit, 'sehpa', tx, tz, o.rotY + Math.PI / 2);
+  const [lx, lz] = at(s * (hw - 0.6), lo - 1.6);
+  standMeshy(kit, 'ayakli-lamba', lx, lz, 0);
   for (const [side, out, w, d] of [
     [s * (hw - 0.6), lo, 0.9, 1.6],
     [ls - s * 0.4, lo, 0.8, 1.0],

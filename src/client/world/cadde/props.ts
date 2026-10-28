@@ -107,8 +107,14 @@ function parasol(kit: CaddeKit, p: PropConfig) {
     const a = (i / 3) * Math.PI * 2 + 0.4;
     g.add(mesh(new THREE.CylinderGeometry(0.2, 0.17, 0.45, 12), kit.street.wood, Math.sin(a) * 0.85, 0.225, Math.cos(a) * 0.85));
   }
-  // Its own table under a striped parasol, stools round it.
-  meshy(g, 'kafe-masasi', { scale: s, replaces: [...g.children] });
+  // Its own set: a marble bistro table, three oak stools round it, a striped parasol over them.
+  const stand = [...g.children];
+  meshy(g, 'kafe-masasi-yuvarlak', { replaces: stand });
+  for (let i = 0; i < 3; i++) {
+    const a = (i / 3) * Math.PI * 2 + 0.4;
+    meshy(g, 'kafe-tabure', {}).position.set(Math.sin(a) * 0.62, 0, Math.cos(a) * 0.62);
+  }
+  meshy(g, 'semsiye', {});
   kit.group.add(g);
   kit.colliders.push({ minX: p.x - 0.55 * s, maxX: p.x + 0.55 * s, minZ: p.z - 0.55 * s, maxZ: p.z + 0.55 * s, top: 0.76 });
 }

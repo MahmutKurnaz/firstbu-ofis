@@ -188,8 +188,11 @@ test('buildDesks\' seat filter finds every desk of every look:desk table on the 
   assert.ok(tables.length >= 6, `desk tables: ${tables.length}`);
   const owner = new Map<string, string>();
   for (const t of tables) {
+    // (the plan's desks are its regular seats: a table's last seats may be beanbags, in plan.overflow)
     const found = plan.desks.filter((d) => d.label.startsWith(`${t.name}, `));
-    assert.equal(found.length, t.seats * t.sides.length, `${t.name}: ${found.length} desks`);
+    const all = [...found, ...plan.overflow.filter((d) => d.label.startsWith(`${t.name}, `))];
+    assert.equal(all.length, t.seats * t.sides.length, `${t.name}: ${all.length} seats`);
+    assert.ok(found.length >= 1, `${t.name} has a regular desk`);
     for (const d of found) {
       assert.ok(!owner.has(d.id), `${d.id} matched by both ${owner.get(d.id)} and ${t.name}`);
       owner.set(d.id, t.name);

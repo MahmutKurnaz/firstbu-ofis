@@ -56,7 +56,8 @@ const TABLES: TableConfig[] = [
       ];
       // The suite takes six of the sixteen seats, so the teams of one (engineering's, the bug lab's and the test lab's remaining) get a short table of one a side.
       const small = (row === 1) || (row === 2 && i === 0);
-      return { name: names[row][i], x: side * (SIDE_X + 1.5), z, length: big ? 7.5 : small ? 3 : 6, seats: big ? 3 : small ? 1 : 2, rotY: 0 };
+      // Each seat has a desk of its own (the pair of rows face each other across the 2 m width), 2 m of table a seat.
+      return { name: names[row][i], x: side * (SIDE_X + 1.5), z, length: big ? 6 : small ? 2 : 4, width: 2, seats: big ? 3 : small ? 1 : 2, rotY: 0, look: 'desk' };
     }),
   ),
   // The café's long table, for when every office's seats are taken.

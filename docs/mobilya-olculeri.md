@@ -60,6 +60,12 @@ Kaynaklar: [desk-din](https://yaasa.com/en/blogs/yaasa-blog/schreibtisch-masse),
 | `pano-cercevesi` | cadde | 3.30 × 0.12 × 2.10 | — | Wall information board: 3.3 x 2.1 m, the street boards (shared/maps/cadde.ts). | — | kısmen |
 | `buzdolabi` | cadde | 0.70 × 0.70 × 1.90 | — | Glass-door beverage fridge: 1.8-2.0 m. (Common practice.) | — | kısmen |
 | `menu-sehpasi` | cadde | 0.60 × 0.70 × 1.00 | — | Sidewalk A-frame menu board: about 1.0 m. (Common practice.) | — | kısmen |
+| `sehpa` | ofis | 1.00 × 0.50 × 0.42 | — | Coffee table: 0.4-0.46 m high, 0.9-1.2 m long. | [sofa-castlery](https://www.castlery.com/us/blog/sofa-sizes-and-dimensions) | kaynaklı |
+| `ayakli-lamba` | ofis | 0.45 × 0.45 × 1.60 | — | Standing floor lamp: 1.4-1.7 m. (Common practice.) | — | kısmen |
+| `puf` | ofis | 0.55 × 0.55 × 0.46 | oturak 43 cm | Pouf: 0.4-0.46 m high, 0.5-0.6 m across; the cushion top 0.43. | — | kısmen |
+| `kafe-tabure` | cadde | 0.38 × 0.38 × 0.46 | oturak 46 cm | Bistro stool seat 43-48 cm (a 71-76 cm table). | [cafe-bbqguys](https://www.bbqguys.com/a/28806/learn/outdoor-living/buying-guides/furniture/table-chair-height) | kaynaklı |
+| `kafe-masasi-yuvarlak` | cadde | 0.75 × 0.75 × 0.74 | üst 74 cm | Bistro table 71-76 cm, 0.6-0.8 m across. | [cafe-bbqguys](https://www.bbqguys.com/a/28806/learn/outdoor-living/buying-guides/furniture/table-chair-height) | kaynaklı |
+| `semsiye` | cadde | 2.70 × 2.70 × 2.40 | — | 9 ft (2.7 m) market umbrella: 2.3-2.45 m overall. | [umbrella-jeco](https://www.walmart.com/ip/Jeco-UBF92-9-ft-Aluminum-Steel-Umbrella-Fabric-Tan/120360055), [umbrella-golden](https://blog.wellappointedhouse.com/products/9-golden-state-patio-umbrella-in-aruba) | kaynaklı |
 
 "Kaynaklı": ölçü, listelenen sayfalardaki aralıktan seçildi. "Kısmen": bir standart bulunamadı, yaygın bir ölçü alındı (sayfada belirtildi).
 

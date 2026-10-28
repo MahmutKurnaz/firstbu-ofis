@@ -81,11 +81,11 @@ test('desks are at the table-top constant, 0.71-0.76 m', () => {
   for (const k of ['ofis-masa', 'yonetici-masa']) assert.equal(spec.pieces[k]!.h, tt, k);
 });
 
-test('all seat heights are 0.43-0.55 m and seated pieces are lower than their height', () => {
+test('all seat heights are 0.43-0.55 m and no seat is above its piece (a stool is its seat)', () => {
   for (const [k, p] of pieces) {
     if (p.seat === undefined) continue;
     assert.ok(p.seat >= 0.43 && p.seat <= 0.55, `${k} seat ${p.seat}`);
-    assert.ok(p.seat < p.h, `${k} seat ${p.seat} >= h ${p.h}`);
+    assert.ok(p.seat <= p.h, `${k} seat ${p.seat} > h ${p.h}`);
   }
   for (const k of ['kanepe', 'bank', 'ofis-sandalye', 'yonetici-koltuk', 'toplanti-sandalye']) {
     assert.ok(spec.pieces[k]!.seat !== undefined, `${k} has no seat`);

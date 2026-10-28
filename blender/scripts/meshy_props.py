@@ -69,6 +69,13 @@ ESYA = {
     "pano-cercevesi": ("wall-mounted digital information board", "A thin black bezel with brass corner caps around a large blank dark screen, slim wall bracket, no text.", False),
     "buzdolabi": ("premium glass-door beverage fridge", "A tall slim fridge with a glass door showing bottles on lit shelves, brushed steel frame, a small brass handle.", False),
     "menu-sehpasi": ("cafe A-frame menu stand", "An A-frame wooden sidewalk menu stand with a black chalkboard panel (blank), brass hinges.", False),
+    # The third round: the old office's lounge and the café's table set, which looked poor in the screenshots.
+    "sehpa": ("low living-room coffee table", "A walnut top with a thin brass edge on slim tapered wooden legs, rectangular, with rounded corners.", False),
+    "ayakli-lamba": ("standing floor lamp", "A slim matte brass pole on a round weighted base with a large pleated off-white drum shade, a warm glow.", False),
+    "puf": ("round upholstered pouf", "A round tufted cognac leather pouf on four small brass feet.", False),
+    "kafe-tabure": ("cafe stool", "A round seat in light oak with a thin black metal frame, four slim legs with a footrest ring, bistro style.", False),
+    "kafe-masasi-yuvarlak": ("round cafe bistro table", "A round white marble top on a black cast-iron pedestal base, small and elegant.", False),
+    "semsiye": ("cafe parasol", "A large octagonal canvas parasol in cream and terracotta stripes on a slim wooden pole with a brass tip, open, seen from the side.", False),
 }
 
 
