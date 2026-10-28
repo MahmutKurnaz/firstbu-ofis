@@ -179,3 +179,32 @@ test('every suite room has a floor colour in client/world/cadde/suite.ts', () =>
   const keys = [...m![1].matchAll(/(?:^|[,\s])['"]?([A-Za-z_][\w-]*)['"]?\s*:/g)].map((k) => k[1]);
   assert.deepEqual([...keys].sort(), SUITE.rooms.map((r) => r.id).sort());
 });
+
+// ---- buildDesks finds its seats by the table's name, whatever language the labels are in ------
+
+test('buildDesks\' seat filter finds every desk of every look:desk table on the real plan, once', () => {
+  const plan = planMap(CADDE);
+  const tables = plan.tables.filter((t) => t.look === 'desk');
+  assert.ok(tables.length >= 6, `desk tables: ${tables.length}`);
+  const owner = new Map<string, string>();
+  for (const t of tables) {
+    const found = plan.desks.filter((d) => d.label.startsWith(`${t.name}, `));
+    assert.equal(found.length, t.seats * t.sides.length, `${t.name}: ${found.length} desks`);
+    for (const d of found) {
+      assert.ok(!owner.has(d.id), `${d.id} matched by both ${owner.get(d.id)} and ${t.name}`);
+      owner.set(d.id, t.name);
+    }
+  }
+  for (let n = 1; n <= 6; n++) assert.ok(owner.has(`desk-${n}`), `desk-${n} is found by a table`);
+});
+
+test('buildDesks matches seats by the `${t.name}, ` prefix, not by a language-specific word', () => {
+  const src = readFileSync(new URL('../src/client/world/cadde/suite.ts', import.meta.url), 'utf8');
+  const m = src.match(/export function buildDesks[\s\S]*?\n}\n/);
+  assert.ok(m, 'found buildDesks');
+  assert.ok(m![0].includes('startsWith(`${t.name}, `)'), 'filters by the table-name prefix');
+  // (model names like 'yonetici-koltuk' elsewhere in the function are fine; the seat filter itself must be language-free.)
+  const filters = m![0].split('\n').filter((l) => l.includes('plan.desks'));
+  assert.ok(filters.length > 0, 'found the plan.desks filter');
+  for (const l of filters) assert.ok(!/ seat |koltuk/i.test(l), `language-specific word in: ${l.trim()}`);
+});

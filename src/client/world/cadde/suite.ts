@@ -172,7 +172,7 @@ export function furnishSuite(kit: CaddeKit, p: PropConfig) {
 export function buildDesks(kit: CaddeKit) {
   for (const t of kit.plan.tables) {
     if (t.look !== 'desk') continue;
-    const seats = kit.plan.desks.filter((d) => d.label.startsWith(`${t.name}, seat `));
+    const seats = kit.plan.desks.filter((d) => d.label.startsWith(`${t.name}, `));
     const big = t.length >= 1.8;
     for (const d of seats) {
       // The sitter's side of the desk, pointing out from it.
