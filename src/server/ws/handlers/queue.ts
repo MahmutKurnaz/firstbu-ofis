@@ -13,7 +13,7 @@ export const queueHandlers = {
     const floor = here(ctx, c);
     if (!floor) return;
     if (msg.provider !== undefined && (!isAgentProvider(msg.provider) || !floor.project.agentProviders.includes(msg.provider))) {
-      ctx.warn(c, 'Unknown agent provider');
+      ctx.warn(c, 'Bilinmeyen ajan sağlayıcısı');
       return;
     }
     const issue = Number.isInteger(msg.issue) && (msg.issue as number) > 0 ? (msg.issue as number) : undefined;
@@ -23,7 +23,7 @@ export const queueHandlers = {
     ctx.withSignIn(c, ctx.claudeFor(msg.provider ?? floor.workers.officeDefault.provider), () => {
       const err = floor.queue.add(str(msg.prompt, 20000), who, str(msg.title, 200), issue, msg.provider, model, effort, c.accountId);
       if (err) ctx.warn(c, err);
-      else ctx.toastFloor(floor, `📋 ${who} queued ${issue !== undefined ? `issue #${issue}` : 'a task'}`);
+      else ctx.toastFloor(floor, `📋 ${who} sıraya ekledi: ${issue !== undefined ? `konu #${issue}` : 'bir iş'}`);
     });
   },
   'queue.remove'(ctx, c, msg) {

@@ -26,17 +26,17 @@ export const MAX_LABEL = 32;
 
 /** What a sign can be painted: its board, and the ink its letters are in. */
 export const SIGN_COLORS = [
-  { color: '#2b2d42', ink: '#fffaf3', name: 'Navy' },
-  { color: '#ef476f', ink: '#fffaf3', name: 'Pink' },
-  { color: '#f78c6b', ink: '#2b2d42', name: 'Orange' },
-  { color: '#ffd166', ink: '#2b2d42', name: 'Yellow' },
-  { color: '#06d6a0', ink: '#2b2d42', name: 'Green' },
-  { color: '#118ab2', ink: '#fffaf3', name: 'Blue' },
-  { color: '#9b5de5', ink: '#fffaf3', name: 'Purple' },
+  { color: '#2b2d42', ink: '#fffaf3', name: 'Lacivert' },
+  { color: '#ef476f', ink: '#fffaf3', name: 'Pembe' },
+  { color: '#f78c6b', ink: '#2b2d42', name: 'Turuncu' },
+  { color: '#ffd166', ink: '#2b2d42', name: 'Sarı' },
+  { color: '#06d6a0', ink: '#2b2d42', name: 'Yeşil' },
+  { color: '#118ab2', ink: '#fffaf3', name: 'Mavi' },
+  { color: '#9b5de5', ink: '#fffaf3', name: 'Mor' },
 ] as const;
 
 /** A few to start from, in the label window. */
-export const LABEL_IDEAS = ['Operations', 'Code cleanup', 'Frontend', 'Backend', 'Bug fixes', 'Docs', 'Infra', 'Research'];
+export const LABEL_IDEAS = ['Operasyon', 'Kod temizliği', 'Arayüz', 'Sunucu', 'Hata düzeltme', 'Dokümanlar', 'Altyapı', 'Araştırma'];
 
 /** Desks that can have a sign: the room's and the back office's, not the bean bags, kiosks or meeting chairs. */
 const LABELABLE = new Set([...DESKS, ...WING_DESKS].map((d) => d.id));

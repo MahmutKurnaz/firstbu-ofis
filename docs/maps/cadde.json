@@ -1,8 +1,8 @@
 {
   "id": "my-cadde",
-  "name": "My street",
+  "name": "Benim caddem",
   "icon": "🏙️",
-  "description": "A copy of the cadde, to make your own.",
+  "description": "Cadde haritasının bir kopyası: kendi haritanı yapmak için.",
   "style": "cadde",
   "hall": {
     "width": 64,

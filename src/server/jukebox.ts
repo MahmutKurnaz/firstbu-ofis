@@ -41,7 +41,7 @@ export class Jukebox {
       if ('error' in u) return u;
       this.set({ on: true, track: STREAM, url: u.url, by });
     } else if (input.track !== undefined) {
-      if (typeof input.track !== 'string' || !tuneById(input.track)) return { error: "The jukebox doesn't have that one" };
+      if (typeof input.track !== 'string' || !tuneById(input.track)) return { error: 'Müzik kutusunda bu parça yok' };
       this.set({ on: true, track: input.track, by });
     } else {
       if (this.s.on) return { changed: false };

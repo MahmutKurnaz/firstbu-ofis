@@ -20,13 +20,13 @@ export const LOOP_PAVED = LOOP_HALF + 0.7;
 export type Place = 'farm' | 'forest' | 'mountains' | 'tunnel' | 'beach' | 'coast' | 'town';
 
 export const PLACES: Record<Place, { name: string; icon: string }> = {
-  farm: { name: 'Meadowbrook Farm', icon: '🌾' },
-  forest: { name: 'Whispering Pines', icon: '🌲' },
-  mountains: { name: 'Summit Pass', icon: '🏔️' },
-  tunnel: { name: 'Granite Tunnel', icon: '🚇' },
-  beach: { name: 'Sunset Beach', icon: '🏖️' },
-  coast: { name: 'Lighthouse Point', icon: '🗼' },
-  town: { name: 'Downtown', icon: '🏙️' },
+  farm: { name: 'Dereboyu Çiftliği', icon: '🌾' },
+  forest: { name: 'Fısıldayan Çamlar', icon: '🌲' },
+  mountains: { name: 'Zirve Geçidi', icon: '🏔️' },
+  tunnel: { name: 'Granit Tünel', icon: '🚇' },
+  beach: { name: 'Gün Batımı Plajı', icon: '🏖️' },
+  coast: { name: 'Deniz Feneri Burnu', icon: '🗼' },
+  town: { name: 'Şehir merkezi', icon: '🏙️' },
 };
 
 /**

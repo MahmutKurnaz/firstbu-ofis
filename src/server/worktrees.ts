@@ -67,7 +67,7 @@ export class Worktrees {
       this.gitSync(['worktree', 'add', '-b', branch, path.resolve(root, rel), base]);
       return { path: rel, branch, base, from, note };
     } catch (err) {
-      return `Could not create a git worktree: ${gitError(err)}`;
+      return `Git worktree oluşturulamadı: ${gitError(err)}`;
     }
   }
 
@@ -127,7 +127,7 @@ export class Worktrees {
     if (this.isAncestor(head, remote)) return { base: remote };
     // Both moved on: the PR goes to origin's, so start there and say what's left behind.
     const n = Number(this.gitSync(['rev-list', '--count', head, '--not', remote]));
-    return { base: remote, note: `starts from origin/${from}, without the ${n} commit${n === 1 ? '' : 's'} on ${from} that origin doesn't have` };
+    return { base: remote, note: `origin/${from} üzerinden başlıyor; ${from} dalındaki ve origin’de olmayan ${n} commit olmadan` };
   }
 
   private isAncestor(a: string, b: string): boolean {
@@ -205,7 +205,7 @@ export class Worktrees {
    * started (`base`, or HEAD when even that commit is gone). Says which, or what went wrong.
    */
   async restore(wt: WorktreeRef): Promise<{ from: LostBranch } | { error: string }> {
-    if (!wt.path) return { error: 'it has no folder to put back' };
+    if (!wt.path) return { error: 'geri konacak bir klasörü yok' };
     const abs = path.join(this.dir, wt.path);
     try {
       // Git still lists the deleted folder, and won't check its branch out anywhere else while it does.
@@ -363,17 +363,17 @@ export function workspaceOf(info: { worktree?: { path: string }; repos?: unknown
 
 /** Why deleting this would lose something ("2 uncommitted changes, 1 unpushed commit"), or '' when it wouldn't. */
 export function describeWork(s: WorktreeState): string {
-  if (s.error) return `could not check it (${s.error})`;
+  if (s.error) return `kontrol edilemedi (${s.error})`;
   const parts: string[] = [];
-  if (s.dirty) parts.push(`${s.dirty} uncommitted change${s.dirty === 1 ? '' : 's'}`);
-  if (s.unpushed) parts.push(`${s.unpushed} unpushed commit${s.unpushed === 1 ? '' : 's'}`);
+  if (s.dirty) parts.push(`${s.dirty} commit edilmemiş değişiklik`);
+  if (s.unpushed) parts.push(`${s.unpushed} push edilmemiş commit`);
   return parts.join(', ');
 }
 
 /** The last line git printed, which is the one that says what's wrong. */
 export function gitError(err: unknown): string {
   const e = err as { stderr?: string; message?: string };
-  return String(e.stderr || e.message || err).trim().split('\n').filter(Boolean).pop() ?? 'git failed';
+  return String(e.stderr || e.message || err).trim().split('\n').filter(Boolean).pop() ?? 'git başarısız oldu';
 }
 
 function real(p: string): string {

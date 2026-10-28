@@ -17,7 +17,7 @@ export const teamHandlers = {
     void ctx.team.invite(user).then(async (r) => {
       ctx.sendTo(c, { t: 'team.invited', github: user, ...r });
       if ('error' in r) return;
-      ctx.toastAll(`${who} invited ${r.name} to the office`);
+      ctx.toastAll(`${who}, ${r.name} adlı kişiyi ofise davet etti`);
       await teamChanged(ctx);
     });
   },
@@ -26,7 +26,7 @@ export const teamHandlers = {
     const name = str(msg.name, 64);
     void ctx.team.remove(name).then(async (err) => {
       if (err) return ctx.warn(c, err);
-      ctx.toastAll(`${who} removed ${name}'s access`);
+      ctx.toastAll(`${who}, ${name} adlı kişinin erişimini kaldırdı`);
       await teamChanged(ctx);
     });
   },

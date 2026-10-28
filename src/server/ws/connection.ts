@@ -33,7 +33,7 @@ export function onConnection(ctx: Ctx, ws: WebSocket, url: URL, session: Session
   const spot = (back && spotFrom(url.searchParams)) || { ...elevatorSpot(), y: 0, rotY: 0 };
   const account = session.account;
   // An account's name is its own; on the shared password people pick one.
-  const name = account?.name ?? (str(url.searchParams.get('name'), 24).trim() || `Guest ${id.slice(0, 3)}`);
+  const name = account?.name ?? (str(url.searchParams.get('name'), 24).trim() || `Misafir ${id.slice(0, 3)}`);
   const colorParam = url.searchParams.get('color') ?? '';
   const intParam = (k: string) => (url.searchParams.get(k) ? Number(url.searchParams.get(k)) : undefined);
   const me = meOf(account?.id);

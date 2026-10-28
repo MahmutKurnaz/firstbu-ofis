@@ -88,16 +88,16 @@ export class Maps {
     if (stamp === this.stamp) return false;
     this.stamp = stamp;
     const files = stats.map(({ f, size }) => {
-      if (size > MAX_BYTES) return { file: f, json: undefined, error: `it's over ${MAX_BYTES / 1024} KB` };
+      if (size > MAX_BYTES) return { file: f, json: undefined, error: `${MAX_BYTES / 1024} KB’ı aşıyor` };
       try {
         return { file: f, json: JSON.parse(readFileSync(path.join(this.dir, f), 'utf8')) as unknown };
       } catch (e) {
-        return { file: f, json: undefined, error: `it isn't valid JSON (${(e as Error).message})` };
+        return { file: f, json: undefined, error: `geçerli bir JSON değil (${(e as Error).message})` };
       }
     });
     const checked = checkCustomMaps(files.filter((f) => !f.error));
     this.custom = files.map((f) => (f.error ? { file: f.file, error: f.error } : checked.find((c) => c.file === f.file)!));
-    for (const f of extra) this.custom.push({ file: f, error: `only the first ${MAX_FILES} maps in the folder are read` });
+    for (const f of extra) this.custom.push({ file: f, error: `klasördeki yalnızca ilk ${MAX_FILES} harita okunur` });
     return true;
   }
 

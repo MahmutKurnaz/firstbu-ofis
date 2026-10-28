@@ -183,21 +183,21 @@ test('hiring across repositories needs its own worktree and different repositori
   const f = fixture(t);
   const workers = manager(f, t);
   const hire = (repos: RepoSource[], worktree = true) => workers.spawn('desk-1', 'Cody', undefined, worktree, 'agent', undefined, undefined, undefined, undefined, undefined, repos);
-  assert.match(String(hire([source('floor-api', f.b)], false)), /own worktree/);
+  assert.match(String(hire([source('floor-api', f.b)], false)), /kendi worktree’sindeki/);
   // Another checkout of the web repository is still the web repository.
   const twin = path.join(f.root, 'web-twin');
   git(f.a, 'worktree', 'add', '-q', twin, '-b', 'twin');
-  assert.match(String(hire([source('floor-twin', twin)])), /same repository/);
-  assert.match(String(hire([source('floor-api', f.b), source('floor-api-2', f.b)])), /same repository/);
+  assert.match(String(hire([source('floor-twin', twin)])), /aynı depo/);
+  assert.match(String(hire([source('floor-api', f.b), source('floor-api-2', f.b)])), /aynı depo/);
   const plain = path.join(f.root, 'projects', 'notes');
   mkdirSync(plain);
-  assert.match(String(hire([source('floor-notes', plain)])), /isn't a git checkout/);
+  assert.match(String(hire([source('floor-notes', plain)])), /bir git checkout’u değil/);
 
   // api can't have the branch (one of that name is there already): web's new worktree and branch are taken out again.
   const before = git(f.a, 'branch', '--list', 'office/*');
   git(f.b, 'branch', 'office/sprocket-0000');
   const failed = (workers as any).makeWorkspace('sprocket-0000', [source('floor-api', f.b)]);
-  assert.match(String(failed), /^api: Could not create a git worktree/);
+  assert.match(String(failed), /^api: Git worktree oluşturulamadı/);
   await waitFor(() => git(f.a, 'branch', '--list', 'office/sprocket-0000'), (out) => out === '');
   assert.equal(git(f.a, 'branch', '--list', 'office/*'), before);
   await waitFor(() => existsSync(path.join(f.a, '.agent-office', 'worktrees', 'sprocket-0000')), (there) => !there);
@@ -216,13 +216,13 @@ test('sending a worker across repositories home checks every worktree, and delet
   assert.equal(state?.dirty, 1);
   // Nobody said what to do, and api holds work: everything stays.
   const kept = await workers.kill(w.id);
-  assert.match(kept.note ?? '', /Kept .*worktrees and branch office\/\S+ in web, api — api has 1 uncommitted change/);
+  assert.match(kept.note ?? '', /worktree’leri ve office\/\S+ dalı web, api içinde bırakıldı — api: 1 commit edilmemiş değişiklik/);
   assert.ok(existsSync(path.join(ws, 'api', 'server.js')));
 
   const w2 = hire();
   const ws2 = path.join(f.a, '.agent-office', 'worktrees', w2.worktree!.branch.slice('office/'.length));
   const done = await workers.kill(w2.id, 'all');
-  assert.match(done.note ?? '', /Deleted .*worktrees and branch office\/\S+ in web, api/);
+  assert.match(done.note ?? '', /worktree’leri ve office\/\S+ dalı web, api içinde silindi/);
   assert.equal(existsSync(ws2), false);
   assert.equal(git(f.a, 'branch', '--list', w2.worktree!.branch), '');
   assert.equal(git(f.b, 'branch', '--list', w2.worktree!.branch), '');
@@ -318,7 +318,7 @@ test('the Changes window follows each repository of a worker across repositories
   assert.equal(await changes.commit('w1', 'Add new.js', 'Cody', undefined, 'floor-api'), undefined);
   assert.equal(git(cwd, 'log', '-1', '--format=%s'), 'Add new.js');
   // Its own floor's checkout is a different target.
-  assert.equal(await changes.diff('w1', 'new.js'), 'No such worker');
+  assert.equal(await changes.diff('w1', 'new.js'), 'Böyle bir çalışan yok');
 });
 
 test('prune leaves a workspace with worktrees in it alone, and lists the other repository’s branch as checked out elsewhere', async (t) => {

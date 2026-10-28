@@ -33,7 +33,7 @@ export const pageRoutes = {
     handle(ctx, { res, path: p }) {
       const file = publicFile(ctx.publicDir, p);
       if (file) return serveFile(res, file, false);
-      res.writeHead(404, { 'content-type': 'text/plain' }).end('Not found');
+      res.writeHead(404, { 'content-type': 'text/plain' }).end('Bulunamadı');
     },
   },
 } satisfies Record<string, Route>;

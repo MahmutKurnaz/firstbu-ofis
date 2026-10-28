@@ -120,7 +120,7 @@ export class WorkerPrs {
     (other ?? info).pr = { number: pr.number, url: pr.url };
     this.ctx.persist();
     this.ctx.emit(w);
-    this.ctx.events.toast(`${info.name} opened PR #${pr.number}${other ? ` in ${other.name}` : ''}`, 'info');
+    this.ctx.events.toast(`${info.name} PR #${pr.number} açtı${other ? ` (${other.name})` : ''}`, 'info');
   }
 
   /**
@@ -130,7 +130,7 @@ export class WorkerPrs {
    */
   link(id: string, pr: { number: number; url: string } | undefined): string | undefined {
     const w = this.ctx.workers.get(id);
-    if (!w) return 'No such worker';
+    if (!w) return 'Böyle bir çalışan yok';
     w.info.pr = pr;
     // Whoever says so knows better than what the office gathered.
     w.info.pastPrs = undefined;
@@ -148,17 +148,17 @@ export class WorkerPrs {
    */
   async openPr(id: string, by: string, as?: GhAs): Promise<{ prs: OpenedPr[]; failed: string[] } | string> {
     const w = this.ctx.workers.get(id);
-    if (!w) return 'No such worker';
+    if (!w) return 'Böyle bir çalışan yok';
     const { info } = w;
     const wt = info.worktree;
-    if (!wt) return `${info.name} works in the main checkout — only workers with their own worktree can open a PR`;
-    if (info.prOpening) return `${info.name}'s pull request is already being opened`;
+    if (!wt) return `${info.name} ana checkout’ta çalışıyor — yalnızca kendi worktree’si olan çalışanlar PR açabilir`;
+    if (info.prOpening) return `${info.name} adlı çalışanın pull request’i zaten açılıyor`;
     if (isBusy(info.status)) {
-      return `${info.name} is still ${info.status === 'needs_input' ? 'waiting on input' : info.status} — wait until it's done`;
+      return `${info.name} hâlâ ${info.status === 'needs_input' ? 'senden bir şey bekliyor' : info.status} — bitene kadar bekle`;
     }
     if (info.repos?.length) return this.openPrs(w, by, as);
     const cwd = path.join(this.ctx.dir, wt.path);
-    if (!existsSync(cwd)) return `${info.name}'s worktree is gone (${wt.path})`;
+    if (!existsSync(cwd)) return `${info.name} adlı çalışanın worktree’si yok (${wt.path})`;
     info.prOpening = true;
     this.ctx.emit(w);
     try {
@@ -167,7 +167,7 @@ export class WorkerPrs {
       const branch = info.worktree?.branch ?? wt.branch;
       const commits = (await run('git', ['log', '--reverse', '--format=%h %s', `${wt.base}..${branch}`], cwd)).split('\n').filter(Boolean);
       const dirty = (await run('git', ['status', '--porcelain'], cwd)) !== '';
-      if (!commits.length) return dirty ? `${info.name} hasn't committed anything yet — ask it to commit first` : `${info.name} has no commits on ${branch} yet`;
+      if (!commits.length) return dirty ? `${info.name} henüz hiçbir şey commit etmedi — önce commit etmesini iste` : `${info.name} adlı çalışanın ${branch} dalında henüz commit’i yok`;
       const open = await findOpenPr(branch, cwd);
       if (open) {
         info.pr = open;
@@ -182,7 +182,7 @@ export class WorkerPrs {
       this.ctx.persist();
       return { prs: [{ number, url, existed: false, dirty }], failed: [] };
     } catch (err) {
-      return `Couldn't open a PR for ${info.name}: ${(err as Error).message}`;
+      return `${info.name} için PR açılamadı: ${(err as Error).message}`;
     } finally {
       info.prOpening = false;
       // The worker may have been sent home meanwhile; an update would bring it back as a ghost.
@@ -205,7 +205,7 @@ export class WorkerPrs {
       ...info.repos!.map((r) => ({ ...r, own: false, set: (pr: { number: number; url: string }) => (r.pr = pr) })),
     ];
     const gone = parts.filter((p) => !existsSync(path.join(this.ctx.dir, p.path)));
-    if (gone.length) return `${info.name}'s worktree${gone.length > 1 ? 's' : ''} of ${gone.map((p) => p.name).join(', ')} ${gone.length > 1 ? 'are' : 'is'} gone`;
+    if (gone.length) return `${info.name} adlı çalışanın şu worktree’leri yok: ${gone.map((p) => p.name).join(', ')}`;
     info.prOpening = true;
     this.ctx.emit(w);
     const prs: (OpenedPr & { cwd: string })[] = [];
@@ -235,12 +235,12 @@ export class WorkerPrs {
           this.ctx.persist();
           prs.push({ repo: p.name, ...pr, existed: false, dirty, cwd });
         } catch (err) {
-          failed.push(`Couldn't open a PR in ${p.name}: ${(err as Error).message}`);
+          failed.push(`${p.name} için PR açılamadı: ${(err as Error).message}`);
         }
       }
       if (!prs.length) {
         if (failed.length) return failed.join('; ');
-        return uncommitted.length ? `${info.name} hasn't committed anything yet in ${uncommitted.join(', ')} — ask it to commit first` : `${info.name} has no commits on ${wt.branch} yet in any of its repositories`;
+        return uncommitted.length ? `${info.name} henüz şuralarda commit etmedi: ${uncommitted.join(', ')} — önce commit etmesini iste` : `${info.name} adlı çalışanın hiçbir deposunda ${wt.branch} dalında henüz commit’i yok`;
       }
       if (prs.length > 1 && prs.some((p) => !p.existed)) {
         for (const p of prs) {
@@ -249,7 +249,7 @@ export class WorkerPrs {
             const next = withRelated(body, relatedBlock(prs, p.url, wt.branch));
             if (next !== body) await gh(['pr', 'edit', p.url, '--body', next], p.cwd, 60_000, as?.env);
           } catch (err) {
-            failed.push(`Couldn't list the other pull requests on ${p.repo} #${p.number}: ${(err as Error).message}`);
+            failed.push(`${p.repo} #${p.number} için öteki pull request’ler listelenemedi: ${(err as Error).message}`);
           }
         }
       }

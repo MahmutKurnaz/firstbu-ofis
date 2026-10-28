@@ -91,13 +91,13 @@ test('lists workers and how sending them home went, a line each', () => {
     leaveOnMerge: false,
     freeDesk: 'desk-3',
     workers: [
-      { id: 'w1', name: 'Mochi', you: true, kind: 'agent', provider: 'claude', status: 'working', desk: 'Desk 1', task: 'Fixing login', merged: false },
+      { id: 'w1', name: 'Mochi', you: true, kind: 'agent', provider: 'claude', status: 'working', desk: 'Masa 1', task: 'Fixing login', merged: false },
       { id: 'w2', name: 'Bolt', kind: 'agent', provider: 'codex', status: 'done', desk: 'Desk 2', worktree: { branch: 'office/bolt-1' }, pr: { number: 7, state: 'merged', title: 'Fix it' }, merged: true },
       { id: 'w3', name: 'Zed', kind: 'agent', status: 'idle', desk: 'Desk 3', pr: { number: 8, state: 'merged' }, merged: true, staying: 'Ada has its terminal open' },
     ],
   });
   assert.equal(text.split('\n')[0], '3 workers on app (acme/app) · go home once merged is off');
-  assert.match(text, /^w1 {2}Mochi \(you, claude\) · working · Desk 1 · Fixing login$/m);
+  assert.match(text, /^w1 {2}Mochi \(you, claude\) · working · Masa 1 · Fixing login$/m);
   assert.match(text, /^w2 {2}Bolt \(codex\) · done · Desk 2 · branch office\/bolt-1 · PR #7 merged “Fix it” · landed: free to go home$/m);
   assert.match(text, /landed, staying: Ada has its terminal open/);
 
@@ -214,7 +214,7 @@ test("a worker's row says where its pull request stands, and whether it would go
   const view = { pulls: [pull(7, 'MERGED', 'office/bolt', head), pull(8, 'OPEN', 'office/zed')], tasks: [] };
   const bolt = workerRow(worker('bolt', { task: { name: 'Login fix', summary: 'Fixed the redirect' } }), view, 'mochi');
   assert.deepEqual(bolt, {
-    id: 'bolt', name: 'Bolt', kind: 'agent', desk: 'Desk 1', status: 'done', task: 'Login fix: Fixed the redirect', hiredBy: 'Ada', hiredAt: '1970-01-01T00:00:00.000Z',
+    id: 'bolt', name: 'Bolt', kind: 'agent', desk: 'Masa 1', status: 'done', task: 'Login fix: Fixed the redirect', hiredBy: 'Ada', hiredAt: '1970-01-01T00:00:00.000Z',
     worktree: { path: '.agent-office/worktrees/bolt', branch: 'office/bolt' },
     pr: { number: 7, state: 'merged', title: 'PR 7', url: 'https://github.com/acme/app/pull/7' },
     merged: true,
@@ -222,10 +222,10 @@ test("a worker's row says where its pull request stands, and whether it would go
   assert.equal(workerRow(worker('zed'), view).merged, false);
   assert.equal(workerRow(worker('zed'), view).pr?.state, 'open');
   const watched = workerRow(worker('bolt', { status: 'working', viewers: [] }), view);
-  assert.equal(watched.staying, 'still working');
+  assert.equal(watched.staying, 'hâlâ çalışıyor');
   assert.equal(workerRow(worker('mochi'), view, 'mochi').you, true);
-  assert.equal(workerRow(worker('pat', { deskId: 'station-pulls' }), view).board, 'PR agent');
-  assert.equal(notLeaving(worker('bolt', { viewers: ['Ada', 'Grace'] })), 'Ada, Grace have its terminal open');
+  assert.equal(workerRow(worker('pat', { deskId: 'station-pulls' }), view).board, 'PR ajanı');
+  assert.equal(notLeaving(worker('bolt', { viewers: ['Ada', 'Grace'] })), 'terminali Ada, Grace tarafından açık');
   assert.equal(notLeaving(worker('bolt')), undefined);
 });
 

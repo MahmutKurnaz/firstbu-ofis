@@ -27,8 +27,8 @@ export const mapNews = (ctx: Ctx, was: string, who?: string) => {
   if (now === was) return;
   const plan = maps.plan();
   // Without a pick, a map of your own broke (back to the office) or was fixed (back to it).
-  const why = now === OFFICE_MAP ? `: the map "${was}" won't load (see ⚙️ Settings)` : ': it loads again';
-  ctx.toastAll(who ? `${who} changed the building's map to ${plan.icon} ${plan.name}` : `The building's map is ${plan.icon} ${plan.name} now${why}`);
+  const why = now === OFFICE_MAP ? `: "${was}" haritası yüklenmiyor (⚙️ Ayarlar’a bak)` : ': yeniden yükleniyor';
+  ctx.toastAll(who ? `${who} binanın haritasını değiştirdi: ${plan.icon} ${plan.name}` : `Binanın haritası artık ${plan.icon} ${plan.name}${why}`);
 };
 
 export const settingsHandlers = {
@@ -37,21 +37,21 @@ export const settingsHandlers = {
     const url = str(msg.url, 4096).trim();
     const err = ctx.webhook.set(url, who);
     ctx.warn(c, err);
-    if (!err) ctx.toastAll(url ? `📣 ${who} set up team notifications` : `${who} turned off team notifications`);
+    if (!err) ctx.toastAll(url ? `📣 ${who} ekip bildirimlerini kurdu` : `${who} ekip bildirimlerini kapattı`);
   },
   'notify.test'(ctx, c) {
     const who = c.peer.name;
-    void ctx.webhook.test(who).then((err) => ctx.sendTo(c, { t: 'toast', text: err ?? '📣 Sent a test message', level: err ? 'warn' : 'info' }));
+    void ctx.webhook.test(who).then((err) => ctx.sendTo(c, { t: 'toast', text: err ?? '📣 Deneme mesajı gönderildi', level: err ? 'warn' : 'info' }));
   },
   'machine.limit'(ctx, c, msg) {
     const who = c.peer.name;
-    if (!ctx.meOf(c.accountId).admin) return ctx.warn(c, 'Only admins can change the worker limit');
+    if (!ctx.meOf(c.accountId).admin) return ctx.warn(c, 'Çalışan sınırını yalnızca yöneticiler değiştirebilir');
     const limit = msg.limit === null ? undefined : parseWorkerLimit(msg.limit);
-    if (msg.limit !== null && limit === undefined) return ctx.warn(c, `The worker limit is a whole number from 1 to ${MAX_WORKER_LIMIT}`);
+    if (msg.limit !== null && limit === undefined) return ctx.warn(c, `Çalışan sınırı 1 ile ${MAX_WORKER_LIMIT} arasında bir tam sayı olmalı`);
     const err = ctx.machine.setLimit(limit, who);
     if (err) return ctx.warn(c, err);
     const now = ctx.machine.limit;
-    ctx.toastAll(limit !== undefined ? `⚙️ ${who} set the worker limit to ${now}` : now === undefined ? `⚙️ ${who} took the worker limit off` : `⚙️ ${who} put the worker limit back to ${now} (--max-workers)`);
+    ctx.toastAll(limit !== undefined ? `⚙️ ${who} çalışan sınırını ${now} yaptı` : now === undefined ? `⚙️ ${who} çalışan sınırını kaldırdı` : `⚙️ ${who} çalışan sınırını eski hâline getirdi: ${now} (--max-workers)`);
     ctx.pumpQueues();
   },
   'upgrade.check'(ctx) {
@@ -61,7 +61,7 @@ export const settingsHandlers = {
     const who = c.peer.name;
     void ctx.upgrader.start(who).then((err) => {
       if (err) ctx.warn(c, err);
-      else ctx.toastAll(`${who} is upgrading the office — it restarts when the new version is built`);
+      else ctx.toastAll(`${who} ofisi güncelliyor — yeni sürüm kurulunca yeniden başlayacak`);
     });
   },
   'theme.set'(ctx, c, msg) {
@@ -72,19 +72,19 @@ export const settingsHandlers = {
     const now = ctx.themes.state().active;
     ctx.toastAll(
       msg.pick === 'halloween'
-        ? `🎃 ${who} dressed the office up for Halloween`
+        ? `🎃 ${who} ofisi Cadılar Bayramı için süsledi`
         : msg.pick === 'christmas'
-          ? `🎄 ${who} dressed the office up for Christmas`
+          ? `🎄 ${who} ofisi Noel için süsledi`
           : msg.pick === 'off'
-            ? `${who} took the holiday decorations down`
-            : `📅 ${who} set the decorations to follow the calendar${now ? ` (it's ${now === 'halloween' ? 'Halloween 🎃' : 'Christmas 🎄'} season)` : ''}`,
+            ? `${who} bayram süslerini indirdi`
+            : `📅 ${who} süsleri takvime göre değişecek şekilde ayarladı${now ? ` (şimdi ${now === 'halloween' ? 'Cadılar Bayramı 🎃' : 'Noel 🎄'} zamanı)` : ''}`,
     );
   },
   'sky.clock'(ctx, c, msg) {
     const real = msg.real === true;
     if (real === !!ctx.sky.state.realTime) return;
     ctx.sky.setClock(real);
-    ctx.toastAll(real ? `🕰️ ${c.peer.name} put the sky on the real time of day` : `⏩ ${c.peer.name} set the sky to a whole day every hour`);
+    ctx.toastAll(real ? `🕰️ ${c.peer.name} gökyüzünü gerçek saate bağladı` : `⏩ ${c.peer.name} gökyüzünü saatte bir tam gün geçecek şekilde ayarladı`);
   },
   'map.set'(ctx, c, msg) {
     const who = c.peer.name;
@@ -93,7 +93,7 @@ export const settingsHandlers = {
     const reloaded = ctx.maps.reload();
     if (msg.map === undefined || !ctx.maps.set(str(msg.map, 64), who)) {
       if (reloaded) mapNews(ctx, was);
-      if (msg.map !== undefined) ctx.warn(c, 'There’s no map by that name, or it won’t load: see ⚙️ Settings');
+      if (msg.map !== undefined) ctx.warn(c, 'Bu adda bir harita yok ya da yüklenmiyor: ⚙️ Ayarlar’a bak');
       return;
     }
     mapNews(ctx, was, who);
@@ -103,25 +103,25 @@ export const settingsHandlers = {
     const on = msg.on === true;
     if (on === ctx.leaveOnMerge.on) return;
     ctx.leaveOnMerge.set(on, who);
-    ctx.toastAll(on ? `🏠 ${who} set workers to go home by themselves once their pull request merges` : `🪑 ${who} set workers whose pull request merged to stay until they're sent home`);
+    ctx.toastAll(on ? `🏠 ${who} çalışanların pull request’leri birleşince kendiliğinden eve gitmesini ayarladı` : `🪑 ${who} pull request’i birleşen çalışanların eve gönderilene kadar kalmasını ayarladı`);
     // The ones already merged go now.
     if (on) for (const f of ctx.floors.values()) f.sendLandedHome();
   },
   'prompts.set'(ctx, c, msg) {
     const who = c.peer.name;
-    if (!ctx.meOf(c.accountId).admin) return ctx.warn(c, 'Only admins can change the office’s prompts');
+    if (!ctx.meOf(c.accountId).admin) return ctx.warn(c, 'Ofisin prompt’larını yalnızca yöneticiler değiştirebilir');
     if (!isPromptId(msg.id) || (msg.text !== null && typeof msg.text !== 'string')) return;
     const custom = !!ctx.prompts.state().custom[msg.id];
     const err = ctx.prompts.setPrompt(msg.id, msg.text === null ? null : str(msg.text, PROMPT_MAX + 1), who);
     if (err) return ctx.warn(c, err);
     const now = !!ctx.prompts.state().custom[msg.id];
     const { label } = PROMPTS[msg.id];
-    if (now) ctx.toastAll(`📝 ${who} rewrote the “${label}” prompt`);
-    else if (custom) ctx.toastAll(`📝 ${who} put the default “${label}” prompt back`);
+    if (now) ctx.toastAll(`📝 ${who} “${label}” prompt’unu yeniden yazdı`);
+    else if (custom) ctx.toastAll(`📝 ${who} “${label}” prompt’unu varsayılana döndürdü`);
   },
   'prompts.agent'(ctx, c, msg) {
     const who = c.peer.name;
-    if (!ctx.meOf(c.accountId).admin) return ctx.warn(c, 'Only admins can pick the office’s default worker');
+    if (!ctx.meOf(c.accountId).admin) return ctx.warn(c, 'Ofisin varsayılan çalışanını yalnızca yöneticiler seçebilir');
     const ch = msg.choice;
     if (ch !== null && (!ch || typeof ch !== 'object')) return;
     const choice = ch && {
@@ -131,6 +131,6 @@ export const settingsHandlers = {
     };
     const err = ctx.prompts.setAgent(choice, who);
     if (err) return ctx.warn(c, err);
-    ctx.toastAll(choice ? `🤖 ${who} set the office’s default worker` : `🤖 ${who} put the office’s default worker back to ${path.basename(ctx.cfg.agentCmd)}`);
+    ctx.toastAll(choice ? `🤖 ${who} ofisin varsayılan çalışanını ayarladı` : `🤖 ${who} ofisin varsayılan çalışanını eski hâline getirdi: ${path.basename(ctx.cfg.agentCmd)}`);
   },
 } satisfies HandlerMap<SettingsClientMsg>;

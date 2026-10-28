@@ -9,37 +9,37 @@ import type { PropConfig } from './types.js';
 
 export const PROP_KINDS = {
   /** A stone pillar, floor to ceiling. `scale` widens it. */
-  pillar: 'A stone pillar, floor to ceiling',
+  pillar: 'Yerden tavana bir taş sütun',
   /** A torch in an iron sconce on a wall or a pillar, `y` up, burning toward `rotY`. */
-  torch: 'A torch in a sconce on a wall or pillar',
+  torch: 'Duvarda ya da sütunda bir mum tutacağında meşale',
   /** An iron fire bowl on legs. */
-  brazier: 'A fire in an iron bowl on legs',
+  brazier: 'Ayaklı demir bir kasede ateş',
   /** An iron ring of candles hanging from the roof, at `y`. */
-  chandelier: 'A ring of candles hanging from the roof',
+  chandelier: 'Tavandan sarkan bir mum halkası',
   /** A long banner hanging on a wall, its top at `y`, `width` by `height`, facing `rotY`. */
-  banner: 'A banner hanging on a wall',
+  banner: 'Duvarda asılı bir sancak',
   /** A tall pointed stained-glass window in a wall, its sill at `y`. */
-  window: 'A tall stained-glass window',
+  window: 'Uzun bir vitray pencere',
   /** A round stained-glass window, its middle at `y`, `width` across. */
-  rose: 'A round stained-glass window',
+  rose: 'Yuvarlak bir vitray pencere',
   /** A carpet runner on the floor, `width` by `length` along `rotY`. */
-  carpet: 'A carpet runner',
+  carpet: 'Bir uzun halı',
   /** A knight in stone on a plinth. */
-  statue: 'A stone knight on a plinth',
+  statue: 'Kaide üzerinde taştan bir şövalye',
   /** A suit of armour on a stand. */
-  armor: 'A suit of armour',
+  armor: 'Bir zırh takımı',
   /** A shield with crossed swords, hung on a wall at `y`. */
-  shield: 'A shield and crossed swords on a wall',
+  shield: 'Duvarda bir kalkan ve çapraz kılıçlar',
   /** A great fireplace against a wall, `width` wide. */
-  hearth: 'A fireplace',
+  hearth: 'Bir şömine',
   /** The gong a merged pull request rings (one per map). */
-  gong: 'The merge gong',
+  gong: 'Merge gongu',
   /** Casks of ale on a rack: a drink perks you up, like the office's coffee. */
-  cask: 'Casks of ale (the coffee)',
+  cask: 'Bira fıçıları (kahve)',
   /** A table with nothing to sit at, `width` by `length`. */
-  table: 'A table without seats',
+  table: 'Oturağı olmayan bir masa',
   /** A tall iron candle stand. */
-  candles: 'A candle stand',
+  candles: 'Bir şamdan',
 } as const;
 export type PropKind = keyof typeof PROP_KINDS;
 

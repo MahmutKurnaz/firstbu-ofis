@@ -50,11 +50,11 @@ export class OfficePrompts implements PromptSource {
 
   /** Rewrites a prompt; `text` null (or the default's own text) puts the default back. Returns why it can't, if it can't. */
   setPrompt(id: unknown, text: string | null, by: string): string | undefined {
-    if (!isPromptId(id)) return 'Unknown prompt';
+    if (!isPromptId(id)) return 'Bilinmeyen prompt';
     const def = PROMPTS[id];
     const clean = text === null ? null : text.replace(/\r\n?/g, '\n').trim();
-    if (clean !== null && clean.length > PROMPT_MAX) return `A prompt can be ${PROMPT_MAX.toLocaleString('en-US')} characters at most`;
-    if (clean === '' && !def.optional) return 'That prompt can’t be empty: write something, or put the default back';
+    if (clean !== null && clean.length > PROMPT_MAX) return `Bir prompt en çok ${PROMPT_MAX.toLocaleString('tr-TR')} karakter olabilir`;
+    if (clean === '' && !def.optional) return 'Bu prompt boş olamaz: bir şey yaz ya da varsayılana döndür';
     if (clean === null || clean === def.text) delete this.saved.custom[id];
     else this.saved.custom[id] = { text: clean, by, at: Date.now() };
     this.changed();
@@ -76,8 +76,8 @@ export class OfficePrompts implements PromptSource {
   }
 
   private problem(c: AgentChoice): string | undefined {
-    if (!isAgentProvider(c.provider) || !this.providers.list.includes(c.provider)) return 'Unknown agent provider';
-    if (c.provider === 'custom' && this.providers.configured !== 'custom') return 'Custom is not the configured agent provider';
+    if (!isAgentProvider(c.provider) || !this.providers.list.includes(c.provider)) return 'Bilinmeyen ajan sağlayıcısı';
+    if (c.provider === 'custom' && this.providers.configured !== 'custom') return 'Özel, yapılandırılmış ajan sağlayıcısı değil';
     return validateWorkerModel('agent', c.provider, c.model) ?? validateWorkerEffort('agent', c.provider, c.effort);
   }
 

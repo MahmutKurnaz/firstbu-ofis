@@ -9,12 +9,12 @@ export class MapError extends Error {}
 export const isObj = (v: unknown): v is Record<string, unknown> => !!v && typeof v === 'object' && !Array.isArray(v);
 
 export function num(v: unknown, what: string, min = -1e4, max = 1e4): number {
-  if (typeof v !== 'number' || !Number.isFinite(v)) throw new MapError(`${what} should be a number`);
-  if (v < min || v > max) throw new MapError(`${what} should be between ${min} and ${max}`);
+  if (typeof v !== 'number' || !Number.isFinite(v)) throw new MapError(`${what} bir sayı olmalı`);
+  if (v < min || v > max) throw new MapError(`${what} ${min} ile ${max} arasında olmalı`);
   return v;
 }
 
 export function str(v: unknown, what: string, max = 80): string {
-  if (typeof v !== 'string' || !v.trim()) throw new MapError(`${what} should be some text`);
+  if (typeof v !== 'string' || !v.trim()) throw new MapError(`${what} bir metin olmalı`);
   return v.trim().slice(0, max);
 }

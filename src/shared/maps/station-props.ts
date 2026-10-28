@@ -10,27 +10,27 @@ import type { PropConfig } from './types.js';
 
 export const STATION_PROP_KINDS = {
   /** A hull rib across the hall at `z`: a column up each side wall, and a beam across the ceiling between them. */
-  rib: 'A hull rib: a column up each side wall and a beam across the ceiling',
+  rib: 'Bir gövde kaburgası: her yan duvarda bir sütun, tavanda bir kiriş',
   /** A window cut through the wall it's on, its sill at `y`, `width` by `height`: space shows through it. */
-  viewport: 'A window out into space',
+  viewport: 'Uzaya bakan bir pencere',
   /** A light pod hanging from the ceiling, down to `y`. */
-  lamp: 'A light pod hanging from the ceiling',
+  lamp: 'Tavandan sarkan bir ışık kapsülü',
   /** A strip of light let into the deck, `width` by `length` along `rotY`. */
-  strip: 'A strip of light in the deck',
+  strip: 'Güvertede bir ışık şeridi',
   /** A display on a wall, its middle at `y`, `width` by `height`, facing `rotY`. */
-  screen: 'A display on a wall',
+  screen: 'Duvarda bir ekran',
   /** A round holo-table, a globe turning over it. */
-  hologram: 'A holo-table with a globe turning over it',
+  hologram: 'Üzerinde dünya dönen bir holo masa',
   /** A hydroponics planter against a wall, `width` wide. */
-  planter: 'A hydroponics planter',
+  planter: 'Bir hidroponik saksı',
   /** A stack of cargo crates. */
-  crate: 'Cargo crates',
+  crate: 'Kargo sandıkları',
   /** The gong a merged pull request rings (one per map). */
-  gong: 'The merge gong',
+  gong: 'Merge gongu',
   /** A drinks dispenser: a cup perks you up, like the office's coffee. */
-  dispenser: 'A drinks dispenser (the coffee)',
+  dispenser: 'Bir içecek makinesi (kahve)',
   /** A console table with nothing to sit at, `width` by `length`. */
-  table: 'A console table without seats',
+  table: 'Oturağı olmayan bir konsol masası',
 } as const;
 export type StationPropKind = keyof typeof STATION_PROP_KINDS;
 

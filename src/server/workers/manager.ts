@@ -42,7 +42,7 @@ const USAGE_SCAN_MS = 10_000;
 /** How often a terminal with new output is saved to disk, so even a crash loses at most this much. */
 const SAVE_SCROLLBACK_MS = 15_000;
 /** Between a worker's saved scrollback and what it prints after the office restarted. */
-const RESTORED_NOTE = '\x1b[2m──── the office restarted · earlier output above ────\x1b[0m\r\n';
+const RESTORED_NOTE = '\x1b[2m──── ofis yeniden başladı · önceki çıktı yukarıda ────\x1b[0m\r\n';
 
 export class WorkerManager {
   private workers = new Map<string, Worker>();
@@ -123,7 +123,7 @@ export class WorkerManager {
     this.tasks = new WorkerTasks(this.ctx, claude, childEnv());
     this.worktrees = new WorkerTrees(this.ctx);
     this.prs = new WorkerPrs(this.ctx);
-    this.host = new PtyHost(dataDir, () => this.events.toast("The workers' terminal host stopped — resuming them", 'warn'));
+    this.host = new PtyHost(dataDir, () => this.events.toast('Çalışanların terminal sunucusu durdu — çalışanlar yeniden başlatılıyor', 'warn'));
     this.scrollback = new ScrollbackStore(dataDir);
     this.drops = new DropStore(dataDir);
     restoreWorkers(this.statePath, this.workers, this.defaultProvider, (deskId) => this.deskOccupied(deskId));
@@ -230,17 +230,17 @@ export class WorkerManager {
     const effortError = validateWorkerEffort(kind, selectedProvider, effort);
     if (effortError) return effortError;
     const seat = DESK_BY_ID.get(deskId);
-    if (!seat) return 'Unknown desk';
-    if (!deskBuilt(seat, this.wing())) return `${seat.label} isn't built yet: expand the back office first`;
-    if (this.deskOccupied(deskId)) return seat.station ? `The ${STATION_AGENT[seat.station].name} is already there` : `That ${seat.beanbag ? 'bean bag' : 'desk'} is taken`;
-    if (kind === 'shell' && seat.station) return 'A board agent is always an agent, not a shell';
-    if (seat.station && !prompt?.trim()) return 'Tell the board agent what to do';
-    if (!seat.room !== !meeting) return seat.room ? 'Only a meeting seats workers at the meeting table: call one in the meeting room' : 'A meeting seats its workers at the meeting table';
-    if (meeting && (kind !== 'agent' || worktree)) return 'A meeting seats agents, in its own worktree';
-    if (repos.length && (kind !== 'agent' || !worktree || seat.station || meeting)) return 'Only a worker in its own worktree can work in other repositories too';
-    if (repos.length > MAX_REPOS) return `A worker can take on at most ${MAX_REPOS} other repositories`;
-    if (kind === 'shell' && provider !== undefined) return 'Shell workers do not have an agent provider';
-    if (kind === 'agent' && selectedProvider === 'custom' && this.defaultProvider !== 'custom') return 'Custom is not the configured agent provider';
+    if (!seat) return 'Bilinmeyen masa';
+    if (!deskBuilt(seat, this.wing())) return `${seat.label} henüz kurulmadı: önce arka ofisi genişlet`;
+    if (this.deskOccupied(deskId)) return seat.station ? `${STATION_AGENT[seat.station].name} zaten orada` : `Bu ${seat.beanbag ? 'puf' : 'masa'} dolu`;
+    if (kind === 'shell' && seat.station) return 'Pano ajanı her zaman bir ajandır, shell olamaz';
+    if (seat.station && !prompt?.trim()) return 'Pano ajanına ne yapacağını söyle';
+    if (!seat.room !== !meeting) return seat.room ? 'Toplantı masasına yalnızca bir toplantı çalışan oturtur: toplantı odasında bir toplantı çağır' : 'Bir toplantı çalışanlarını toplantı masasına oturtur';
+    if (meeting && (kind !== 'agent' || worktree)) return 'Toplantı ajanları kendi worktree’sinde oturtur';
+    if (repos.length && (kind !== 'agent' || !worktree || seat.station || meeting)) return 'Yalnızca kendi worktree’sindeki bir çalışan başka depolarda da çalışabilir';
+    if (repos.length > MAX_REPOS) return `Bir çalışan en çok ${MAX_REPOS} başka depo üstlenebilir`;
+    if (kind === 'shell' && provider !== undefined) return 'Shell çalışanların ajan sağlayıcısı yoktur';
+    if (kind === 'agent' && selectedProvider === 'custom' && this.defaultProvider !== 'custom') return 'Özel, yapılandırılmış ajan sağlayıcısı değil';
     if (kind === 'agent') {
       const paused = this.ledger.hiringPaused;
       if (paused) return paused;
@@ -251,7 +251,7 @@ export class WorkerManager {
     if (full) return full;
     const used = new Set([...this.workers.values()].map((w) => w.info.name.replace(/ 🐚$/, '')));
     const agent = seat.station && STATION_AGENT[seat.station];
-    const name = agent ? agent.name : opts.name ? freeName(opts.name, used) : (NAMES.find((n) => !used.has(n)) ?? `Worker ${this.workers.size + 1}`);
+    const name = agent ? agent.name : opts.name ? freeName(opts.name, used) : (NAMES.find((n) => !used.has(n)) ?? `Çalışan ${this.workers.size + 1}`);
     const id = randomBytes(6).toString('hex');
     let wt: WorkerInfo['worktree'] = meeting?.worktree;
     let others: WorkerRepo[] | undefined;
@@ -261,11 +261,11 @@ export class WorkerManager {
       if (typeof made === 'string') return made;
       if ('repos' in made) {
         ({ worktree: wt, repos: others } = made);
-        for (const note of made.notes) this.events.toast(`🌿 ${name}'s worktree of ${note}`, 'info');
+        for (const note of made.notes) this.events.toast(`🌿 ${name} worktree’si (${note})`, 'info');
       } else {
         const { note, ...ref } = made;
         wt = ref;
-        if (note) this.events.toast(`🌿 ${name}'s worktree ${note}`, 'info');
+        if (note) this.events.toast(`🌿 ${name} worktree’si ${note}`, 'info');
       }
     }
     const info: WorkerInfo = {
@@ -311,8 +311,8 @@ export class WorkerManager {
   /** Starts a worker that isn't running again, carrying on its session, with `prompt` as its next message. */
   resume(id: string, prompt?: string): string | undefined {
     const w = this.workers.get(id);
-    if (!w) return 'No such worker';
-    if (w.pty || w.dsh) return 'Worker is already running';
+    if (!w) return 'Böyle bir çalışan yok';
+    if (w.pty || w.dsh) return 'Çalışan zaten çalışıyor';
     if (this.worktrees.checkLost(w, true)) return lostMessage(w.info);
     clockWork(w.info, 'starting');
     w.info.status = 'starting';
@@ -337,16 +337,16 @@ export class WorkerManager {
    * the agent and whether it was just hired.
    */
   station(deskId: string, by: string, text: string, owner?: string): { info: WorkerInfo; hired: boolean } | string {
-    if (!DESK_BY_ID.get(deskId)?.station) return 'There is no agent to ask there';
+    if (!DESK_BY_ID.get(deskId)?.station) return 'Orada soru sorulacak bir ajan yok';
     const clean = text.replace(/\r\n?/g, '\n').trim();
-    if (!clean) return 'Empty prompt';
+    if (!clean) return 'Boş prompt';
     const w = [...this.workers.values()].find((x) => x.info.deskId === deskId);
     if (!w) {
       const info = this.spawn(deskId, by, clean, false, 'agent', undefined, undefined, undefined, undefined, owner);
       return typeof info === 'string' ? info : { info, hired: true };
     }
     // Typed into the question it's asking, the prompt would answer it.
-    if (w.info.status === 'needs_input') return `The ${w.info.name} is waiting on an answer in its terminal`;
+    if (w.info.status === 'needs_input') return `${w.info.name} terminalinde bir cevap bekliyor`;
     const running = !!(w.pty || w.dsh);
     if (!running) w.info.lastInput = { by, at: Date.now() };
     const err = running ? this.prompt(w.info.id, clean, by) : this.resume(w.info.id, clean);
@@ -502,10 +502,10 @@ export class WorkerManager {
   /** Types a prompt into the agent's input box and submits it; `by` is the person who sent it, if any. */
   prompt(id: string, text: string, by?: string): string | undefined {
     const w = this.workers.get(id);
-    if (!w) return 'No such worker';
+    if (!w) return 'Böyle bir çalışan yok';
     if (w.dsh) {
       const clean = text.replace(/\r\n?/g, '\n').trim();
-      if (!clean) return 'Empty prompt';
+      if (!clean) return 'Boş prompt';
       w.dsh.prompt(clean);
       w.info.activity = truncate(clean, 80);
       this.tasks.notePrompt(w, clean);
@@ -513,9 +513,9 @@ export class WorkerManager {
       this.emitUpdate(w);
       return undefined;
     }
-    if (!w.pty) return 'Worker is not running';
+    if (!w.pty) return 'Çalışan çalışmıyor';
     const clean = text.replace(/\r\n?/g, '\n').trim();
-    if (!clean) return 'Empty prompt';
+    if (!clean) return 'Boş prompt';
     // Bracketed paste keeps multi-line prompts in one message, then Enter submits.
     w.pty.write(`\x1b[200~${clean}\x1b[201~`);
     setTimeout(() => w.pty?.write('\r'), 120);
@@ -692,7 +692,7 @@ export class WorkerManager {
     if (info.repos?.length) env.GIT_CEILING_DIRECTORIES = [path.dirname(cwd), env.GIT_CEILING_DIRECTORIES].filter(Boolean).join(path.delimiter);
     if (w.owner && this.runAs) {
       if (adapter?.signIn && !this.runAs.claudeReady(w.owner)) {
-        this.startFailed(w, `whoever hired ${info.name} (${info.createdBy}) isn't signed in to Claude — they can sign in under ☰ → 🔐 Your sign-ins, then press R here`);
+        this.startFailed(w, `${info.name} adlı çalışanı işe alan kişi (${info.createdBy}) Claude’a giriş yapmamış — ☰ → 🔐 Girişlerin altından giriş yapıp burada R’ye basabilir`);
         return;
       }
       this.runAs.apply(w.owner, env, [this.dir, cwd]);
@@ -814,15 +814,15 @@ export class WorkerManager {
       // Resuming a conversation Claude no longer has ("No conversation found") exits before Claude
       // ever starts. Start a fresh one rather than leave the worker asleep.
       if (adapter?.freshIfResumeFails && resumeSessionId && info.status === 'starting' && !this.closing) {
-        this.events.toast(`${info.name}'s last conversation couldn't be resumed — starting a fresh one`, 'warn');
+        this.events.toast(`${info.name} adlı çalışanın son konuşması sürdürülemedi — yenisi başlatılıyor`, 'warn');
         this.launch(w, undefined, undefined);
         return;
       }
       info.exitCode = exitCode;
       clockWork(info, 'exited');
       markExited(info);
-      const hint = info.kind === 'shell' ? ' — press R to restart' : info.sessionId ? ' — press R to resume' : '';
-      const msg = `\r\n\x1b[2m[${info.name} exited with code ${exitCode}${hint}]\x1b[0m\r\n`;
+      const hint = info.kind === 'shell' ? ' — yeniden başlatmak için R’ye bas' : info.sessionId ? ' — devam etmek için R’ye bas' : '';
+      const msg = `\r\n\x1b[2m[${info.name} ${exitCode} koduyla çıktı${hint}]\x1b[0m\r\n`;
       term.write(msg);
       if (w.viewers.size) this.events.data(info.id, msg, [...w.viewers.keys()]);
       w.screenDirty = true;
@@ -845,7 +845,7 @@ export class WorkerManager {
 
   private startFailed(w: Worker, message: string) {
     const what = this.command(w.info);
-    const msg = `\r\n\x1b[31mFailed to start ${what}: ${message}\x1b[0m\r\n`;
+    const msg = `\r\n\x1b[31mBaşlatılamadı: ${what} — ${message}\x1b[0m\r\n`;
     clockWork(w.info, 'exited');
     markExited(w.info);
     w.info.exitCode = -1;
@@ -853,7 +853,7 @@ export class WorkerManager {
     if (w.viewers.size) this.events.data(w.info.id, msg, [...w.viewers.keys()]);
     w.screenDirty = true;
     w.unsaved = true;
-    this.events.toast(`Could not start ${what}: ${message}`, 'error');
+    this.events.toast(`Başlatılamadı: ${what} — ${message}`, 'error');
     this.emitUpdate(w);
   }
 

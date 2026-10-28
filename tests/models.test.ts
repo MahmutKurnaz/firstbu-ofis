@@ -89,9 +89,9 @@ test('Codex catalogue lists the models its own picker shows, by name, with the e
 
 test('Codex catalogue errors do not expose command output', async () => {
   await assert.rejects(fetchCodexModels('codex', '/project', async () => ({ stdout: 'error: unrecognized subcommand', stderr: 'secret-token' })), (error: unknown) => {
-    return error instanceof Error && /unavailable/i.test(error.message) && !error.message.includes('secret-token');
+    return error instanceof Error && /alınamıyor/i.test(error.message) && !error.message.includes('secret-token');
   });
-  await assert.rejects(fetchCodexModels('codex', '/project', async () => ({ stdout: '{"models":"none"}', stderr: '' })), /unavailable/i);
+  await assert.rejects(fetchCodexModels('codex', '/project', async () => ({ stdout: '{"models":"none"}', stderr: '' })), /alınamıyor/i);
 });
 
 test('every provider that says its CLI lists its models has a lister, and only those', () => {
@@ -213,7 +213,7 @@ test('Cursor catalogue caches briefly and hides why it failed (not signed in)', 
   assert.equal(calls, 1);
   await assert.rejects(createModelCatalogue(() => fetchCursorModels('cursor-agent', '/project', async () => {
     throw new Error("Authentication required. Run 'agent login'");
-  })).get(), (error: unknown) => error instanceof Error && /unavailable/i.test(error.message) && !error.message.includes('Authentication'));
+  })).get(), (error: unknown) => error instanceof Error && /alınamıyor/i.test(error.message) && !error.message.includes('Authentication'));
 });
 
 test('a catalogue past its minute still answers at once with the last list, and asks again for the next', async () => {
@@ -244,8 +244,8 @@ test('OpenCode catalogue errors do not expose command output', async () => {
   const runner: ModelCommandRunner = async () => {
     throw new Error('secret-token from stderr');
   };
-  await assert.rejects(fetchOpenCodeModels('opencode', '/project', runner), /unavailable/i);
+  await assert.rejects(fetchOpenCodeModels('opencode', '/project', runner), /alınamıyor/i);
   await assert.rejects(createModelCatalogue(() => fetchOpenCodeModels('opencode', '/project', runner)).get(), (error: unknown) => {
-    return error instanceof Error && /unavailable/i.test(error.message) && !error.message.includes('secret-token');
+    return error instanceof Error && /alınamıyor/i.test(error.message) && !error.message.includes('secret-token');
   });
 });

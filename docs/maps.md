@@ -2,7 +2,7 @@
 
 Back to the [README](../README.md).
 
-The office is one map the building can be. Under **⚙️ Settings → 🏢 Building → Map**, anyone can change it for everyone, on every floor: to the **🏰 Castle**, to the **🚀 Space station**, to the **🏙️ Cadde** (a street of team offices), or to a map of your own. Everything that makes the office work comes along: the workers and their terminals, the issues and PR boards, the task queue and its agent, the services board, meetings, the merge gong, the budget and the limits. Workers keep their seats, since every map places the same seats (see [Seats](#seats)), so a map can change while they work.
+The office is one map the building can be. Under **⚙️ Settings → 🏢 Building → Map**, anyone can change it for everyone, on every floor: to the **🏰 Kale** (the castle), to the **🚀 Uzay istasyonu** (the space station), to the **🏙️ Cadde** (a street of team offices), or to a map of your own. Everything that makes the office work comes along: the workers and their terminals, the issues and PR boards, the task queue and its agent, the services board, meetings, the merge gong, the budget and the limits. Workers keep their seats, since every map places the same seats (see [Seats](#seats)), so a map can change while they work.
 
 The office has plenty of its own that a map doesn't (the elevator, the balcony, the rooftop bar, the lounge, the dog, pictures on the walls). On another map you go to another project from the floor list in the top-left corner (or **☰ → Floors**), and each project's hall is dressed in its own colors: the castle's banners and shields, the station's lines of light.
 
@@ -26,7 +26,7 @@ A long pressurised deck in orbit: white hull panels and dark plating, ribs overh
 - **The line.** As in the castle, a worker that's done or waiting on you comes and lines up before the chair, the one that has waited longest at the front, and from the chair **E**, **P**, **O** and **X** are for whoever's first in line.
 - **The First Officer** stands at your left. Speak to them (**E** by them, **K** from the chair) and say what a new worker should do: it runs off to the first free seat. A worker the task queue sends comes in through the docking port, aft.
 - **The benches.** Two long benches down each side of the deck, where the workers sit at their laptops. The seats toward the middle fill first.
-- **The boards** are displays on the side walls (*Incoming signals* for issues, *Mission queue*, *Docking requests* for pull requests, *Subsystems* for services), a board agent at a console under each of the first three. The **briefing table**, aft on the starboard side, is the meeting room, with its display on a stand beside it. The merge gong is by the bridge, there's a drinks dispenser aft (the coffee), and a holo-table in the middle of the deck with the Earth turning over it.
+- **The boards** are displays on the side walls (*Gelen sinyaller* for issues, *Görev sırası*, *Kenetlenme istekleri* for pull requests, *Alt sistemler* for services), a board agent at a console under each of the first three. The **briefing table**, aft on the starboard side, is the meeting room, with its display on a stand beside it. The merge gong is by the bridge, there's a drinks dispenser aft (the coffee), and a holo-table in the middle of the deck with the Earth turning over it.
 - **The airlock.** Send a worker home (**X**) and **Security**, on watch by the airlock in the starboard wall, comes for it, says its piece, waits while it packs its box, and marches it across the deck. The inner door slides up, it's shoved through, and the door comes down behind it: you can see it through the porthole, under the red lights. Then the outer hatch parts and it's blown out into space, tumbling, box and all. **Stand at one of the two big observation windows either side of the airlock to watch it go.** It doesn't come back: everyone ever ejected is still out there, adrift, each off on a heading of its own and turning over as it goes, quickly at first and slower by the hour, out to about 40 m. They waste away as the castle's prisoners do: thinner for an hour until the air's gone (☠️ on its name tag), then down to a skeleton (💀) over the next twelve. The latest 30 are still to be seen; the ones from before them have drifted out of sight. It's the same for workers that go home on their own when their pull request merges, ones another worker sends home, and ones the task queue sends home to make room; a meeting's workers still just walk out of the docking port. Each floor has its own, and it's the same list the castle's dungeon keeps (the project's `.agent-office/jail.json`): change the building from the station to the castle and the ones adrift are in the cells.
 
 ## The street (Cadde)
@@ -240,7 +240,7 @@ A worker whose `sendHome` script has an `eject` step is blown out of it, and kep
   "name": "The castle's script",
   "extends": "castle",
   "sendHome": {
-    "escort": { "name": "Kingsguard", "post": { "x": 6.3, "z": 21.8, "rotY": -1.5708, "below": true }, "color": "#8e1b1b" },
+    "escort": { "name": "Kraliyet Muhafızı", "post": { "x": 6.3, "z": 21.8, "rotY": -1.5708, "below": true }, "color": "#8e1b1b" },
     "steps": [
       { "do": "fetch" },
       { "do": "say", "who": "escort", "text": ["By order of the crown, you’re coming with me.", "Up. The dungeon’s waiting."] },

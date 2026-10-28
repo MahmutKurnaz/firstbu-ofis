@@ -83,8 +83,8 @@ test('queued Pi model and thinking survive restart and retry', (t) => {
 test('queued Cursor model survives restart and retry', (t) => {
   const f = fixture(); t.after(() => f.close());
   const q = f.open(); q.setLimit(0);
-  assert.match(q.add('Fix login', 'Tester', undefined, undefined, 'cursor', '--force') ?? '', /Invalid Cursor model/);
-  assert.match(q.add('Fix login', 'Tester', undefined, undefined, 'cursor', 'gpt-5', 'high') ?? '', /effort/i);
+  assert.match(q.add('Fix login', 'Tester', undefined, undefined, 'cursor', '--force') ?? '', /Geçersiz Cursor modeli/);
+  assert.match(q.add('Fix login', 'Tester', undefined, undefined, 'cursor', 'gpt-5', 'high') ?? '', /efor/i);
   assert.equal(q.add('Fix login', 'Tester', undefined, undefined, 'cursor', 'claude-opus-4-8[effort=high]'), undefined);
   q.shutdown();
   const restored = f.open(); restored.setLimit(1);
@@ -109,8 +109,8 @@ test('new and legacy tasks without a provider use the configured agent', (t) => 
 test('invalid or unavailable providers are rejected before a task is queued', (t) => {
   const f = fixture(); t.after(() => f.close());
   const q = f.open();
-  assert.match(q.add('Task', 'Tester', undefined, undefined, 'bad' as AgentProvider) ?? '', /provider/i);
-  assert.match(q.add('Task', 'Tester', undefined, undefined, 'custom') ?? '', /provider/i);
+  assert.match(q.add('Task', 'Tester', undefined, undefined, 'bad' as AgentProvider) ?? '', /sağlayıcı/i);
+  assert.match(q.add('Task', 'Tester', undefined, undefined, 'custom') ?? '', /sağlayıcı/i);
   assert.equal(q.state().tasks.length, 0);
 });
 
@@ -213,9 +213,9 @@ test('queue preserves a Muse model and effort through seating, retry, and restar
 test('queue rejects a reasoning effort nobody knows, whichever provider the task is for', (t) => {
   const f = fixture(); t.after(() => f.close());
   const q = f.open();
-  assert.match(q.add('Task', 'Tester', undefined, undefined, 'opencode', undefined, 'overdrive' as AgentEffort) ?? '', /Invalid effort/i);
-  assert.match(q.add('Task', 'Tester', undefined, undefined, 'codex', undefined, 'overdrive' as AgentEffort) ?? '', /Invalid effort/i);
-  assert.match(q.add('Task', 'Tester', undefined, undefined, 'claude', undefined, 'overdrive' as AgentEffort) ?? '', /effort/i);
+  assert.match(q.add('Task', 'Tester', undefined, undefined, 'opencode', undefined, 'overdrive' as AgentEffort) ?? '', /Geçersiz efor/i);
+  assert.match(q.add('Task', 'Tester', undefined, undefined, 'codex', undefined, 'overdrive' as AgentEffort) ?? '', /Geçersiz efor/i);
+  assert.match(q.add('Task', 'Tester', undefined, undefined, 'claude', undefined, 'overdrive' as AgentEffort) ?? '', /efor/i);
   assert.equal(q.state().tasks.length, 0);
 });
 

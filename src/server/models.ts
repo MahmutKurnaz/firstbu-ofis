@@ -40,9 +40,9 @@ const runModelCommand: ModelCommandRunner = async (file, args, options) => {
     await new Promise<void>((resolve, reject) => {
       const child = spawn(file, args, { cwd: options.cwd, timeout: options.timeout, stdio: ['ignore', fd, 'ignore'] });
       child.on('error', reject);
-      child.on('close', (code, signal) => (code === 0 ? resolve() : reject(new Error(`ended with ${signal ?? code}`))));
+      child.on('close', (code, signal) => (code === 0 ? resolve() : reject(new Error(`${signal ?? code} ile sonlandı`))));
     });
-    if (statSync(out).size > options.maxBuffer) throw new Error('too much output');
+    if (statSync(out).size > options.maxBuffer) throw new Error('çok fazla çıktı');
     return { stdout: readFileSync(out, 'utf8'), stderr: '' };
   } finally {
     closeSync(fd);
@@ -114,7 +114,7 @@ export async function fetchOpenCodeModels(command: string, cwd: string, runner: 
     const result = await runner(command, ['models'], { cwd, timeout: MODEL_COMMAND_TIMEOUT_MS, maxBuffer: MODEL_COMMAND_MAX_BUFFER });
     return unique(plain(result.stdout).split(/\r?\n/).map((raw) => raw.trim().replace(/^[-*]\s+/, '')).filter(isValidOpenCodeModel).map((id) => ({ id })));
   } catch {
-    throw new Error('OpenCode model catalogue unavailable');
+    throw new Error('OpenCode model kataloğu alınamıyor');
   }
 }
 
@@ -125,7 +125,7 @@ export async function fetchGrokModels(command: string, cwd: string, runner: Mode
     const ids = plain(result.stdout).split(/\r?\n/).map((raw) => raw.trim().replace(/^[-*]\s+/, '').replace(/\s*\(default\)\s*$/i, '').trim());
     return unique(ids.filter(isValidGrokModel).map((id) => ({ id })));
   } catch {
-    throw new Error('Grok model catalogue unavailable');
+    throw new Error('Grok model kataloğu alınamıyor');
   }
 }
 
@@ -137,7 +137,7 @@ export async function fetchCodexModels(command: string, cwd: string, runner: Mod
   try {
     const result = await runner(command, ['debug', 'models'], { cwd, timeout: MODEL_COMMAND_TIMEOUT_MS, maxBuffer: MODEL_DETAILS_MAX_BUFFER });
     const listed: unknown = JSON.parse(result.stdout)?.models;
-    if (!Array.isArray(listed)) throw new Error('no models');
+    if (!Array.isArray(listed)) throw new Error('model yok');
     const models: ModelOption[] = [];
     for (const m of listed) {
       if (!m || typeof m !== 'object' || !isValidCodexModel(m.slug) || (m.visibility !== undefined && m.visibility !== 'list')) continue;
@@ -147,7 +147,7 @@ export async function fetchCodexModels(command: string, cwd: string, runner: Mod
     }
     return unique(models);
   } catch {
-    throw new Error('Codex model catalogue unavailable');
+    throw new Error('Codex model kataloğu alınamıyor');
   }
 }
 
@@ -171,7 +171,7 @@ export async function fetchCursorModels(command: string, cwd: string, runner: Mo
     }
     return unique(models);
   } catch {
-    throw new Error('Cursor model catalogue unavailable');
+    throw new Error('Cursor model kataloğu alınamıyor');
   }
 }
 

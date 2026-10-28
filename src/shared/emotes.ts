@@ -2,12 +2,12 @@
 // Server and client share the list, so an emote is just its id on the wire.
 
 export const EMOTES = [
-  { id: 'wave', emoji: '👋', label: 'Wave', seconds: 2.2 },
-  { id: 'thumbs', emoji: '👍', label: 'Thumbs up', seconds: 1.8 },
-  { id: 'clap', emoji: '👏', label: 'Clap', seconds: 2.2 },
-  { id: 'dance', emoji: '🕺', label: 'Dance', seconds: 4 },
-  { id: 'point', emoji: '👉', label: 'Point', seconds: 2 },
-  { id: 'facepalm', emoji: '🤦', label: 'Facepalm', seconds: 2.4 },
+  { id: 'wave', emoji: '👋', label: 'El salla', seconds: 2.2 },
+  { id: 'thumbs', emoji: '👍', label: 'Başparmak', seconds: 1.8 },
+  { id: 'clap', emoji: '👏', label: 'Alkışla', seconds: 2.2 },
+  { id: 'dance', emoji: '🕺', label: 'Dans et', seconds: 4 },
+  { id: 'point', emoji: '👉', label: 'İşaret et', seconds: 2 },
+  { id: 'facepalm', emoji: '🤦', label: 'Yüzünü kapat', seconds: 2.4 },
 ] as const;
 
 export type Emote = (typeof EMOTES)[number];

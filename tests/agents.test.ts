@@ -42,10 +42,10 @@ test('Pi can be selected with model patterns and thinking levels', () => {
   assert.ok(agentProviders('custom').includes('pi'));
   assert.equal(validateWorkerModel('agent', 'pi', 'anthropic/claude-sonnet-4'), undefined);
   assert.equal(validateWorkerModel('agent', 'pi', 'sonnet'), undefined);
-  assert.match(validateWorkerModel('agent', 'pi', '--print') ?? '', /Invalid Pi model/);
-  assert.match(validateWorkerModel('agent', 'pi', 'bad\u0000model') ?? '', /Invalid Pi model/);
+  assert.match(validateWorkerModel('agent', 'pi', '--print') ?? '', /Geçersiz Pi modeli/);
+  assert.match(validateWorkerModel('agent', 'pi', 'bad\u0000model') ?? '', /Geçersiz Pi modeli/);
   assert.equal(validateWorkerEffort('agent', 'pi', 'high'), undefined);
-  assert.match(validateWorkerEffort('agent', 'pi', 'invalid') ?? '', /Invalid effort/);
+  assert.match(validateWorkerEffort('agent', 'pi', 'invalid') ?? '', /Geçersiz efor/);
 });
 
 test('Cursor can be selected with a model, runs as cursor-agent, and takes no effort', () => {
@@ -58,9 +58,9 @@ test('Cursor can be selected with a model, runs as cursor-agent, and takes no ef
   assert.equal(validateWorkerModel('agent', 'cursor', undefined), undefined);
   assert.equal(validateWorkerModel('agent', 'cursor', 'gpt-5'), undefined);
   assert.equal(validateWorkerModel('agent', 'cursor', 'claude-opus-4-8[context=1m,effort=high]'), undefined);
-  assert.match(validateWorkerModel('agent', 'cursor', '--yolo') ?? '', /Invalid Cursor model/);
-  assert.match(validateWorkerModel('agent', 'cursor', 'gpt 5') ?? '', /Invalid Cursor model/);
-  assert.match(validateWorkerEffort('agent', 'cursor', 'high') ?? '', /Reasoning effort can only be selected/);
+  assert.match(validateWorkerModel('agent', 'cursor', '--yolo') ?? '', /Geçersiz Cursor modeli/);
+  assert.match(validateWorkerModel('agent', 'cursor', 'gpt 5') ?? '', /Geçersiz Cursor modeli/);
+  assert.match(validateWorkerEffort('agent', 'cursor', 'high') ?? '', /Akıl yürütme eforu yalnızca/);
 });
 
 test('a DeepSeek Harness model is bounded by length and control characters only', () => {
@@ -80,7 +80,7 @@ test('model validation follows the provider', () => {
   assert.equal(validateWorkerModel('agent', 'dsh', undefined), undefined);
   assert.equal(validateWorkerModel('agent', 'dsh', 'deepseek-v4-pro'), undefined);
   assert.match(validateWorkerModel('agent', 'dsh', 'bad\u0001') ?? '', /DeepSeek Harness/);
-  assert.match(validateWorkerModel('shell', 'dsh', 'deepseek-v4-pro') ?? '', /Shell workers/);
+  assert.match(validateWorkerModel('shell', 'dsh', 'deepseek-v4-pro') ?? '', /Shell çalışanların/);
   // Claude and OpenCode keep their own rules.
   assert.equal(validateWorkerModel('agent', 'claude', 'opus'), undefined);
   assert.match(validateWorkerModel('agent', 'claude', 'gpt-5') ?? '', /Claude/);
@@ -89,22 +89,22 @@ test('model validation follows the provider', () => {
   // Codex takes its own model ids, and a local provider's.
   assert.equal(validateWorkerModel('agent', 'codex', 'gpt-5.5'), undefined);
   assert.equal(validateWorkerModel('agent', 'codex', 'gpt-oss:20b'), undefined);
-  assert.match(validateWorkerModel('agent', 'codex', '--yolo') ?? '', /Invalid Codex model/);
-  assert.match(validateWorkerModel('agent', 'codex', 'gpt 5.5') ?? '', /Invalid Codex model/);
+  assert.match(validateWorkerModel('agent', 'codex', '--yolo') ?? '', /Geçersiz Codex modeli/);
+  assert.match(validateWorkerModel('agent', 'codex', 'gpt 5.5') ?? '', /Geçersiz Codex modeli/);
   // Custom still takes none.
-  assert.match(validateWorkerModel('agent', 'custom', 'anything') ?? '', /Claude Code, OpenCode, Codex, Grok, Muse, DeepSeek Harness, Pi or Cursor/);
+  assert.match(validateWorkerModel('agent', 'custom', 'anything') ?? '', /Claude Code, OpenCode, Codex, Grok, Muse, DeepSeek Harness, Pi ya da Cursor/);
 });
 
 test('reasoning effort joins Claude for DeepSeek Harness', () => {
   assert.equal(validateWorkerEffort('agent', 'dsh', undefined), undefined);
   assert.equal(validateWorkerEffort('agent', 'dsh', 'high'), undefined);
-  assert.match(validateWorkerEffort('agent', 'dsh', 'enormous') ?? '', /Invalid effort/);
-  assert.match(validateWorkerEffort('shell', 'dsh', 'high') ?? '', /Shell workers/);
+  assert.match(validateWorkerEffort('agent', 'dsh', 'enormous') ?? '', /Geçersiz efor/);
+  assert.match(validateWorkerEffort('shell', 'dsh', 'high') ?? '', /Shell çalışanların/);
   assert.equal(validateWorkerEffort('agent', 'claude', 'xhigh'), undefined);
   assert.equal(validateWorkerEffort('agent', 'codex', 'high'), undefined);
   assert.equal(validateWorkerEffort('agent', 'opencode', 'high'), undefined);
-  assert.match(validateWorkerEffort('agent', 'opencode', 'enormous') ?? '', /Invalid effort/);
-  assert.match(validateWorkerEffort('agent', 'custom', 'high') ?? '', /Claude Code, OpenCode, Codex, Grok, Muse, DeepSeek Harness or Pi/);
+  assert.match(validateWorkerEffort('agent', 'opencode', 'enormous') ?? '', /Geçersiz efor/);
+  assert.match(validateWorkerEffort('agent', 'custom', 'high') ?? '', /Claude Code, OpenCode, Codex, Grok, Muse, DeepSeek Harness ya da Pi/);
 });
 
 test('every provider the office knows the CLI of takes a model and (but for Cursor) an effort, with the fields to pick them', () => {

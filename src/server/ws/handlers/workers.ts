@@ -22,7 +22,7 @@ export const workerHandlers = {
     if (!floor) return;
     const kind = msg.kind === 'shell' ? 'shell' : 'agent';
     if (kind === 'agent' && msg.provider !== undefined && (!isAgentProvider(msg.provider) || !floor.project.agentProviders.includes(msg.provider))) {
-      ctx.warn(c, 'Unknown agent provider');
+      ctx.warn(c, 'Bilinmeyen ajan sağlayıcısı');
       return;
     }
     const model = msg.model === undefined ? undefined : str(msg.model, OPEN_CODE_MODEL_MAX + 1);
@@ -31,16 +31,16 @@ export const workerHandlers = {
     const repos: RepoSource[] = [];
     for (const id of Array.isArray(msg.repos) ? [...new Set(msg.repos.slice(0, MAX_REPOS + 1).map((x) => str(x, 64)))] : []) {
       const other = ctx.floors.get(id);
-      if (!other || other === floor) return ctx.warn(c, other ? "The worker's own floor's project is already in its workspace" : 'That project is no longer in the building');
+      if (!other || other === floor) return ctx.warn(c, other ? 'Çalışanın kendi katının projesi zaten çalışma alanında' : 'Bu proje artık binada değil');
       repos.push({ floor: other.id, name: other.def.name, repo: other.def.repo, dir: other.dir });
     }
     // A shell is theirs too: `claude auth login` or `gh auth login` typed there signs them in.
     const hire = () => {
       const r = floor.workers.spawn(str(msg.deskId, 32), who, str(msg.prompt, 20000) || undefined, msg.worktree === true, kind, msg.provider, model, effort, undefined, c.accountId, repos, msg.via === 'herald' ? 'herald' : undefined);
       const issue = kind === 'agent' ? issueNumber(msg.issue) : undefined;
-      const across = repos.length ? ` across ${[floor.def.name, ...repos.map((x) => x.name)].join(' + ')}` : '';
+      const across = repos.length ? ` (${[floor.def.name, ...repos.map((x) => x.name)].join(' + ')} üzerinde)` : '';
       if (typeof r === 'string') ctx.warn(c, r);
-      else ctx.toastFloor(floor, kind === 'shell' ? `${who} opened a shell at a desk` : `${who} hired ${r.name}${issue ? ` for issue #${issue}` : r.prompt ? ' with a task' : ''}${across}`);
+      else ctx.toastFloor(floor, kind === 'shell' ? `${who} bir masada shell açtı` : `${who} işe aldı: ${r.name}${issue ? ` (konu #${issue} için)` : r.prompt ? ' (bir işle)' : ''}${across}`);
       if (typeof r !== 'string' && issue) ctx.takeIssue(c, floor, issue);
     };
     // Every project it gets a worktree of starts from what's on GitHub.
@@ -49,7 +49,7 @@ export const workerHandlers = {
   },
   'worker.resume'(ctx, c, msg) {
     const w = workerOf(ctx, msg.workerId);
-    ctx.warn(c, w ? w.floor.workers.resume(w.wid) : 'No such worker');
+    ctx.warn(c, w ? w.floor.workers.resume(w.wid) : 'Böyle bir çalışan yok');
   },
   'worker.kill'(ctx, c, msg) {
     const who = c.peer.name;
@@ -58,7 +58,7 @@ export const workerHandlers = {
     const { floor, info } = w;
     // The worker leaves right away; its worktree is dealt with after that, and the outcome follows.
     const done = floor.sendHome(info.id, CLEANUPS.has(String(msg.cleanup)) ? msg.cleanup : undefined);
-    ctx.toastFloor(floor, `${who} sent ${info.name} home`);
+    ctx.toastFloor(floor, `${who}, ${info.name} adlı çalışanı eve gönderdi`);
     void done.then(({ note, error }) => {
       if (note) ctx.toastFloor(floor, note);
       if (error) ctx.toastFloor(floor, error, 'warn');
@@ -87,15 +87,15 @@ export const workerHandlers = {
         if (!info || (id !== w.wid && !info.lost)) continue;
         const r = await floor.workers.rebuild(id);
         if (r.error) ctx.warn(c, r.error);
-        else if (!r.rebuilt) ctx.sendTo(c, { t: 'toast', text: r.note ?? `${info.name}'s worktree is already there`, level: 'info' });
+        else if (!r.rebuilt) ctx.sendTo(c, { t: 'toast', text: r.note ?? `${info.name} için worktree zaten var`, level: 'info' });
         else {
           names.push(info.name);
           if (r.note) notes.push(r.note);
         }
       }
       if (!names.length) return;
-      const whose = names.length === 1 ? `${names[0]}'s worktree` : `the worktrees of ${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
-      ctx.toastFloor(floor, `🌿 ${who} rebuilt ${whose}${notes.length ? ` — ${notes.join('; ')}` : ''}`);
+      const whose = names.length === 1 ? `${names[0]} worktree’si` : `${names.slice(0, -1).join(', ')} ve ${names[names.length - 1]} worktree’leri`;
+      ctx.toastFloor(floor, `🌿 ${who} yeniden kurdu: ${whose}${notes.length ? ` — ${notes.join('; ')}` : ''}`);
     })();
   },
   'worker.attach'(ctx, c, msg) {
@@ -116,11 +116,11 @@ export const workerHandlers = {
   'worker.prompt'(ctx, c, msg) {
     const who = c.peer.name;
     const w = workerOf(ctx, msg.workerId);
-    const err = w ? w.floor.workers.prompt(w.wid, str(msg.prompt, 20000), who) : 'No such worker';
+    const err = w ? w.floor.workers.prompt(w.wid, str(msg.prompt, 20000), who) : 'Böyle bir çalışan yok';
     ctx.warn(c, err);
     const issue = w?.info.kind === 'agent' ? issueNumber(msg.issue) : undefined;
     if (w && !err && issue) {
-      ctx.toastFloor(w.floor, `${who} handed issue #${issue} to ${w.info.name}`);
+      ctx.toastFloor(w.floor, `${who}, #${issue} numaralı konuyu ${w.info.name} adlı çalışana verdi`);
       ctx.takeIssue(c, w.floor, issue);
     }
   },
@@ -134,7 +134,7 @@ export const workerHandlers = {
     ctx.withSignIn(c, hires ? ctx.claudeFor(floor.workers.officeDefault.provider) : undefined, () => {
       const r = floor.workers.station(deskId, who, str(msg.prompt, 20000), c.accountId);
       if (typeof r === 'string') ctx.warn(c, r);
-      else if (r.hired) ctx.toastFloor(floor, `${who} asked the ${r.info.name} something`);
+      else if (r.hired) ctx.toastFloor(floor, `${who}, ${r.info.name} ajanına bir şey sordu`);
     });
   },
   'worker.pr'(ctx, c, msg) {
@@ -145,16 +145,16 @@ export const workerHandlers = {
     ctx.withGitHub(c, (as) => void floor.workers.openPr(wid, who, as).then((r) => {
       if (typeof r === 'string') return ctx.warn(c, r);
       const info = floor.workers.get(wid);
-      const name = info?.name ?? 'the worker';
+      const name = info?.name ?? 'çalışan';
       const [one] = r.prs;
-      if (r.prs.length === 1 && !one.repo) ctx.toastFloor(floor, one.existed ? `${name}'s branch already has PR #${one.number}` : `${who} opened PR #${one.number} for ${name}`);
+      if (r.prs.length === 1 && !one.repo) ctx.toastFloor(floor, one.existed ? `${name} dalında zaten PR #${one.number} var` : `${who}, ${name} için PR #${one.number} açtı`);
       else {
         // Across repositories: one line for them all.
         const list = r.prs.map((p) => `${p.repo} #${p.number}`).join(', ');
-        ctx.toastFloor(floor, r.prs.every((p) => p.existed) ? `${name}'s pull requests are already open: ${list}` : `${who} opened ${name}'s pull requests: ${list}`);
+        ctx.toastFloor(floor, r.prs.every((p) => p.existed) ? `${name} için pull request’ler zaten açık: ${list}` : `${who}, ${name} için pull request’leri açtı: ${list}`);
       }
       const dirty = r.prs.filter((p) => p.dirty);
-      if (dirty.length) ctx.warn(c, `${name} still has uncommitted changes in ${dirty.some((p) => p.repo) ? `its worktree${dirty.length > 1 ? 's' : ''} of ${dirty.map((p) => p.repo).join(', ')}` : 'its worktree'} — they are not in the PR`);
+      if (dirty.length) ctx.warn(c, `${name} adlı çalışanın commit edilmemiş değişiklikleri var (${dirty.some((p) => p.repo) ? `worktree: ${dirty.map((p) => p.repo).join(', ')}` : 'worktree’sinde'}) — bunlar PR’da değil`);
       for (const f of r.failed) ctx.warn(c, f);
       // Put it on the board now rather than at the next poll. A refresh already in flight
       // returns at once and can miss it, so look again shortly after.

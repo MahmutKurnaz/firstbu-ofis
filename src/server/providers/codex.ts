@@ -100,7 +100,7 @@ export const codex: ProviderAdapter<CodexState, CodexSetup> = {
     tracker(h.state).clear();
     return { args, rotateToken: true };
   },
-  bootHint: 'Open the terminal: complete login and review Office hooks in /hooks',
+  bootHint: 'Terminali aç: girişi tamamla ve /hooks içindeki Ofis hook’larını gözden geçir',
   hook: { strictJson: true, handle: codexHook },
   usage: {
     persisted: true,

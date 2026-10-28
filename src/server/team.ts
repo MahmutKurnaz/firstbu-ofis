@@ -61,11 +61,11 @@ export class Team {
     const base = { port: this.port, members: [], tailnet: this.tailnet };
     if (!this.available) {
       if (this.tailnet) return base;
-      return { ...base, unavailable: 'Invites work on offices set up with deploy/provision.sh or deploy/aws.sh (run it again on one made before invites).' };
+      return { ...base, unavailable: 'Davetler deploy/provision.sh ya da deploy/aws.sh ile kurulan ofislerde çalışır (davetlerden önce kurulduysa onu yeniden çalıştır).' };
     }
     this.fingerprint ??= (await helper(['fingerprint'])).out.trim() || undefined;
     const list = await helper(['list']);
-    if (list.code) return { ...base, ssh: this.ssh, fingerprint: this.fingerprint, error: `Couldn't list the team: ${list.err}` };
+    if (list.code) return { ...base, ssh: this.ssh, fingerprint: this.fingerprint, error: `Ekip listelenemedi: ${list.err}` };
     const members = list.out
       .split('\n')
       .map((l) => l.trim().split(/\s+/))
@@ -76,32 +76,32 @@ export class Team {
 
   /** Installs the SSH keys on github.com/<user>.keys, each limited to opening the tunnel. */
   async invite(github: string): Promise<{ name: string; keys: number } | { error: string }> {
-    if (!this.available) return { error: 'Invites work on offices set up with deploy/provision.sh or deploy/aws.sh' };
+    if (!this.available) return { error: 'Davetler deploy/provision.sh ya da deploy/aws.sh ile kurulan ofislerde çalışır' };
     const user = github.trim().replace(/^@/, '');
-    if (!GITHUB_USER.test(user)) return { error: `"${github}" isn't a GitHub username` };
+    if (!GITHUB_USER.test(user)) return { error: `"${github}" bir GitHub kullanıcı adı değil` };
     let text: string;
     try {
       const res = await fetch(`https://github.com/${user}.keys`, { signal: AbortSignal.timeout(10_000) });
-      if (res.status === 404) return { error: `There's no GitHub user called ${user}` };
-      if (!res.ok) return { error: `GitHub answered ${res.status} for ${user}'s keys — try again` };
+      if (res.status === 404) return { error: `${user} adında bir GitHub kullanıcısı yok` };
+      if (!res.ok) return { error: `GitHub, ${user} kullanıcısının anahtarları için ${res.status} cevabı verdi — yeniden dene` };
       text = (await res.text()).slice(0, 64 * 1024);
     } catch (err) {
-      return { error: `Couldn't reach GitHub: ${(err as Error).message}` };
+      return { error: `GitHub’a ulaşılamadı: ${(err as Error).message}` };
     }
-    if (!text.trim()) return { error: `${user} has no SSH keys on GitHub — they can add one at github.com/settings/keys` };
+    if (!text.trim()) return { error: `${user} kullanıcısının GitHub’da SSH anahtarı yok — github.com/settings/keys adresinden ekleyebilir` };
     const r = await helper(['add', user], text);
-    if (r.code === 65) return { error: `None of ${user}'s GitHub keys are a type SSH accepts here` };
-    if (r.code) return { error: `Couldn't add ${user}'s keys: ${r.err}` };
+    if (r.code === 65) return { error: `${user} kullanıcısının GitHub anahtarlarından hiçbiri burada SSH’ın kabul ettiği türde değil` };
+    if (r.code) return { error: `${user} kullanıcısının anahtarları eklenemedi: ${r.err}` };
     return { name: user, keys: Number(r.out.trim()) || 0 };
   }
 
   /** Removes their keys. Open tunnels drop for everyone (they just re-run the command). */
   async remove(name: string): Promise<string | undefined> {
-    if (!this.available) return 'Invites work on offices set up with deploy/provision.sh or deploy/aws.sh';
-    if (!MEMBER.test(name)) return `"${name}" isn't a teammate name`;
+    if (!this.available) return 'Davetler deploy/provision.sh ya da deploy/aws.sh ile kurulan ofislerde çalışır';
+    if (!MEMBER.test(name)) return `"${name}" geçerli bir ekip arkadaşı adı değil`;
     const r = await helper(['remove', name]);
-    if (r.code === 66) return `${name} isn't invited`;
-    if (r.code) return `Couldn't remove ${name}: ${r.err}`;
+    if (r.code === 66) return `${name} davetli değil`;
+    if (r.code) return `${name} kaldırılamadı: ${r.err}`;
     return undefined;
   }
 }

@@ -12,11 +12,11 @@ export const agentRoutes = {
     async handle(ctx, { res, path }) {
       const [provider, what, ...rest] = path.slice('/api/agents/'.length).split('/');
       const catalogue = isAgentProvider(provider) && what === 'models' && !rest.length ? ctx.models[provider] : undefined;
-      if (!catalogue || !isAgentProvider(provider)) return send(res, 404, { error: 'Not found' });
+      if (!catalogue || !isAgentProvider(provider)) return send(res, 404, { error: 'Bulunamadı' });
       try {
         return send(res, 200, { models: await catalogue.get() });
       } catch {
-        return send(res, 502, { error: `Could not load ${PROVIDER_META[provider].name} models` });
+        return send(res, 502, { error: `${PROVIDER_META[provider].name} modelleri yüklenemedi` });
       }
     },
   },
