@@ -102,7 +102,7 @@ export const settingsHandlers = {
     const who = c.peer.name;
     if (!ctx.meOf(c.accountId).admin) return ctx.warn(c, 'Haritayı yalnızca yöneticiler düzenleyebilir');
     const was = ctx.maps.pick();
-    const err = ctx.maps.saveEdit(str(msg.base, 64), msg.props, who, msg.tables);
+    const err = ctx.maps.saveEdit(str(msg.base, 64), msg.props, who, msg.tables, msg.throne);
     if (err) return ctx.warn(c, err);
     mapNews(ctx, was, who);
   },

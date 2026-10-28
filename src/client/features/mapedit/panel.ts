@@ -76,11 +76,11 @@ export function createPanel(act: PanelActions) {
     if (chosen) h += `<div style="color:#8fe39a">➕ Seçtiğin: <b>${esc(chosen.label)}</b>. Haritada boş bir yere tıkla, oraya koyulur.</div>`;
     if (p) {
       const [w, l] = footprint(p);
-      const table = p.kind === 'table' && typeof p.tableIndex === 'number';
+      const table = (p.kind === 'table' && typeof p.tableIndex === 'number') || p.kind === 'throne';
       h +=
         `<div style="color:#ffb547;margin-top:4px">Seçili: <b>${esc(nameOf(p))}</b><br><span style="opacity:.85">konum ${p.x.toFixed(1)}, ${p.z.toFixed(1)} · ${w.toFixed(1)}×${l.toFixed(1)} m${p.rotY ? ` · ${(Number(p.rotY) * 57.3).toFixed(0)}°` : ''}</span></div>` +
         (table
-          ? btn('turn', '↻ Döndür') + btn('undo', '↶ Geri al', !s.canUndo) + '<div style="opacity:.65;font-size:12px">Masa: koltukları ve bankları onunla gelir. Sürükleyerek taşı.</div>'
+          ? btn('turn', '↻ Döndür') + btn('undo', '↶ Geri al', !s.canUndo) + '<div style="opacity:.65;font-size:12px">Sürükleyerek taşı (masanın koltukları, senin koltuğunda da sen onunla gelirsin).</div>'
           : btn('turn', '↻ Döndür') + btn('smaller', '− Küçült') + btn('bigger', '+ Büyüt') + btn('copy', '⧉ Kopyala') + btn('remove', '🗑 Sil') + btn('undo', '↶ Geri al', !s.canUndo)) +
         (chosen && !table ? `<br>${btn('swap', `🔁 Bunu «${esc(chosen.label)}» yap`)}` : table ? '' : '<div style="opacity:.65;font-size:12px">Sürükleyip bırakarak taşı.</div>');
     } else if (!chosen)

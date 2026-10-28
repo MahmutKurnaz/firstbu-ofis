@@ -14,7 +14,7 @@ import { streetOf } from './worlds';
 
 export type MapsParts = Pick<
   Parts,
-  'stage' | 'worlds' | 'place' | 'travel' | 'arrival' | 'views' | 'walking' | 'peers' | 'telescope' | 'smoking' | 'hoops' | 'arcade' | 'cabinet' | 'dog' | 'jukebox' | 'boards'
+  'stage' | 'worlds' | 'place' | 'travel' | 'arrival' | 'views' | 'walking' | 'peers' | 'telescope' | 'smoking' | 'hoops' | 'arcade' | 'cabinet' | 'dog' | 'jukebox' | 'boards' | 'seating'
 >;
 
 /** Registers the floor's paint (store 'floors'), the map (store 'map') and the floors' waiting count (the 'floors' message). */
@@ -99,7 +99,11 @@ export function installMaps(ctx: Ctx, core: CoreState, parts: MapsParts) {
     boards.renderServicesBoard();
     boards.renderQueueBoard();
     if (stay && !inOffice()) {
-      // The same street, edited: nobody is moved, sat down or stood up.
+      // The same street, edited: nobody is moved, sat down or stood up. Sitting on the throne, you're on it where it is now.
+      if (parts.place.onThrone()) {
+        parts.seating.standUp();
+        parts.place.sitOnThrone();
+      }
     } else if (store.floor && !core.upTop && !core.trip) {
       parts.place.placeInCar();
       // Back in the office, in its elevator: the doors open onto it.

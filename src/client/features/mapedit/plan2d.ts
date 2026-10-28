@@ -3,7 +3,7 @@
 // its name), to pick, drag, turn and put down on. It only draws and turns pointer events into points in the world (m);
 // what they mean is index.ts's, the same as in 3D. Wheel zooms, the middle or right button (or a drag on bare ground) pans.
 import { CADDE_SIZE, OFFICE_DOOR, SUITE, officeBox, officePoint } from '../../../shared/maps/cadde-props';
-import { BENCH_OUT, type MapPlan } from '../../../shared/maps';
+import { BENCH_OUT, COUNCIL, THRONE_SIZE, type MapPlan } from '../../../shared/maps';
 import { CATALOG, footprint, made, nameOf, type Guide, type Prop } from './logic';
 
 export interface PlanState {
@@ -171,6 +171,11 @@ export function createPlan2d(h: PlanHandlers) {
       else if (p.kind === 'lamp') circle(0.3);
       else if (p.kind === 'parasol') circle(CADDE_SIZE.parasol * s);
       else if (p.kind === 'gong') circle(0.35);
+      else if (p.kind === 'throne') {
+        // Your own seat: an armchair, its back toward -z.
+        rect(g, THRONE_SIZE.width * 0.6, THRONE_SIZE.depth * 0.6, fill);
+        g.strokeRect(-THRONE_SIZE.width * 0.3, -THRONE_SIZE.depth * 0.3, THRONE_SIZE.width * 0.6, 0.2);
+      }
       else if (p.kind === 'planter') rect(g, Number(p.width ?? CADDE_SIZE.planter.width) * s, CADDE_SIZE.planter.depth * s, fill);
       else if (p.kind === 'bench') rect(g, Number(p.width ?? CADDE_SIZE.bench.width) * s, CADDE_SIZE.bench.depth * s, fill);
       else if (p.kind === 'counter') rect(g, Number(p.width ?? CADDE_SIZE.counter.width) * s, CADDE_SIZE.counter.depth * s, fill);
@@ -279,6 +284,43 @@ export function createPlan2d(h: PlanHandlers) {
       g.fill();
     }
 
+    // What's in the map but isn't for editing here: the board agents' lecterns, the meeting table, the greeter, the boards on the walls.
+    for (const d of s.plan.stations) {
+      frame(g, d.x, d.z, d.rotY, () => {
+        g.strokeStyle = DIM;
+        rect(g, 0.8, 0.5);
+      });
+      label(g, d.label, d.x, d.z - 0.7, DIM, k > 12 ? 11 : 0);
+    }
+    const council = s.plan.config?.council;
+    if (council) {
+      g.strokeStyle = DIM;
+      g.lineWidth = 1.5;
+      const [cx0, cy0] = toScreen(council.x, council.z);
+      g.beginPath();
+      g.arc(cx0, cy0, COUNCIL.radius * k, 0, Math.PI * 2);
+      g.stroke();
+      label(g, 'Toplantı masası', council.x, council.z, DIM, k > 12 ? 11 : 0);
+    }
+    const herald = s.plan.config?.herald;
+    if (herald) {
+      const [hx, hy] = toScreen(herald.x, herald.z);
+      g.fillStyle = DIM;
+      g.beginPath();
+      g.arc(hx, hy, Math.max(3, k * 0.3), 0, Math.PI * 2);
+      g.fill();
+      label(g, herald.name ?? 'Karşılayıcı', herald.x, herald.z - 0.8, DIM, k > 12 ? 11 : 0);
+    }
+    g.strokeStyle = '#7fd3a8';
+    for (const bd of Object.values(s.plan.boards)) {
+      frame(g, bd.x, bd.z, bd.rotY, () => {
+        g.lineWidth = 4 / k;
+        g.beginPath();
+        g.moveTo(-bd.width / 2, 0);
+        g.lineTo(bd.width / 2, 0);
+        g.stroke();
+      });
+    }
     // The props, the editable ones; the table pseudo-props are the tables above, drawn lit when they're picked.
     s.props.forEach((p, i) => {
       if (p.kind === 'office') return;

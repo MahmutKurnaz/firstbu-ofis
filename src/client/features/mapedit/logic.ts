@@ -1,7 +1,7 @@
 // The map editor's arithmetic (features/mapedit): which prop a point on the ground means, and what moving,
 // turning, deleting and copying one makes of the list. Pure, so it can be tested; the list is never changed in place.
 
-import { BENCH_OUT } from '../../../shared/maps';
+import { BENCH_OUT, THRONE_SIZE } from '../../../shared/maps';
 import { CADDE_SIZE, treeLook } from '../../../shared/maps/cadde-props';
 import type { TableConfig } from '../../../shared/maps/types';
 
@@ -17,7 +17,9 @@ export const FIXED = new Set(['office']);
 export const PINNED = new Set([...FIXED, 'table']);
 /** One of the editor's stand-ins for the map's tables (see `editables`): a `table` prop with the index of its table. A real `table` prop of the map isn't. */
 export const isTable = (p: Prop) => p.kind === 'table' && typeof p.tableIndex === 'number';
-const pinned = (p: Prop) => FIXED.has(p.kind) || isTable(p);
+/** The editor's stand-in for the map's throne (your own seat): moved and turned like a table, and no more. */
+export const isThrone = (p: Prop) => p.kind === 'throne';
+const pinned = (p: Prop) => FIXED.has(p.kind) || isTable(p) || isThrone(p);
 
 /** How close (m) a click has to be to a prop's middle to mean it. */
 export const PICK_RADIUS = 1.8;
@@ -217,12 +219,13 @@ export function nameOf(p: Prop): string {
     const m = String(p.model ?? '');
     return CATALOG.find((c) => c.id === m)?.label ?? (m.replace(/^meshy-/, '') || 'Model');
   }
-  if (isTable(p) && typeof p.name === 'string' && p.name) return p.name;
+  if ((isTable(p) || isThrone(p)) && typeof p.name === 'string' && p.name) return p.name;
   return KIND_NAMES[p.kind] ?? p.kind;
 }
 
 /** The ground a prop takes (m, width × length) as it is scaled: 1.2 × 1.2 when the map doesn't say; a table's is with its benches. */
 export function footprint(p: Prop): [number, number] {
+  if (isThrone(p)) return [THRONE_SIZE.width, THRONE_SIZE.depth];
   if (isTable(p)) return [(Number(p.width) > 0 ? Number(p.width) : 1.4) + 2 * (BENCH_OUT + 0.22), Number(p.length) || 1.2];
   const s = Number(p.scale ?? 1) || 1;
   const [dw, dl] = KIND_SIZES[p.kind] ?? [1.2, 1.2];
@@ -313,28 +316,31 @@ export class History {
 }
 
 /** What the editor works on: the map's props, and its tables that aren't desks as `table` props (with `tableIndex` into the map's list of tables). */
-export function editables(config: { props?: readonly Prop[]; tables?: readonly TableConfig[] }): Prop[] {
+export function editables(config: { props?: readonly Prop[]; tables?: readonly TableConfig[]; throne?: { x: number; z: number; rotY?: number; label?: string } | null }): Prop[] {
   const tables = (config.tables ?? []).flatMap((t, i): Prop[] =>
     t.look ? [] : [{ kind: 'table', x: t.x, z: t.z, rotY: t.rotY ?? 0, length: t.length, width: t.width ?? 1.4, name: t.name ?? `Masa ${i + 1}`, tableIndex: i }],
   );
-  return [...(config.props ?? []).map((p) => ({ ...p })), ...tables];
+  const throne: Prop[] = config.throne ? [{ kind: 'throne', x: config.throne.x, z: config.throne.z, rotY: config.throne.rotY ?? 0, name: config.throne.label ?? 'Senin koltuğun' }] : [];
+  return [...(config.props ?? []).map((p) => ({ ...p })), ...tables, ...throne];
 }
 
-/** The editor's list split for saving: the real props, and where each table was put. */
-export function split(list: readonly Prop[]): { props: Prop[]; tables: { i: number; x: number; z: number; rotY: number }[] } {
+/** The editor's list split for saving: the real props, where each table was put, and where the throne is. */
+export function split(list: readonly Prop[]): { props: Prop[]; tables: { i: number; x: number; z: number; rotY: number }[]; throne?: { x: number; z: number; rotY: number } } {
   const props: Prop[] = [];
   const tables: { i: number; x: number; z: number; rotY: number }[] = [];
+  let throne: { x: number; z: number; rotY: number } | undefined;
   for (const p of list) {
     if (isTable(p)) tables.push({ i: Number(p.tableIndex), x: p.x, z: p.z, rotY: Number(p.rotY ?? 0) });
+    else if (isThrone(p)) throne = { x: p.x, z: p.z, rotY: Number(p.rotY ?? 0) };
     else props.push(p);
   }
-  return { props, tables };
+  return { props, tables, ...(throne ? { throne } : {}) };
 }
 
 /** Prop `i` pulled back inside `b` if it's a table (its ends and its benches have to be in the hall), else as it is. */
 export function fitted(props: readonly Prop[], i: number, b: { minX: number; maxX: number; minZ: number; maxZ: number }): Prop[] {
   const p = props[i];
-  if (!p || !isTable(p)) return props.slice();
+  if (!p || !(isTable(p) || isThrone(p))) return props.slice();
   const [w, l] = footprint(p);
   const r = Number(p.rotY ?? 0);
   const hx = (Math.abs(Math.sin(r)) * l + Math.abs(Math.cos(r)) * w) / 2 + 0.3;

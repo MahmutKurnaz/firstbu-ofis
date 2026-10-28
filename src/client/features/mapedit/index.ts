@@ -205,7 +205,7 @@ export function installMapEdit(ctx: Ctx) {
     saveTimer = setTimeout(() => {
       saveTimer = null;
       const out = split(props);
-      ctx.net.send({ t: 'map.edit', base: ctx.plan().id, props: out.props, tables: out.tables });
+      ctx.net.send({ t: 'map.edit', base: ctx.plan().id, props: out.props, tables: out.tables, ...(out.throne ? { throne: out.throne } : {}) });
       echoUntil = Date.now() + 2500;
     }, 350);
   }
@@ -225,7 +225,7 @@ export function installMapEdit(ctx: Ctx) {
     show();
   }
   function remove() {
-    if (selected < 0 || !props[selected] || props[selected].kind === 'office' || (props[selected].kind === 'table' && typeof props[selected].tableIndex === 'number')) return;
+    if (selected < 0 || !props[selected] || props[selected].kind === 'office' || (props[selected].kind === 'table' && typeof props[selected].tableIndex === 'number') || props[selected].kind === 'throne') return;
     commit(removed(props, selected));
     selected = -1;
     hovered = -1;

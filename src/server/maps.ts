@@ -72,7 +72,7 @@ export class Maps {
    * The street, rearranged by someone in the editor (see features/mapedit): its props as they put them, saved as a map of
    * your own that extends the street (`duzen.json`) and picked. Null if it went through, or why it didn't.
    */
-  saveEdit(base: string, props: unknown, by: string, tables?: unknown): string | null {
+  saveEdit(base: string, props: unknown, by: string, tables?: unknown, throne?: unknown): string | null {
     if (base !== 'cadde' && base !== EDIT_ID) return 'Yalnızca cadde haritası düzenlenebilir';
     // Someone changed the map to another while this was on its way: it's not for that one.
     if (this.pick() === 'castle' || this.pick() === 'station') return 'Harita bu arada değişti: düzenleme kaydedilmedi';
@@ -96,6 +96,15 @@ export class Maps {
         moved.set(Number(o.i), { x: Number(o.x), z: Number(o.z), rotY: Number(o.rotY) });
       }
     }
+    // Your seat moved: the street's own throne with its place changed.
+    let seat: { x: number; z: number; rotY: number } | undefined;
+    if (throne !== undefined) {
+      const o = (typeof throne === 'object' && throne !== null ? throne : {}) as Record<string, unknown>;
+      const ok = [o.x, o.z, o.rotY].every((v) => typeof v === 'number' && Number.isFinite(v) && Math.abs(v) < 500);
+      if (!ok || !CADDE.throne) return 'Koltuk konumu geçersiz';
+      seat = { x: Number(o.x), z: Number(o.z), rotY: Number(o.rotY) };
+    }
+    const seatMoved = !!seat && !!CADDE.throne && (CADDE.throne.x !== seat.x || CADDE.throne.z !== seat.z || (CADDE.throne.rotY ?? 0) !== seat.rotY);
     const changed = [...moved].some(([i, m]) => CADDE.tables[i].x !== m.x || CADDE.tables[i].z !== m.z || (CADDE.tables[i].rotY ?? 0) !== m.rotY);
     const json = {
       id: EDIT_ID,
@@ -104,6 +113,7 @@ export class Maps {
       description: 'Caddenin senin yerleştirdiğin hâli (düzenleme modu).',
       extends: 'cadde',
       props: clean,
+      ...(seatMoved ? { throne: { ...CADDE.throne, ...seat } } : {}),
       ...(changed ? { tables: CADDE.tables.map((t, i) => (moved.has(i) ? movedTable(t, moved.get(i)!.x, moved.get(i)!.z, moved.get(i)!.rotY) : t)) } : {}),
     };
     if (JSON.stringify(json).length > MAX_BYTES) return 'Harita çok büyük';
